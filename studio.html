@@ -357,7 +357,7 @@ $('.lb').onclick = (e) => { if (e.target === $('.lb')) $('.lb').classList.remove
 $('.lfav').onclick = () => { fav(lbKey); openLb(lbKey); };
 $('.loff').onclick = () => { toggleOff(lbKey); openLb(lbKey); };
 $('.lset').onclick = () => { set({ layout: lbKey, mode: 'one', offThemes: st.offThemes.filter((x) => x !== lbKey) }); paintModes(); grid(); paintBehind(); $('.lb').classList.remove('on'); say(tt`Стартовый экран — ${T[lbKey].title}`); };
-$$('.mode').forEach((m) => m.onclick = (e) => { if (e.target.closest('[data-shuffle]')) return; const patch = { mode: m.dataset.mode }; if (patch.mode === 'one' && isOff(st.layout)) patch.layout = THEMES.find((t) => !isOff(t.key)).key; set(patch); paintModes(); grid(); paintBehind(); });
+$$('.mode').forEach((m) => m.onclick = (e) => { if (e.target.closest('[data-shuffle]')) return; const patch = { mode: m.dataset.mode }; if (patch.mode === 'one' && isOff(st.layout)) patch.layout = THEMES.find((t) => !isOff(t.key)).key; set(patch); paintModes(); grid(); paintBehind();  if (patch.mode === 'random' && favsOn().length < 2) say(tt('Добавь в избранное хотя бы две темы')); });
 $$('.chip[data-f]').forEach((c) => c.onclick = () => { filter = c.dataset.f; $$('.chip[data-f]').forEach((x) => x.classList.toggle('on', x === c)); grid(); });
 $('.q').oninput = grid;
 // «Что выпадет?» — так же, как при запуске: случайная из избранного (только показать, ничего не сохраняет)
