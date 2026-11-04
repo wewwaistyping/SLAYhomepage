@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--topBarBlockSize:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#000}
+#app{position:fixed;inset:0}
+#app h1,#app h6,#app p{margin:0} #app img{display:block;max-width:none}
+#app button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+/* ═════════════ ЧЕРНОВАЯ: MK / Dragon Age / Sims 4 ═════════════ */
+/* ── Mortal Kombat ── */
+#app { background: #0b0604; color: #f3e2b8; font-family: 'Russo One', sans-serif; overflow: hidden; }
+#app .mk-bg { position: absolute; inset: 0; background:
+    radial-gradient(ellipse 60% 45% at 50% 100%, #ff6a1a55, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 50% 40%, #3a1408, transparent 70%),
+    repeating-linear-gradient(0deg, #00000055 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(90deg, #00000044 0 2px, transparent 2px 96px),
+    linear-gradient(#1a0d08, #0b0604); }
+#app .mk-fire { position: absolute; left: 0; right: 0; bottom: 0; height: 34vh; background: linear-gradient(0deg, #ff5a0a66, #ff2a0022 40%, transparent); animation: mk-flick 1.6s ease-in-out infinite alternate; pointer-events: none; }
+#app .mk-smoke { position: absolute; inset: 0; background: radial-gradient(ellipse 40% 20% at 30% 70%, #ffffff10, transparent), radial-gradient(ellipse 35% 18% at 70% 60%, #ffffff0c, transparent); animation: mk-smoke 14s linear infinite alternate; pointer-events: none; }
+#app .mk-title { position: absolute; left: 0; right: 0; top: calc(var(--topBarBlockSize) + 14px); text-align: center; font: 400 clamp(30px, 3.4vw, 54px)/1 'Russo One', sans-serif; text-transform: uppercase; letter-spacing: .06em;
+    background: linear-gradient(#fff3c0, #e8b448 45%, #8a4a0c 55%, #f0c060); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1px #2a1204; filter: drop-shadow(0 4px 0 #000) drop-shadow(0 0 18px #ff6a1a66); }
+#app .mk-side { position: absolute; bottom: 0; width: 30vw; height: calc(100% - var(--topBarBlockSize) - 70px); }
+#app .mk-p1 { left: 1vw; }
+#app .mk-p2 { right: 1vw; }
+#app .mk-p1.in .mk-fig { animation: mk-in .35s cubic-bezier(.2, .8, .2, 1); }
+#app .mk-fig { position: absolute; inset: 0 0 60px; }
+#app .mk-fig img { width: 100%; height: 100%; object-fit: cover; object-position: top;
+    -webkit-mask-image: linear-gradient(0deg, transparent, #000 30%), linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(0deg, transparent, #000 30%), linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-composite: intersect; }
+#app .mk-fig.is-render img { object-fit: contain; object-position: bottom; -webkit-mask-image: none; mask-image: none; filter: drop-shadow(0 0 2px #ffb46a) drop-shadow(0 0 22px #ff5a0a88) drop-shadow(0 20px 18px #000); }
+#app .mk-fig.is-mirror img { transform: scaleX(-1); }
+#app .mk-plate { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; }
+#app .mk-plate small { display: inline-block; font: 400 14px 'Russo One', sans-serif; color: #000; background: #e8b448; padding: 2px 10px; margin-bottom: 6px; }
+#app .mk-p2 .mk-plate small { background: #3a8ee8; color: #fff; }
+#app .mk-plate b { display: block; font: 400 clamp(22px, 2.2vw, 36px)/1 'Russo One', sans-serif; text-transform: uppercase; color: #fff3c0; text-shadow: 0 3px 0 #000, 0 0 14px #ff6a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* сетка и подпись — одним столбцом: подпись всегда под последним рядом, сколько бы ни было бойцов */
+#app .mk-center { position: absolute; left: 50%; top: calc(var(--topBarBlockSize) + 96px); transform: translateX(-50%); width: min(36vw, 480px); display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 3; }
+#app .mk-grid { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; z-index: 3; }
+#app .mk-tile { position: relative; aspect-ratio: 1; padding: 0; background: #1a0c06; border: 3px solid #6b4a24; box-shadow: inset 0 0 0 2px #000, 0 4px 10px #000a; overflow: hidden; }
+#app .mk-tile img { width: 100%; height: 100%; object-fit: cover; object-position: center 14%; filter: grayscale(.5) brightness(.75); transition: filter .1s; }
+#app .mk-tile.on { border-color: #ff3a1a; animation: mk-sel .5s steps(2) infinite; z-index: 1; }
+#app .mk-tile.on img { filter: none; }
+#app .mk-tile.on::after { content: 'P1'; position: absolute; left: 2px; top: 2px; font: 400 11px 'Russo One', sans-serif; color: #fff; background: #ff3a1a; padding: 0 4px; }
+#app .mk-info { font: 400 13px 'IBM Plex Mono', monospace; color: #c9a27a; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+#app .mk-acts { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; z-index: 4; }
+/* аркадные таблички: бронза/камень, фаска, двойная рамка, заклёпки, выбитый золотой текст */
+#app .mk-acts button { position: relative; padding: 13px 26px; font: 400 14px 'Rubik Mono One', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #ffd36a; text-shadow: 2px 2px 0 #000, 0 -1px 0 #7a3a08;
+    background: radial-gradient(circle at 7px 7px, #f0d29a 1.5px, #3a2410 2.5px, transparent 3.5px), radial-gradient(circle at calc(100% - 7px) 7px, #f0d29a 1.5px, #3a2410 2.5px, transparent 3.5px), radial-gradient(circle at 7px calc(100% - 7px), #f0d29a 1.5px, #3a2410 2.5px, transparent 3.5px), radial-gradient(circle at calc(100% - 7px) calc(100% - 7px), #f0d29a 1.5px, #3a2410 2.5px, transparent 3.5px),
+        repeating-linear-gradient(97deg, #ffffff06 0 2px, transparent 2px 7px), linear-gradient(#5e4a34, #3c2c1e 48%, #2a1c12 52%, #3a2a1c);
+    box-shadow: inset 2px 2px 0 #9a7a52, inset -2px -2px 0 #120804, 0 0 0 2px #000, 0 0 0 4px #9a6a2a, 0 0 0 6px #000, 0 8px 0 4px #0009; transition: transform .06s, filter .1s; }
+#app .mk-acts button:hover { filter: brightness(1.2); color: #fff3b0; }
+#app .mk-acts button:active { transform: translateY(3px); box-shadow: inset 2px 2px 0 #9a7a52, inset -2px -2px 0 #120804, 0 0 0 2px #000, 0 0 0 4px #9a6a2a, 0 0 0 6px #000, 0 4px 0 4px #0009; }
+#app .mk-acts .mk-go { padding: 16px 44px; font-size: 22px; color: #fff3c0; text-shadow: 3px 3px 0 #000, 0 0 12px #ffb03a;
+    background: radial-gradient(circle at 8px 8px, #ffe0a0 1.5px, #4a0a04 2.5px, transparent 3.5px), radial-gradient(circle at calc(100% - 8px) 8px, #ffe0a0 1.5px, #4a0a04 2.5px, transparent 3.5px), radial-gradient(circle at 8px calc(100% - 8px), #ffe0a0 1.5px, #4a0a04 2.5px, transparent 3.5px), radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), #ffe0a0 1.5px, #4a0a04 2.5px, transparent 3.5px),
+        linear-gradient(#d4361a, #8a1206 50%, #6a0c04 52%, #9a1a08);
+    box-shadow: inset 2px 2px 0 #ff8a5a, inset -2px -2px 0 #2a0402, 0 0 0 2px #000, 0 0 0 4px #e8b448, 0 0 0 6px #000, 0 8px 0 4px #0009, 0 0 30px #ff4a1a88; }
+#app .mk-press { position: absolute; left: 0; right: 0; bottom: 104px; text-align: center; font: 400 14px 'Rubik Mono One', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #ffd36a; text-shadow: 2px 2px 0 #000; animation: mkpress 1s steps(1) infinite; z-index: 4; }
+@keyframes mkpress { 50% { opacity: 0; } }
+#app .mk-rnd { display: flex; gap: 10px; margin-left: 6px; }
+#app .mk-rnd button { padding: 11px 13px; font-size: 13px; }
+#app .mk-flash { position: absolute; left: 0; right: 0; top: 40%; text-align: center; font: 400 clamp(60px, 9vw, 150px)/1 'Russo One', sans-serif; text-transform: uppercase; color: #ffd23a; text-shadow: 0 6px 0 #6a1a04, 0 0 40px #ff3a1a; opacity: 0; pointer-events: none; z-index: 10; }
+#app .mk-flash.go { animation: mk-flash .65s ease-out forwards; }
+
+
+
+
+
+
+
+
+
+
+
+
+@keyframes mk-flick { 50% { opacity: .7; } 100% { opacity: 1; transform: scaleY(1.06); } }
+@keyframes mk-smoke { to { transform: translateX(4vw); } }
+@keyframes mk-in { from { transform: translateX(-60px); opacity: 0; } }
+@keyframes mk-sel { 50% { border-color: #ffd23a; } }
+@keyframes mk-flash { 0% { opacity: 0; transform: scale(2.4); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1.06); } }
+@media (max-width: 1000px) {
+#app .mk-title { font-size: 26px; }
+#app .mk-side { width: 50vw; height: 44vh; bottom: 150px; }
+#app .mk-p1 { left: 0; }
+#app .mk-p2 { right: 0; }
+#app .mk-fig { inset: 0 0 46px; }
+#app .mk-plate b { font-size: 18px; }
+#app .mk-center { top: calc(var(--topBarBlockSize) + 58px); width: calc(100% - 24px); }
+#app .mk-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+#app .mk-info { display: none; }
+#app .mk-acts { left: 12px; right: 12px; transform: none; bottom: 16px; flex-wrap: wrap; justify-content: center; gap: 14px; }
+#app .mk-acts .mk-go { flex: 1 1 100%; padding: 12px; font-size: 20px; }
+#app .mk-press { bottom: 150px; font-size: 11px; }
+#app .mk-acts button { padding: 10px 12px; font-size: 11px; }
+}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-30px);z-index:99;background:#fff;color:#111;padding:11px 20px;border-radius:99px;font:600 14px sans-serif;box-shadow:0 10px 30px #0008;opacity:0;pointer-events:none;transition:.25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (hover:none){#app .mk-press{display:none}}
+</style></head>
+<body><div id="app" class="sh-l-mk"></div><div class="toast"></div>
+<script src="bridge.js"></script>
+<script>
+// как в расширении: те же раскладка и данные (своя PNG — c.render, иначе аватар)
+const NOW = Date.now();
+const items = CHARS.slice(0, 14).map(c => { const name = c.name.replace(/\s+/g,' ').trim(); return { name, img: c.img, ts: c.last, msgs: c.msgs || 0, chats: c.chats, snip: c.snip || '', render: c.render || '' }; });
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function ago(ts) { const m = (NOW - ts) / 60e3; if (m < 60) return Math.round(m) + tt(' мин назад'); if (m < 1440) return Math.round(m / 60) + tt(' ч назад'); const d = Math.round(m / 1440); return d === 1 ? tt('вчера') : d + tt(' дн назад'); }
+const mark = (root, sel, i) => root.querySelectorAll(sel).forEach(x => x.classList.toggle('on', +x.dataset.i === i));
+const toast = (() => { const t = document.querySelector('.toast'); let h; return s => { t.textContent = s; t.classList.add('show'); clearTimeout(h); h = setTimeout(() => t.classList.remove('show'), 1700); }; })();
+function fullFig(el, c, mirror = false) {
+    const img = el.querySelector('img');
+    el.classList.toggle('is-render', !!c.render);
+    el.classList.toggle('is-mirror', !!(mirror && c.render));
+    img.src = c.render || c.img;
+}
+
+
+const L = {
+    mk: {
+        title: 'Mortal Kombat',
+        hover: true,
+        html: (items) => `
+            <div class="mk-bg"></div><div class="mk-fire"></div><div class="mk-smoke"></div>
+            <h1 class="mk-title">${tt("Выбери бойца")}</h1>
+            <div class="mk-side mk-p1"><div class="mk-fig"><img decoding="async" alt=""></div><div class="mk-plate"><small>P1</small><b class="mk-n1"></b></div></div>
+            <div class="mk-side mk-p2"><div class="mk-fig"><img decoding="async" alt=""></div><div class="mk-plate"><small>${tt("P2 · ты")}</small><b class="mk-n2"></b></div></div>
+            <div class="mk-center"><div class="mk-grid">${items.map((c, i) => `<button class="mk-tile" data-i="${i}" title="${esc(c.name)}"><img src="${esc(c.img)}" alt="" decoding="async"></button>`).join('')}</div>
+            <div class="mk-info"></div></div>
+            <div class="mk-acts"><button class="mk-go" data-ui="fight">${tt("В бой")}</button><button data-act="new">${tt("Новый бой")}</button><button data-act="all">${tt("История")}</button>
+                <span class="mk-rnd"><button data-render="set" title="${tt("Своя PNG в полный рост")}">PNG</button><button data-render="clear" title="${tt("Убрать свою PNG")}">✕</button></span></div>
+            <div class="mk-press">${tt("Нажми Enter — в бой")}</div><div class="mk-flash">${tt("К бою!")}</div>`,
+        mount(root, api) {
+            root._fight = () => {
+                const f = root.querySelector('.mk-flash');
+                f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+                setTimeout(() => api.act('continue'), 650);
+            };
+            root.querySelector('[data-ui="fight"]').addEventListener('click', root._fight);
+        },
+        show(root, i, items) {
+            const c = items[i], p1 = root.querySelector('.mk-p1');
+            fullFig(p1.querySelector('.mk-fig'), c);
+            p1.classList.remove('in'); void p1.offsetWidth; p1.classList.add('in');
+            root.querySelector('.mk-n1').textContent = c.name;
+            const me = api.me;
+            fullFig(root.querySelector('.mk-p2 .mk-fig'), { img: me.img, render: '' });
+            root.querySelector('.mk-n2').textContent = me.name;
+            root.querySelector('.mk-info').textContent = tt`${c.msgs} сообщ. · ${ago(c.ts)}${c.render ? '' : tt(' · без своей картинки')}`;
+            mark(root, '.mk-tile', i);
+        },
+        key(k, root, api) {
+            const cols = 5, d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols }[k];
+            if (d) { api.show(Math.max(0, Math.min(api.items.length - 1, api.current + d))); return true; }
+            if (k === 'Enter') { root._fight(); return true; }
+            return false;
+        },
+    },
+
+    // Выбор спутника (Dragon Age): столб света, медальоны слева, лор справа
+};
+const root = document.getElementById('app'), LAY = L['mk'];
+let current = 0;
+const api = {
+  show: (i) => show(Math.max(0, Math.min(items.length - 1, i))),
+  act: (what) => SH.act(what, current),
+  get current() { return current; }, get items() { return items; },
+  get me() { return meOf(current); },
+};
+function show(i) { current = i; LAY.show(root, i, items); }
+root.innerHTML = LAY.html(items);
+LAY.mount?.(root, api);
+show(START);
+const touch = matchMedia('(hover: none)').matches;
+root.addEventListener('mouseover', e => { if (touch || !LAY.hover) return; const c = e.target.closest('[data-i]'); if (c && +c.dataset.i !== current) show(+c.dataset.i); });
+root.addEventListener('click', e => {
+  if (e.target.closest('[data-render]')) return SH.act('png', current);
+  const a = e.target.closest('[data-act]'); if (a) return api.act(a.dataset.act);
+  const n = e.target.closest('[data-nav]'); if (n) return api.show(current + +n.dataset.nav);
+  const c = e.target.closest('[data-i]'); if (!c) return;
+  const i = +c.dataset.i; if (i !== current && (touch || !LAY.hover)) return show(i); api.act('continue');
+});
+addEventListener('keydown', e => {
+  if (LAY.key?.(e.key, root, api)) return e.preventDefault();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') api.show(current + (e.key === 'ArrowLeft' ? -1 : 1));
+  if (e.key === 'Enter') api.act('continue');
+});
+</script></body></html>

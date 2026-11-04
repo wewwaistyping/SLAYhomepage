@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Roboto+Condensed:ital,wght@0,400;0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--p:#ff1f7a;--pd:#b0084c;--k:#0c0a0d;--w:#f5f1f3;--g:#2a2228;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--k);color:var(--w);font-family:'Roboto Condensed',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: чёрный, косые розовые полосы и крупный растр */
+.bg{position:fixed;inset:0;background:radial-gradient(circle,#ff1f7a22 2px,transparent 2.6px) 0 0/14px 14px,repeating-linear-gradient(-58deg,#0000 0 120px,#ff1f7a10 120px 124px),var(--k)}
+.band{position:fixed;left:-10vw;right:-10vw;top:58%;height:120px;background:var(--p);transform:rotate(-8deg);opacity:.9;box-shadow:0 0 0 10px var(--k),0 0 0 14px var(--p)}
+.band::after{content:'НАДЕЖДА  ОТЧАЯНИЕ  НАДЕЖДА  ОТЧАЯНИЕ  НАДЕЖДА  ОТЧАЯНИЕ  НАДЕЖДА  ОТЧАЯНИЕ  НАДЕЖДА  ОТЧАЯНИЕ';position:absolute;left:0;top:50%;transform:translateY(-50%);white-space:pre;font:400 74px 'Rubik Mono One';color:var(--k);opacity:.18;animation:run 30s linear infinite}
+@keyframes run{to{transform:translate(-50%,-50%)}}
+
+/* абстрактный «медведь»: круг, разрезанный на белое и чёрное, на чёрной половине — рваный красный глаз */
+.bear{position:fixed;left:62%;top:calc(50% + var(--top) / 2);width:min(74vh,640px);aspect-ratio:1;transform:translate(-50%,-50%) rotate(-8deg);border-radius:50%;background:linear-gradient(90deg,var(--w) 50%,#000 50%);box-shadow:0 0 0 12px var(--k),0 0 0 16px var(--p)}
+.bear::before{content:'';position:absolute;left:58%;top:26%;width:30%;height:24%;background:#ff2335;clip-path:polygon(0 52%,22% 30%,30% 46%,50% 8%,58% 40%,78% 18%,100% 50%,74% 70%,62% 58%,44% 92%,36% 64%,16% 80%)}
+.bear::after{content:'';position:absolute;left:22%;top:32%;width:13%;aspect-ratio:1;border-radius:50%;background:#000;box-shadow:inset -4px -4px 0 #fff3}
+
+/* персонаж */
+.hero{position:fixed;left:62%;bottom:0;height:calc(100% - var(--top) - 1vh);width:44vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;z-index:1}
+.hero img.full{max-height:100%;max-width:44vw;object-fit:contain;filter:drop-shadow(10px 0 0 var(--p))}
+/* без PNG: портрет на косой плашке с розовой каймой */
+.hero .frm{align-self:center;width:min(23vw,330px);aspect-ratio:2/3;padding:8px;background:var(--p);clip-path:polygon(6% 0,100% 3%,94% 100%,0 97%);transform:rotate(4deg);filter:drop-shadow(-14px 12px 0 var(--k))}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;clip-path:polygon(6% 0,100% 3%,94% 100%,0 97%)}
+.hero.in{animation:slam .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes slam{from{opacity:0;transform:translateX(-50%) translateX(60px) skewX(-14deg)}}
+
+/* верхняя плашка академии */
+.hdr{position:fixed;left:2.5vw;top:calc(var(--top) + 10px);z-index:3;display:flex;align-items:center;gap:10px;padding:6px 22px 6px 14px;background:var(--w);color:var(--k);transform:rotate(-2deg) skewX(-14deg);font:900 13px 'Roboto Condensed';letter-spacing:3px;box-shadow:6px 6px 0 var(--p)}
+.hdr>*{transform:skewX(14deg)}
+.hdr i{width:20px;height:20px;border-radius:50%;background:linear-gradient(90deg,var(--k) 50%,var(--p) 50%)}
+
+/* личное дело ученика */
+.left{position:fixed;left:2.5vw;top:calc(var(--top) + 56px);width:min(470px,35vw);display:flex;flex-direction:column;gap:20px;z-index:3}
+.card{position:relative;background:var(--w);color:var(--k);clip-path:polygon(0 2%,100% 0,98% 100%,1.5% 98%);transform:rotate(-1.5deg);padding:0 0 16px}
+.card .no{display:flex;justify-content:space-between;padding:12px 22px 6px;background:var(--p);color:var(--k);font:900 12px 'Roboto Condensed';letter-spacing:3px}
+.card .no b{color:var(--w)}
+.nm{padding:12px 22px 0;font:400 clamp(26px,2.5vw,38px)/1.05 'Russo One';text-transform:uppercase;overflow-wrap:anywhere}
+.tal{display:inline-block;margin:8px 0 0 14px;padding:4px 16px;background:var(--p);color:var(--w);font:400 clamp(13px,1.1vw,16px) 'Rubik Mono One';transform:skewX(-14deg);box-shadow:4px 4px 0 var(--k)}
+.tal span{display:inline-block;transform:skewX(14deg)}
+.prof{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:14px 22px 0;border-top:2px solid var(--k)}
+.prof div{padding:6px 0;border-bottom:1px dashed #0004}
+.prof div:nth-child(odd){padding-right:10px;border-right:1px dashed #0004}
+.prof div:nth-child(even){padding-left:12px}
+.prof dt{font:700 10px 'Roboto Condensed';letter-spacing:2px;color:var(--pd);text-transform:uppercase}
+.prof dd{font:700 16px/1.2 'Roboto Condensed';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* шкала надежды и отчаяния */
+.hd{margin:12px 22px 0}
+.hd .lab{display:flex;justify-content:space-between;font:900 11px 'Roboto Condensed';letter-spacing:2px}
+.hd .lab b:first-child{color:var(--pd)}
+.hd .bar{position:relative;height:14px;margin-top:4px;background:var(--k);transform:skewX(-20deg);overflow:hidden}
+.hd .bar i{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(90deg,var(--p) 0 10px,#ff5a9c 10px 12px);transition:width .4s}
+
+/* пули правды = меню */
+.cap{font:900 12px 'Roboto Condensed';letter-spacing:4px;color:var(--p);margin-bottom:-10px;transform:rotate(-1.5deg)}
+.menu{display:flex;flex-direction:column;gap:8px}
+.menu button{position:relative;display:flex;align-items:center;gap:14px;height:46px;width:84%;padding:0 30px 0 16px;background:var(--g);clip-path:polygon(0 0,86% 0,100% 50%,86% 100%,0 100%,3% 50%);font:400 19px 'Russo One';text-transform:uppercase;transition:transform .12s,background .12s,width .12s}
+.menu button em{font:900 italic 12px 'Roboto Condensed';color:var(--p);font-style:italic}
+.menu button.on{width:96%;background:var(--p);transform:translateX(12px)}
+.menu button.on em{color:var(--k)}
+.menu button.on::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 46%,#ffffff55 46% 54%,transparent 54%);animation:glint 1.2s ease-in-out infinite}
+@keyframes glint{0%{transform:translateX(-35%);opacity:0}30%{opacity:1}100%{transform:translateX(35%);opacity:0}}
+
+/* текстовое окно в духе игры: полупрозрачное чёрное, розовая плашка имени */
+.tb{position:fixed;left:calc(2.5vw + min(470px,35vw) + 30px);right:calc(min(200px,15vw) + 3vw);bottom:20px;padding:24px 24px 18px;background:#0c0a0de6;border-top:4px solid var(--p);clip-path:polygon(0 0,100% 0,100% 100%,2% 100%);z-index:4}
+.tb .tag{position:absolute;left:0;top:-4px;padding:3px 26px 3px 18px;background:var(--p);font:400 15px 'Russo One';text-transform:uppercase;clip-path:polygon(0 0,100% 0,88% 100%,0 100%);max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb p{margin-top:12px;font:400 17px/1.5 'Roboto Condensed';display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.tb .ag{position:absolute;right:16px;top:8px;font:700 11px 'Roboto Condensed';letter-spacing:2px;color:#fff8}
+
+/* справа: список учеников на косых плашках */
+.roster{position:fixed;right:3vw;top:calc(var(--top) + 14px);bottom:20px;width:min(214px,16vw);display:flex;flex-direction:column;gap:6px;overflow-y:auto;scrollbar-width:none;z-index:3;padding:4px 10px 4px 18px}
+.ch{flex:none;display:flex;align-items:center;gap:8px;height:52px;padding:0 10px 0 0;background:var(--g);transform:skewX(-12deg);border-left:5px solid #0000;transition:transform .12s}
+.ch>*{transform:skewX(12deg)}
+.ch img{width:52px;height:52px;object-fit:cover;object-position:top;filter:grayscale(.7) contrast(1.1);transform:none;clip-path:polygon(12% 0,100% 0,88% 100%,0 100%)}
+.ch b{flex:1;min-width:0;font:700 13px 'Roboto Condensed';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch:hover{transform:skewX(-12deg) translateX(-4px)}
+.ch.on{background:var(--w);color:var(--k);border-left-color:var(--p);transform:skewX(-12deg) translateX(-10px);box-shadow:6px 6px 0 var(--p)}
+.ch.on img{filter:none}
+
+@media (max-width:760px){
+  .hdr,.cap{display:none}
+  .band{top:40%;height:70px}.band::after{font-size:44px}
+  .bear{left:50%;top:38%;width:78vw}
+  .roster{left:0;right:0;top:calc(var(--top) + 4px);bottom:auto;width:auto;height:66px;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px 14px;gap:8px}
+  .ch{height:50px;width:132px}.ch img{width:44px;height:50px}.ch b{font-size:11px}
+  .ch.on{transform:skewX(-12deg) translateY(-2px);box-shadow:4px 4px 0 var(--p)}
+  .hero{left:50%;top:calc(var(--top) + 74px);bottom:300px;height:auto;width:92vw}
+  .hero img.full{max-width:92vw;filter:drop-shadow(6px 0 0 var(--p))}
+  .hero .frm{width:min(36vw,160px)}
+  .tb{left:10px;right:10px;bottom:300px;padding:18px 14px 10px}
+  .tb p{font-size:13px;margin-top:6px;-webkit-line-clamp:2}
+  .tb .tag{font-size:12px}
+  .left{left:10px;right:10px;top:auto;bottom:10px;width:auto;gap:8px}
+  .card{transform:none;padding-bottom:10px}
+  .card .no{padding:5px 14px;font-size:10px}
+  .nm{padding:6px 14px 0;font-size:20px}
+  .tal{font-size:11px;margin-top:5px}
+  .prof{margin:8px 14px 0}.prof div:nth-child(n+3){display:none}.prof dd{font-size:14px}
+  .hd{margin:8px 14px 0}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .menu button{width:100%;height:40px;font-size:13px;padding:0 20px 0 12px;gap:6px}
+  .menu button.on{width:100%;transform:none}
+  .menu button em{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="band"></div>
+<div class="bear"></div>
+<div class="hero"></div>
+<div class="hdr"><i></i><span>Академия «Пик Надежды» · Личные дела</span></div>
+<div class="left">
+  <div class="card">
+    <div class="no"><span>ЛИЧНОЕ ДЕЛО <b class="num"></b></span><span>ЗАЧИСЛЕН(А)</span></div>
+    <h1 class="nm"></h1>
+    <div class="tal"><span></span></div>
+    <dl class="prof">
+      <div><dt>Рост</dt><dd class="p-h"></dd></div>
+      <div><dt>Вес</dt><dd class="p-w"></dd></div>
+      <div><dt>Группа крови</dt><dd class="p-b"></dd></div>
+      <div><dt>Последний раз замечен</dt><dd class="p-a"></dd></div>
+      <div><dt>Нравится</dt><dd class="p-l"></dd></div>
+      <div><dt>Не нравится</dt><dd class="p-d"></dd></div>
+    </dl>
+    <div class="hd"><div class="lab"><b>НАДЕЖДА <span class="hv"></span></b><b>ОТЧАЯНИЕ</b></div><div class="bar"><i></i></div></div>
+  </div>
+  <div class="cap">ПУЛИ ПРАВДЫ</div>
+  <div class="menu">
+    <button data-a="continue" class="on"><em>01</em>Продолжить</button>
+    <button data-a="new"><em>02</em>Новый чат</button>
+    <button data-a="all"><em>03</em>Все чаты</button>
+    <button data-a="png"><em>04</em>Своя картинка</button>
+  </div>
+</div>
+<div class="tb"><div class="tag"></div><span class="ag"></span><p></p></div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const pl = PL;
+// «абсолютный» талант и анкета — стабильно по имени; рост и вес — из сообщений и чатов
+const TAL = [tt('Абсолютный романтик'), tt('Абсолютный бариста'), tt('Абсолютный поэт'), tt('Абсолютный танцор'), tt('Абсолютный лжец'), tt('Абсолютный повар'), tt('Абсолютный детектив'), tt('Абсолютный художник'), tt('Абсолютный счастливчик'), tt('Абсолютный ревнивец'), tt('Абсолютный гитарист'), tt('Абсолютный соблазнитель'), tt('Абсолютный библиотекарь'), tt('Абсолютный телохранитель')];
+const LIKE = [tt('Поздние разговоры'), tt('Чай с мёдом'), tt('Дождь по стеклу'), tt('Твой смех'), tt('Старые книги'), tt('Тишина вдвоём'), tt('Клубника'), tt('Ночные прогулки')];
+const HATE = [tt('Пустой экран'), tt('Долгие паузы'), tt('Слово «потом»'), tt('Будильники'), tt('Сквозняки'), tt('Отчаяние'), tt('Холодный кофе'), tt('Понедельники')];
+const pickS = (arr, c, k) => arr[Math.floor(seeded(c.name, k) * arr.length)];
+const hopeOf = (c) => Math.max(4, Math.min(100, Math.round(c.msgs / 2 + c.chats * 4)));
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+
+let cur = 0, sel = 0;
+const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frm"><img decoding="async" src="${c.img}" alt=""></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], h = hopeOf(c);
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.num').textContent = '№' + String(cur + 1).padStart(2, '0');
+  $('.nm').textContent = c.name;
+  $('.tal span').textContent = pickS(TAL, c, 2);
+  $('.p-h').textContent = `${c.msgs} ${pl(c.msgs, 'реплика', 'реплики', 'реплик')}`;
+  $('.p-w').textContent = `${c.chats} ${pl(c.chats, 'чат', 'чата', 'чатов')}`;
+  $('.p-b').textContent = ['A', 'B', 'AB', '0', tt('Неизвестна')][Math.floor(seeded(c.name, 6) * 5)];
+  $('.p-a').textContent = ago(c.ts);
+  $('.p-l').textContent = pickS(LIKE, c, 7); $('.p-d').textContent = pickS(HATE, c, 8);
+  $('.hv').textContent = h + '%'; $('.hd .bar i').style.width = h + '%';
+  $('.tb .tag').textContent = c.name; $('.tb .ag').textContent = ago(c.ts).toUpperCase();
+  $('.tb p').textContent = c.snip || tt('…Молчит. Похоже, начинать придётся тебе.');
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+// #N в адресе — открыть сразу N-го (для проверки)
+show(location.hash ? +location.hash.slice(1) : START);
+</script>
+</body>
+</html>

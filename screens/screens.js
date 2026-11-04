@@ -1,0 +1,22 @@
+// Экраны-игры: открываются в рамке поверх стартового экрана и берут данные через window.SLAYHOME
+export const SCREENS = {
+    mk: 'Mortal Kombat',
+    sims: 'The Sims 4',
+    genshin: 'Genshin Impact',
+    pipboy: 'Fallout · Pip-Boy',
+    gta: 'GTA V',
+    ow: 'Overwatch',
+    persona: 'Persona 5',
+    disco: 'Disco Elysium',
+    acnh: 'Animal Crossing',
+    lis: 'Life is Strange',
+    sf6: 'Street Fighter 6',
+    ddlc: 'Doki Doki Literature Club',
+    otome: 'Love and Deepspace',
+    danganronpa: 'Danganronpa',
+    undertale: 'Undertale',
+    hollow: 'Hollow Knight',
+    valorant: 'Valorant',
+    pokemon: 'Pokémon',
+    cult: 'Cult of the Lamb',
+};

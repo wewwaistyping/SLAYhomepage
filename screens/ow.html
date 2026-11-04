@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--or:#f99e1a;--bl:#3fb6ff;--ink:#1d2433;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Jost',sans-serif;color:#fff;background:#8ec5ec}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* светлое небо карты, силуэты зданий, лёгкая дымка */
+.sky{position:fixed;inset:0;background:linear-gradient(#6fb6ee 0,#a9d6f5 45%,#f5dcc0 75%,#e9b98a)}
+.city{position:fixed;left:0;right:0;bottom:0;height:46vh;opacity:.55;filter:blur(1.5px)}
+.haze{position:fixed;inset:0;background:linear-gradient(90deg,#1d2433aa 0,#1d243333 38%,transparent 55%,#1d243344 75%,#1d2433aa)}
+
+.hero{position:fixed;left:30vw;bottom:0;width:40vw;height:calc(100% - var(--top) - 2vh);transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero.in{animation:hin .4s cubic-bezier(.2,.8,.2,1)}
+@keyframes hin{from{opacity:0;transform:translateX(-50%) scale(1.05)}}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 20px 20px #1d243366);-webkit-mask-image:linear-gradient(0deg,transparent,#000 8%);mask-image:linear-gradient(0deg,transparent,#000 8%)}
+.hero .ph{align-self:center;width:min(26vw,360px);aspect-ratio:3/4;margin-bottom:6vh;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);background:#fff;padding:6px}
+.hero .ph img{width:100%;height:100%;object-fit:cover;object-position:top;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%)}
+
+.head{position:fixed;left:3vw;top:calc(var(--top) + 18px);z-index:4}
+.head h2{font:700 clamp(26px,2.4vw,40px)/1 'Oswald';font-style:italic;text-transform:uppercase;letter-spacing:.02em;text-shadow:0 3px 0 #1d243366}
+.head .timer{display:inline-block;margin-top:8px;padding:2px 12px;background:#fff;color:var(--ink);font:700 18px 'Oswald';font-style:italic;transform:skewX(-12deg)}
+.who{position:fixed;left:3vw;bottom:calc(132px + 3vh);z-index:4;max-width:44vw}
+.role{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;background:var(--or);color:#fff;font:700 15px 'Oswald';text-transform:uppercase;transform:skewX(-12deg)}
+.role i{width:14px;height:14px;border-radius:3px;background:#fff;transform:rotate(45deg)}
+.big{font:700 clamp(54px,6.4vw,110px)/.9 'Oswald';font-style:italic;text-transform:uppercase;letter-spacing:.01em;margin-top:8px;text-shadow:4px 4px 0 var(--bl),0 10px 30px #1d243388}
+.sub{margin-top:8px;font:500 16px 'Jost';color:#ffffffdd;text-shadow:0 1px 4px #000a}
+
+/* способности = действия */
+.abil{position:fixed;right:3vw;top:calc(var(--top) + 18px);width:min(380px,28vw);z-index:4}
+.abil h6{font:600 14px 'Oswald';letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;text-shadow:0 1px 4px #000a}
+.ab{display:grid;grid-template-columns:58px 1fr;gap:14px;align-items:center;width:100%;text-align:left;padding:10px 14px 10px 10px;margin-bottom:8px;background:#1d2433cc;backdrop-filter:blur(8px);transform:skewX(-8deg);transition:background .12s,transform .12s;border-left:4px solid transparent}
+.ab > *{transform:skewX(8deg)}
+.ab:hover{background:#1d2433f0;border-left-color:var(--or)}
+.ab .ic{position:relative;width:52px;height:52px;display:grid;place-items:center;font:700 20px 'Oswald';color:var(--ink);background:#fff;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.ab .ic small{position:absolute;right:-2px;bottom:-4px;padding:0 4px;background:var(--ink);color:#fff;font:600 10px 'Jost';clip-path:none}
+.ab b{display:block;font:700 18px 'Oswald';text-transform:uppercase;letter-spacing:.02em}
+.ab span{font:400 13px 'Jost';color:#ffffffbb}
+.ab.ult .ic{background:conic-gradient(var(--or) var(--p),#fff3 0);color:#fff}
+.ab.go{background:var(--or)}
+.ab.go .ic{color:var(--or)}
+.ab.go span{color:#fff}
+.quote{margin-top:14px;padding:12px 14px;background:#ffffffe6;color:var(--ink);font:500 14px/1.5 'Jost';display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;clip-path:polygon(0 0,100% 0,100% 82%,94% 100%,0 100%)}
+
+/* лента героев */
+.roster{position:fixed;left:0;right:0;bottom:0;padding:16px 3vw 20px;display:flex;gap:6px;justify-content:center;background:linear-gradient(transparent,#1d2433cc 45%);overflow-x:auto;scrollbar-width:none;z-index:4}
+.tile{flex:none;width:72px;height:84px;padding:3px;background:#ffffff55;clip-path:polygon(12% 0,100% 0,88% 100%,0 100%);transition:transform .12s,background .12s}
+.tile img{width:100%;height:100%;object-fit:cover;object-position:top;clip-path:polygon(12% 0,100% 0,88% 100%,0 100%);filter:saturate(.7)}
+.tile:hover{background:#fff;transform:translateY(-3px)}
+.tile.on{background:var(--or);transform:translateY(-6px)}
+.tile.on img{filter:none}
+
+@media (max-width:1000px){
+  .hero{left:50%;width:90vw;height:auto;bottom:310px;top:calc(var(--top) + 60px)}
+  .hero .ph{width:44vw;margin-bottom:0}
+  .head{left:14px;top:calc(var(--top) + 8px)}
+  .head h2{font-size:22px}
+  .who{left:14px;right:14px;max-width:none;top:auto;bottom:232px}
+  .big{font-size:40px}
+  .sub{display:none}
+  .abil{left:14px;right:14px;width:auto;top:auto;bottom:112px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .abil h6,.quote,.ab span{display:none}
+  .ab{margin:0;grid-template-columns:40px 1fr;padding:6px 8px 6px 6px}
+  .ab .ic{width:38px;height:38px;font-size:15px}
+  .ab b{font-size:13px;white-space:nowrap}
+  .roster{justify-content:flex-start;padding:12px 14px 14px}
+  .tile{width:58px;height:68px}
+}
+
+/* таймер на нуле: выбор фиксируется сам — полоса «Герой выбран» и отсчёт до матча */
+.lock{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:#1d243366;backdrop-filter:blur(2px)}
+.lock.on{display:grid}
+.lock .band{width:100%;padding:22px 0 18px;text-align:center;background:linear-gradient(90deg,transparent,var(--or) 15%,var(--or) 85%,transparent);transform:skewY(-3deg);animation:band .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes band{from{transform:skewY(-3deg) scaleX(0)}}
+.lock b{display:block;font:700 clamp(40px,5vw,80px)/1 'Oswald';font-style:italic;text-transform:uppercase;text-shadow:4px 4px 0 #1d243366}
+.lock span{display:block;margin-top:8px;font:600 clamp(16px,1.6vw,22px) 'Oswald';font-style:italic;text-transform:uppercase;letter-spacing:.06em}
+.timer.low{background:#ff4a3a;color:#fff;animation:tick .5s steps(1) infinite}
+@keyframes tick{50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<svg class="city" viewBox="0 0 1600 460" preserveAspectRatio="xMidYMax slice"><g fill="#3a5a7a"></g></svg>
+<div class="haze"></div>
+<div class="hero"></div>
+<div class="head"><h2>Выберите героя</h2><span class="timer">0:30</span></div>
+<div class="who"><span class="role"><i></i><span class="rname"></span></span><div class="big"></div><div class="sub"></div></div>
+<div class="abil"><h6>Способности</h6>
+  <button class="ab go" data-a="continue"><span class="ic">ЛКМ</span><div><b>Продолжить</b><span>вернуться в последний бой</span></div></button>
+  <button class="ab" data-a="new"><span class="ic">E</span><div><b>Новый чат</b><span>начать матч заново</span></div></button>
+  <button class="ab ult" data-a="all"><span class="ic">Q<small class="ultp"></small></span><div><b>Все чаты</b><span>ульта: вся история разговоров</span></div></button>
+  <button class="ab" data-a="png"><span class="ic">P</span><div><b>Своя картинка</b><span>облик героя в полный рост</span></div></button>
+  <p class="quote"></p>
+</div>
+<div class="roster"></div>
+<div class="lock"><div class="band"><b>Герой выбран</b><span class="lname"></span></div></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// силуэты города на горизонте
+$('.city g').innerHTML = Array.from({ length: 40 }, (_, k) => { const w = 30 + seeded('c', k) * 70, h = 60 + seeded('h', k) * 300, x = k * 42 - 20;
+  return `<rect x="${x}" y="${460 - h}" width="${w}" height="${h}" rx="4"/>` + (seeded('t', k) > .7 ? `<rect x="${x + w / 2 - 4}" y="${460 - h - 40}" width="8" height="40"/>` : ''); }).join('');
+const ROLES = [tt('Танк'), tt('Урон'), tt('Поддержка')];
+const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs));
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="tile" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+let cur = 0, t = 30;
+let locked = false;
+setInterval(() => {
+  if (locked) return;
+  t -= 1;
+  $('.timer').textContent = '0:' + String(Math.max(0, t)).padStart(2, '0');
+  $('.timer').classList.toggle('low', t <= 5);
+  if (t <= 0) lockIn();
+}, 1000);
+// время вышло: фиксируем выбор, но чат сам НЕ открываем — только по клику/клавише
+function lockIn() {
+  locked = true; const lk = $('.lock');
+  $('.lname').textContent = tt`${ITEMS[cur].name} · Продолжить — в любой момент`;
+  lk.classList.add('on');
+}
+function unlock() { $('.lock').classList.remove('on'); locked = false; t = 30; $('.timer').textContent = '0:30'; $('.timer').classList.remove('low'); }
+$('.lock').addEventListener('click', unlock);
+addEventListener('keydown', (e) => { if (locked) { e.stopImmediatePropagation(); unlock(); } }, true);
+
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  const h = $('.hero'); h.innerHTML = figHTML(c, 'ph'); h.classList.remove('in'); void h.offsetWidth; h.classList.add('in');
+  $('.rname').textContent = ROLES[Math.floor(seeded(c.name, 5) * 3)];
+  $('.big').textContent = c.name; $('.sub').textContent = tt`${c.msgs} сообщений · ${c.chats} чатов · ${ago(c.ts)}`;
+  const ult = Math.max(5, Math.round(c.msgs / maxMsgs * 100)); $('.ultp').textContent = ult + '%'; $('.ab.ult').style.setProperty('--p', ult + '%');
+  $('.quote').textContent = c.snip || tt('«Герои никогда не умирают».');
+  $$('.tile').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.tile')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+const touch = matchMedia('(hover: none)').matches;
+$$('.tile').forEach((x) => { if (!touch) x.onmouseenter = () => show(+x.dataset.i); x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i); });
+$$('[data-a]').forEach((b) => b.onclick = () => ACT(b.dataset.a, ITEMS[cur]));
+addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'Enter') ACT('continue', ITEMS[cur]);
+  if (e.key === 'e' || e.key === 'у') ACT('new', ITEMS[cur]); if (e.key === 'q' || e.key === 'й') ACT('all', ITEMS[cur]); });
+show(START);
+</script>
+</body>
+</html>

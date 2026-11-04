@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Neucha&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--bl:#140608;--dk:#24090d;--r:#c4202f;--rd:#7d1220;--cr:#f3e6c8;--crd:#b9a888}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bl);color:var(--cr);font-family:'Neucha',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: тёмно-красная темнота, мягкий свет из центра, «мазки» */
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 55% 60% at 64% 62%,#5a1018 0%,#2a0a0e 55%,var(--bl) 100%)}
+.bg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,#0000 0 22px,#ffffff05 22px 24px);mix-blend-mode:screen}
+
+/* круг ритуала на полу: сплющенный SVG, крутится; вокруг свечи */
+.altar{position:fixed;left:64%;bottom:96px;width:min(44vw,620px);height:calc(min(44vw,620px) * .32);transform:translate(-50%,40%);pointer-events:none}
+.altar svg{position:absolute;left:0;top:50%;width:100%;height:auto;aspect-ratio:1;transform:translateY(-50%) scaleY(.32)}
+.altar .spin{transform-box:fill-box;transform-origin:center;animation:spin 60s linear infinite}
+.altar .glow{position:absolute;inset:-10% -4%;border-radius:50%;background:radial-gradient(closest-side,#c4202f55,#0000)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.candle{position:absolute;width:12px;height:26px;margin:-26px 0 0 -6px;background:var(--cr);border-radius:3px 3px 2px 2px;box-shadow:inset -3px 0 0 #d6c6a2}
+.candle::before{content:'';position:absolute;left:50%;top:-15px;width:9px;height:14px;margin-left:-4.5px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 70%,#fff3b0,#ffb43a 55%,#e8431f);box-shadow:0 0 14px 4px #ff7a2a66;animation:fl 1.4s ease-in-out infinite alternate}
+@keyframes fl{to{transform:scale(.88,1.08) rotate(3deg)}}
+
+/* последователь: своя PNG целиком; без неё — карта таро в кремовой рамке */
+.hero{position:fixed;left:64%;bottom:100px;height:calc(100% - var(--top) - 118px);width:44vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;-webkit-mask:linear-gradient(#000 88%,#0000);mask:linear-gradient(#000 88%,#0000);filter:drop-shadow(0 0 22px #c4202f55)}
+.hero .frm{position:relative;align-self:center;width:min(22vw,300px);aspect-ratio:2/3.35;padding:14px 14px 46px;background:var(--cr);border-radius:16px;box-shadow:0 0 0 4px var(--bl),0 0 40px #c4202f66;transform:rotate(-3deg)}
+.hero .frm::before{content:'';position:absolute;inset:7px;border:2px solid var(--rd);border-radius:11px;pointer-events:none}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:8px;border:3px solid var(--bl)}
+.hero .frm b{position:absolute;left:0;right:0;bottom:12px;text-align:center;font:400 17px 'Yeseva One';color:var(--rd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 18px}
+.hero .frm i{position:absolute;top:-4px;width:20px;height:20px;background:var(--r);border:3px solid var(--bl);transform:rotate(45deg)}
+.hero .frm i:nth-of-type(1){left:-6px}.hero .frm i:nth-of-type(2){right:-6px}
+.hero.in{animation:rise .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes rise{from{opacity:0;transform:translateX(-50%) translateY(30px) scale(.94)}}
+
+/* «рисованная» обводка: рамка через фильтр с шумом */
+.sk{position:relative}
+.sk::before{content:'';position:absolute;inset:0;border:3px solid var(--cr);border-radius:18px 10px 20px 12px/12px 20px 10px 18px;filter:url(#rough);pointer-events:none}
+
+/* левая колонка: карточка последователя и меню */
+.left{position:fixed;left:4vw;top:calc(var(--top) + 3vh);bottom:118px;width:min(430px,36vw);display:flex;flex-direction:column;gap:16px;z-index:3}
+.card{padding:30px 24px 20px;background:#1a0709e6;border-radius:18px}
+.ribbon{position:absolute;left:50%;top:-16px;transform:translateX(-50%) rotate(-2deg);padding:4px 26px;background:var(--r);color:var(--cr);font:400 14px 'Yeseva One';letter-spacing:3px;clip-path:polygon(0 0,100% 0,94% 50%,100% 100%,0 100%,6% 50%);white-space:nowrap}
+.nm{font:400 clamp(24px,2.4vw,36px)/1.1 'Yeseva One';text-shadow:3px 3px 0 var(--rd);overflow-wrap:anywhere}
+.lvl{margin-top:4px;font-size:16px;color:var(--crd)}
+.lvl b{color:var(--cr);font-weight:400}
+.stat{display:flex;align-items:center;gap:10px;margin-top:14px}
+.stat svg{flex:none;width:26px;height:26px}
+.stat .lab{font-size:15px;min-width:74px}
+.bar{position:relative;flex:1;height:16px;border:3px solid var(--cr);border-radius:10px 6px 9px 7px;background:var(--bl);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--rd),var(--r) 70%,#ff6a55);transition:width .5s cubic-bezier(.3,1.3,.5,1)}
+.bar i::after{content:'';position:absolute;inset:2px 4px auto;height:3px;border-radius:2px;background:#fff5}
+.pct{min-width:44px;text-align:right;font-size:15px}
+.hearts{display:flex;gap:4px}
+.hearts svg{width:24px;height:22px}
+.faith{margin-top:2px;padding-left:36px;font-size:14px;color:var(--crd)}
+.faith b{color:#ff8a7a;font-weight:400}
+.trait{display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:14px;border-top:2px dashed #f3e6c84d}
+.trait .ic{flex:none;margin:0 4px 0 8px;display:grid;place-items:center;width:44px;height:44px;background:var(--cr);border:3px solid var(--bl);box-shadow:0 0 0 3px var(--cr);transform:rotate(45deg);border-radius:6px}
+.trait .ic svg{width:26px;height:26px;transform:rotate(-45deg)}
+.trait b{display:block;font:400 17px 'Yeseva One'}
+.trait span{font-size:14px;color:var(--crd);line-height:1.25}
+.whisper{position:relative;margin-top:16px;padding:10px 14px;background:var(--cr);color:var(--bl);border-radius:14px 18px 12px 16px;font-size:15px;line-height:1.35}
+.whisper::before{content:'';position:absolute;left:22px;top:-9px;border:9px solid transparent;border-bottom-color:var(--cr);border-top:0}
+.whisper p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.whisper s{text-decoration:none;color:var(--rd);font-weight:700}
+
+/* меню: выбранный пункт — красная клякса с короной */
+.menu{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.menu button{position:relative;display:flex;align-items:baseline;gap:12px;padding:6px 16px 6px 46px;border-radius:14px 8px 16px 10px;transition:transform .15s,background .15s}
+.menu button big{font:400 clamp(20px,1.8vw,26px)/1.15 'Yeseva One'}
+.menu button small{font-size:15px;color:var(--crd)}
+.menu button .cr{position:absolute;left:8px;top:50%;width:30px;height:26px;transform:translateY(-50%) scale(0) rotate(-20deg);transition:transform .2s cubic-bezier(.3,1.8,.5,1)}
+.menu button.on{background:var(--r);transform:rotate(-1.5deg) translateX(6px)}
+.menu button.on small{color:var(--cr)}
+.menu button.on .cr{transform:translateY(-50%) scale(1) rotate(-8deg)}
+.menu button.on::before{content:'';position:absolute;inset:0;border:3px solid var(--cr);border-radius:inherit;filter:url(#rough)}
+
+/* справа сверху: состояние культа */
+.hud{position:fixed;right:3vw;top:calc(var(--top) + 2.5vh);display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:3;text-align:right}
+.hud .t{font:400 22px 'Yeseva One';letter-spacing:1px}
+.hud .t small{display:block;font:400 14px 'Neucha';color:var(--crd);letter-spacing:0}
+.hud .pill{display:flex;align-items:center;gap:8px;padding:4px 14px;background:#1a0709cc;border-radius:99px;font-size:15px}
+.hud .pill svg{width:18px;height:18px}
+
+/* лента последователей: зубчатая кромка, кружки в кремовой обводке */
+.roster{position:fixed;left:0;right:0;bottom:0;height:112px;padding:22px 4vw 0;background:#0e0405;display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;z-index:4;-webkit-mask:radial-gradient(circle at 12px 0,#0000 9px,#000 10px) 0 0/24px 14px repeat-x,linear-gradient(#000,#000) 0 14px/100% 100% no-repeat;mask:radial-gradient(circle at 12px 0,#0000 9px,#000 10px) 0 0/24px 14px repeat-x,linear-gradient(#000,#000) 0 14px/100% 100% no-repeat}
+.ch{flex:none;position:relative;width:70px;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:12px;transition:transform .15s}
+.ch .av{width:56px;height:56px;border-radius:50%;border:3px solid var(--cr);overflow:hidden;background:var(--dk);box-shadow:0 0 0 3px var(--bl)}
+.ch img{width:100%;height:100%;object-fit:cover;object-position:top}
+.ch b{max-width:70px;font-weight:400;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--crd)}
+.ch .cr{position:absolute;top:-4px;left:50%;width:30px;height:24px;margin-left:-15px;opacity:0;transform:translateY(6px);transition:.2s}
+.ch:hover{transform:translateY(-3px)}
+.ch.on .av{border-color:var(--r);box-shadow:0 0 0 3px var(--cr),0 0 16px #c4202f}
+.ch.on b{color:var(--cr)}
+.ch.on .cr{opacity:1;transform:none}
+
+@media (max-width:760px){
+  .altar{left:50%;width:92vw;height:29vw;bottom:var(--hb,190px)}
+  .hero{left:50%;width:92vw;top:var(--ht,200px);bottom:calc(var(--hb,190px) + 9vw);height:auto}
+  .hero .frm{width:auto;height:100%;padding:9px 9px 32px}
+  .hero .frm b{font-size:13px;bottom:8px}
+  .left{left:3vw;right:3vw;width:auto;top:calc(var(--top) + 18px);bottom:102px;gap:10px}
+  .card{padding:20px 14px 12px}
+  .ribbon{font-size:12px;padding:3px 20px;top:-13px}
+  .nm{font-size:22px}
+  .lvl{font-size:14px;margin:0}
+  .stat{margin-top:8px;gap:8px}.stat .lab{min-width:50px;font-size:13px}
+  .faith{display:none}
+  .hearts svg{width:20px;height:18px}
+  .trait{margin-top:8px;padding-top:8px;gap:10px}
+  .trait .ic{margin:0 2px 0 6px;width:30px;height:30px;box-shadow:0 0 0 2px var(--cr)}.trait .ic svg{width:18px;height:18px}
+  .trait b{font-size:14px}.trait span{display:none}
+  .whisper{display:none}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;background:#0e0405e6;border-radius:16px}
+  .menu button{padding:5px 8px 5px 34px;flex-direction:column;gap:0}
+  .menu button big{font-size:16px}.menu button small{font-size:12px}
+  .menu button .cr{left:4px;width:24px;height:21px}
+  .menu button.on{transform:none}
+  .hud{display:none}
+  .roster{height:96px;padding-top:18px;gap:10px}
+  .ch{width:58px}.ch .av{width:48px;height:48px}.ch b{max-width:58px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<!-- шум для «рисованных» линий -->
+<svg width="0" height="0" style="position:absolute"><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>
+<symbol id="crown" viewBox="0 0 30 24"><path d="M3 21 L4.5 6 L10 11.5 L15 2.5 L20 11.5 L25.5 6 L27 21 Z" fill="#c4202f" stroke="#140608" stroke-width="2.4" stroke-linejoin="round"/><ellipse cx="15" cy="15.5" rx="5" ry="3.2" fill="#f3e6c8" stroke="#140608" stroke-width="1.6"/><circle cx="15" cy="15.5" r="1.7" fill="#140608"/></symbol>
+<symbol id="flame" viewBox="0 0 26 26"><path d="M13 2c1 5 7 7 7 14a7 7 0 0 1-14 0c0-4 2-5 3-8 1 2 2 3 3 3 0-3-1-6 1-9z" fill="#c4202f" stroke="#f3e6c8" stroke-width="2.4" stroke-linejoin="round"/><path d="M13 13c2 2 3 3 3 5a3 3 0 0 1-6 0c0-2 2-3 3-5z" fill="#f3e6c8"/></symbol>
+<symbol id="heart" viewBox="0 0 24 22"><path d="M12 20 C4 14 2 10 2 7 a5 5 0 0 1 10-1 a5 5 0 0 1 10 1 c0 3-2 7-10 13z"/></symbol>
+</svg>
+
+<div class="bg"></div>
+<div class="altar"><div class="glow"></div><svg viewBox="0 0 200 200"></svg></div>
+<div class="hero"></div>
+
+<div class="left">
+  <div class="card sk">
+    <div class="ribbon">ПОСЛЕДОВАТЕЛЬ</div>
+    <h1 class="nm"></h1>
+    <div class="lvl"></div>
+    <div class="stat"><svg><use href="#flame"/></svg><span class="lab">Вера</span><div class="bar"><i class="fb"></i></div><span class="pct"></span></div>
+    <div class="faith"></div>
+    <div class="stat"><svg viewBox="0 0 26 26"><path d="M13 23 L4 14 a5 5 0 0 1 9-7 a5 5 0 0 1 9 7z" fill="none" stroke="#f3e6c8" stroke-width="2.4" stroke-linejoin="round"/></svg><span class="lab">Преданность</span><div class="hearts"></div></div>
+    <div class="trait"><div class="ic"><svg viewBox="0 0 24 24" class="tg"></svg></div><div><b class="tn"></b><span class="td"></span></div></div>
+    <div class="whisper"><p></p></div>
+  </div>
+  <div class="menu">
+    <button data-a="continue" class="on"><svg class="cr"><use href="#crown"/></svg><big>Продолжить</big><small>наставлять в вере</small></button>
+    <button data-a="new"><svg class="cr"><use href="#crown"/></svg><big>Новый чат</big><small>новый обряд</small></button>
+    <button data-a="all"><svg class="cr"><use href="#crown"/></svg><big>Все чаты</big><small>летопись культа</small></button>
+    <button data-a="png"><svg class="cr"><use href="#crown"/></svg><big>Своя картинка</big><small>сменить облик</small></button>
+  </div>
+</div>
+
+<div class="hud">
+  <div class="t"><span class="cname"></span><small>паства собрана</small></div>
+  <div class="pill"><svg viewBox="0 0 26 26"><use href="#flame"/></svg><span class="hv"></span></div>
+</div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const pl = PL;
+const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+
+// круг ритуала: два кольца, руны-штрихи, пятиконечная звезда и огоньки на вершинах
+(() => {
+  const P = (k, r) => { const a = -Math.PI / 2 + k * 2 * Math.PI / 5; return [100 + r * Math.cos(a), 100 + r * Math.sin(a)]; };
+  const star = [0, 2, 4, 1, 3].map((k) => P(k, 78).map((v) => v.toFixed(1)).join(',')).join(' ');
+  const dots = [0, 1, 2, 3, 4].map((k) => { const [x, y] = P(k, 78); return `<circle cx="${x}" cy="${y}" r="5" fill="#140608" stroke="#f3e6c8" stroke-width="2"/>`; }).join('');
+  $('.altar svg').innerHTML = `<g class="spin" fill="none" stroke="#f3e6c8" stroke-linejoin="round">
+    <circle cx="100" cy="100" r="96" stroke-width="3" opacity=".75"/>
+    <circle cx="100" cy="100" r="88" stroke-width="7" stroke-dasharray="2 7 9 5" opacity=".45"/>
+    <circle cx="100" cy="100" r="78" stroke-width="2" opacity=".7"/>
+    <polygon points="${star}" stroke="#c4202f" stroke-width="3"/>
+    <circle cx="100" cy="100" r="30" stroke-width="1.6" opacity=".5"/>${dots}</g>`;
+  // свечи по краю эллипса
+  const alt = $('.altar');
+  [200, 240, 290, 340, 20, 160].forEach((deg) => {
+    const a = deg * Math.PI / 180, el = document.createElement('i');
+    el.className = 'candle'; el.style.left = (50 + 47 * Math.cos(a)) + '%'; el.style.top = (50 + 47 * Math.sin(a)) + '%';
+    alt.append(el);
+  });
+})();
+
+// черты последователя: значок рисуем линиями, как в игре
+const TRAITS = [
+  [tt('Болтун'), tt('Говорит больше, чем молится. Любит длинные ответы.'), '<path d="M4 6h16v10H11l-5 4v-4H4z"/><path d="M8 10h8M8 13h5"/>'],
+  [tt('Фанатик'), tt('Вера не угасает даже без проповедей.'), '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-6 1 2 2 2 3 2 0-2-1-4 0-6z"/>'],
+  [tt('Полуночник'), tt('Лучше всего говорит после заката.'), '<path d="M15 4a8 8 0 1 0 5 13 7 7 0 0 1-5-13z"/>'],
+  [tt('Обожатель'), tt('Преданность Агнцу растёт от каждого слова.'), '<path d="M12 20C5 15 3 11 3 8a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 3-2 7-9 12z"/>'],
+  [tt('Провидец'), tt('Видит, чем кончится чат, но молчит.'), '<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'],
+  [tt('Бессмертный'), tt('Старость его не берёт. Странно.'), '<path d="M6 11a6 6 0 1 1 12 0v4h-3v3H9v-3H6z"/><circle cx="9.5" cy="11" r="1.2"/><circle cx="14.5" cy="11" r="1.2"/>'],
+];
+const traitOf = (c) => TRAITS[Math.floor(seeded(c.name, 3) * TRAITS.length)];
+// вера — от сообщений (логарифм, 1000 сообщений = 100%), преданность — от чатов, уровень — каждые 50 сообщений
+const faithOf = (c) => Math.max(6, Math.min(100, Math.round(Math.log10(c.msgs + 1) / 3 * 100)));
+const faithWord = (f) => f >= 90 ? tt('фанатично предан') : f >= 60 ? tt('искренне верит') : f >= 30 ? tt('начинает верить') : tt('сомневается');
+const loyalOf = (c) => Math.min(10, Math.round(c.chats / 1.5)); // в половинках сердец, макс. 5 сердец
+const lvlOf = (c) => Math.min(10, 1 + Math.floor(c.msgs / 50));
+
+const heart = (fill) => `<svg viewBox="0 0 24 22"><defs><clipPath id="h${fill}"><rect width="12" height="22"/></clipPath></defs>
+  <use href="#heart" fill="#140608" stroke="#f3e6c8" stroke-width="2.4"/>${fill === 2 ? '<use href="#heart" fill="#c4202f"/>' : fill === 1 ? `<use href="#heart" fill="#c4202f" clip-path="url(#h1)"/>` : ''}
+  <use href="#heart" fill="none" stroke="#f3e6c8" stroke-width="2.4"/></svg>`;
+
+const total = ITEMS.reduce((s, c) => s + c.msgs, 0);
+$('.hv').textContent = `${ITEMS.length} ${pl(ITEMS.length, 'последователь', 'последователя', 'последователей')} · ${total} ${pl(total, 'молитва', 'молитвы', 'молитв')}`;
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><svg class="cr"><use href="#crown"/></svg><span class="av"><img decoding="async" src="${c.img}" alt=""></span><b>${esc(c.name)}</b></button>`).join('');
+
+let cur = 0, sel = 0;
+const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frm"><i></i><i></i><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], f = faithOf(c), lo = loyalOf(c), tr = traitOf(c);
+  $('.cname').textContent = tt('Культ · ') + meOf(cur).name;
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.nm').textContent = c.name;
+  $('.lvl').innerHTML = `${tt("Уровень")} <b>${ROMAN[lvlOf(c) - 1]}</b> ${tt("· последняя молитва")} ${ago(c.ts)}`;
+  $('.fb').style.width = f + '%'; $('.pct').textContent = f + '%';
+  $('.faith').innerHTML = `<b>${faithWord(f)}</b> · ${c.msgs} ${pl(c.msgs, 'молитва', 'молитвы', 'молитв')}, ${c.chats} ${pl(c.chats, 'обряд', 'обряда', 'обрядов')}`;
+  $('.hearts').innerHTML = Array.from({ length: 5 }, (_, k) => heart(Math.max(0, Math.min(2, lo - k * 2)))).join('');
+  $('.tg').innerHTML = `<g fill="none" stroke="#140608" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${tr[2]}</g>`;
+  $('.tn').textContent = tr[0]; $('.td').textContent = tr[1];
+  $('.whisper p').innerHTML = `<s>${tt("Шепчет:")}</s> ${esc(c.snip)}`; $('.whisper').style.display = c.snip ? '' : 'none';
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+  fit();
+}
+// высота карточки зависит от имени, поэтому границы места под картинку меряем
+function fit() {
+  const st = document.documentElement.style;
+  st.setProperty('--ht', $('.card').getBoundingClientRect().bottom + 14 + 'px');
+  st.setProperty('--hb', innerHeight - $('.menu').getBoundingClientRect().top + 'px');
+}
+addEventListener('resize', fit); document.fonts?.ready.then(fit);
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

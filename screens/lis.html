@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Neucha&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--paper:#f7f1e3;--line:#9cc3d955;--ink:#2a3550;--blue:#2f6fd0;--red:#d0453a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#3b3632;color:var(--ink);font-family:'Neucha',cursive}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* стол и раскрытый дневник */
+.desk{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,#5a5048,#2e2925 75%)}
+.book{position:fixed;left:50%;top:calc(var(--top) + 3vh);bottom:112px;width:min(1180px,92vw);transform:translateX(-50%) rotate(-.6deg);display:grid;grid-template-columns:1fr 1fr;filter:drop-shadow(0 18px 30px #0008)}
+.pg{position:relative;background:repeating-linear-gradient(transparent 0 33px,var(--line) 33px 34px) 0 70px,var(--paper)}
+.pg.l{overflow:hidden;border-radius:10px 2px 2px 10px;box-shadow:inset -24px 0 30px -20px #0003;padding:28px 40px 24px 64px}
+.pg.l::before{content:'';position:absolute;left:44px;top:0;bottom:0;width:2px;background:#e8a0a066}
+.pg.r{border-radius:2px 10px 10px 2px;box-shadow:inset 24px 0 30px -20px #0003}
+
+/* левая страница: запись от руки */
+.date{font:700 34px 'Caveat';color:var(--blue);transform:rotate(-2deg);transform-origin:left}
+.entry{margin-top:14px;font:400 19px/34px 'Neucha'}
+.entry .q{display:block;margin-top:2px;font:500 22px/34px 'Caveat';color:#5a4a3a;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+.entry b{font-weight:400;color:var(--red)}
+.todo{margin-top:24px;display:flex;flex-direction:column}
+.todo button{position:relative;display:flex;align-items:center;gap:12px;height:34px;font:700 26px 'Caveat';color:var(--ink);width:max-content}
+.todo button::before{content:'';width:18px;height:18px;border:2px solid var(--ink);border-radius:3px;transform:rotate(-4deg)}
+.todo button.on::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 10l5 6L19 1' stroke='%23d0453a' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center/120% no-repeat}
+.todo button svg{position:absolute;left:28px;bottom:2px;width:calc(100% - 28px);height:10px;opacity:0}
+.todo button.on svg{opacity:1}
+.todo button.on svg path{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .35s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* правая страница: PNG как наклейка с белой обводкой; без неё — полароид на скотче */
+.hero{position:absolute;left:0;right:0;bottom:6%;top:calc(12px - 3vh);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero img.full{max-height:100%;max-width:92%;object-fit:contain;transform:rotate(2deg);filter:drop-shadow(0 0 0 #fff) drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(0 8px 10px #0004)}
+.hero .pol{align-self:center;width:min(62%,320px);padding:14px 14px 58px;background:#fff;box-shadow:0 8px 18px #0003;transform:rotate(3deg);position:relative}
+.hero .pol img{width:100%;aspect-ratio:1;object-fit:cover;object-position:top}
+.hero .pol::before,.tape{content:'';position:absolute;width:110px;height:30px;background:#e8dfa0aa;box-shadow:0 1px 2px #0002}
+.hero .pol::before{left:50%;top:-14px;transform:translateX(-50%) rotate(-4deg)}
+.hero.in{animation:stick .5s cubic-bezier(.3,1.4,.5,1)}
+@keyframes stick{from{opacity:0;transform:scale(1.08) rotate(-3deg)}}
+.cap{position:absolute;right:7%;top:5%;z-index:2;font:700 30px 'Caveat';color:var(--ink);transform:rotate(-3deg);max-width:70%;text-align:right;line-height:1}
+.fly{position:absolute;left:12%;top:16%;width:70px;transform:rotate(-14deg);animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:rotate(-8deg) translateY(-6px)}}
+
+/* лента полароидов внизу, поверх стола */
+.roster{position:fixed;left:0;right:0;bottom:0;height:150px;padding:0 4vw;display:flex;align-items:flex-start;justify-content:center;gap:0;overflow:auto hidden;scrollbar-width:none;z-index:5;pointer-events:none}
+.ph{display:block;flex:none;width:96px;padding:6px 6px 26px;margin:0 -8px;background:#fff;box-shadow:0 4px 10px #0005;pointer-events:auto;transform:rotate(var(--rot)) translateY(28px);transition:transform .18s;position:relative}
+.ph img{width:100%;aspect-ratio:1;object-fit:cover;object-position:top}
+.ph b{position:absolute;left:4px;right:4px;bottom:3px;font:700 15px/1 'Caveat';color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.ph:hover{transform:rotate(0) translateY(12px);z-index:2}
+.ph.on{transform:rotate(0) translateY(0);z-index:3;box-shadow:0 10px 20px #0007}
+
+@media (max-width:760px){
+  .book{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;width:94vw;bottom:118px;transform:translateX(-50%)}
+  .hero{top:8px;bottom:8px}
+  .pg.l{order:2;border-radius:2px 2px 10px 10px;padding:12px 16px 10px 36px}
+  .pg.l::before{left:24px}
+  .pg.r{order:1;border-radius:10px 10px 2px 2px}
+  .date{font-size:24px}.entry{font-size:14px;line-height:26px;margin-top:4px}.entry .q{font-size:17px;line-height:24px;-webkit-line-clamp:2}
+  .todo{margin-top:6px;display:grid;grid-template-columns:1fr 1fr}.todo button{font-size:19px;height:28px}
+  .cap{font-size:22px}.fly{width:44px}
+  .roster{justify-content:flex-start;height:130px}.ph{width:76px;margin:0 3px;transform:rotate(var(--rot)) translateY(22px)}
+}
+</style>
+</head>
+<body>
+<div class="desk"></div>
+<div class="book">
+  <div class="pg l">
+    <div class="date"></div>
+    <p class="entry"></p>
+    <div class="todo">
+      <button data-a="continue" class="on">Продолжить<svg viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 6C40 2 80 9 120 4S180 7 198 3" stroke="#d0453a" stroke-width="2.5" fill="none"/></svg></button>
+      <button data-a="new">Новый чат<svg viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 6C40 2 80 9 120 4S180 7 198 3" stroke="#d0453a" stroke-width="2.5" fill="none"/></svg></button>
+      <button data-a="all">Все чаты<svg viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 6C40 2 80 9 120 4S180 7 198 3" stroke="#d0453a" stroke-width="2.5" fill="none"/></svg></button>
+      <button data-a="png">Вклеить картинку<svg viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 6C40 2 80 9 120 4S180 7 198 3" stroke="#d0453a" stroke-width="2.5" fill="none"/></svg></button>
+    </div>
+  </div>
+  <div class="pg r">
+    <!-- синяя бабочка, нарисованная ручкой -->
+    <svg class="fly" viewBox="0 0 70 50"><g fill="#4a90e2" fill-opacity=".35" stroke="#2f6fd0" stroke-width="2" stroke-linejoin="round"><path d="M35 25C26 4 6 2 6 14s14 13 29 11Z"/><path d="M35 25C44 4 64 2 64 14S50 27 35 25Z"/><path d="M35 25C24 30 14 44 22 46s12-10 13-21Z"/><path d="M35 25C46 30 56 44 48 46S36 36 35 25Z"/></g><path d="M35 14v24M35 14l-5-8M35 14l5-8" stroke="#2a3550" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    <div class="hero"></div>
+    <div class="cap"></div>
+  </div>
+</div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const MON = [tt('января'), tt('февраля'), tt('марта'), tt('апреля'), tt('мая'), tt('июня'), tt('июля'), tt('августа'), tt('сентября'), tt('октября'), tt('ноября'), tt('декабря')];
+const pl = PL;
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ph" data-i="${i}" style="--rot:${((seeded(c.name, 41) - .5) * 14).toFixed(1)}deg"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+
+let cur = 0, sel = 0;
+const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="pol"><img decoding="async" src="${c.img}" alt=""></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], d = new Date(c.ts);
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.date').textContent = `${d.getDate()} ${MON[d.getMonth()]}`;
+  $('.entry').innerHTML = `${tt("Последний раз —")} <b>${ago(c.ts)}</b>. ${c.chats} ${pl(c.chats, 'чат', 'чата', 'чатов')}, ${c.msgs} ${pl(c.msgs, 'сообщение', 'сообщения', 'сообщений')}${tt(". Остановились вот на чём:")}`
+    + `<span class="q">«${esc(c.snip || tt('…ничего не помню. Странно.'))}»</span>`;
+  $('.cap').textContent = c.name;
+  $$('.ph').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ph')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.todo button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.todo button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ph').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.todo button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

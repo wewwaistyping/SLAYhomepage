@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--r:#ff4655;--t:#19e6c1;--bg:#0f1923;--bg2:#16232f;--w:#ece8e1;--m:#768079}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--w);font-family:'Roboto Condensed',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: тёмно-синий, тонкая сетка и огромное контурное имя */
+.bg{position:fixed;inset:0;background:linear-gradient(#ffffff06 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,#ffffff06 1px,transparent 1px) 0 0/48px 48px,radial-gradient(ellipse 50% 60% at 46% 55%,#1f3443,var(--bg) 70%)}
+.ghost{position:fixed;left:46%;top:52%;transform:translate(-50%,-50%);font:700 22vw/.8 'Oswald';text-transform:uppercase;color:transparent;-webkit-text-stroke:1px #ece8e114;white-space:nowrap;pointer-events:none}
+.ghost.lk{-webkit-text-stroke-color:#19e6c133}
+
+/* шапка */
+.head{position:fixed;left:50%;top:calc(var(--top) + 14px);transform:translateX(-50%);text-align:center;z-index:3}
+.head b{display:block;font:700 26px 'Oswald';letter-spacing:4px}
+.head small{font:400 12px 'Roboto Condensed';letter-spacing:3px;color:var(--m)}
+.head small i{font-style:normal;color:var(--t)}
+
+/* агент */
+.hero{position:fixed;left:46%;bottom:0;top:calc(var(--top) + 8vh);width:38vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;z-index:1}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;-webkit-mask:linear-gradient(#000 78%,transparent 98%);mask:linear-gradient(#000 78%,transparent 98%);transition:filter .3s}
+/* рамка без PNG: строгая, с уголками-скобками */
+.hero .frm{position:relative;align-self:center;width:min(20vw,260px);aspect-ratio:2/3;padding:6px;background:var(--bg2);outline:1px solid #ece8e133;margin-bottom:220px}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top}
+.hero .frm::before,.hero .frm::after{content:'';position:absolute;width:26px;height:26px;border:3px solid var(--r)}
+.hero .frm::before{left:-8px;top:-8px;border-right:0;border-bottom:0}
+.hero .frm::after{right:-8px;bottom:-8px;border-left:0;border-top:0}
+.locked .hero img.full{filter:drop-shadow(0 0 22px #19e6c155)}
+.locked .hero .frm::before,.locked .hero .frm::after{border-color:var(--t)}
+.hero.in{animation:fin .35s ease-out}
+@keyframes fin{from{opacity:0;transform:translateX(-50%) translateY(16px)}}
+
+/* слева: команда, первая ячейка — ты */
+.team{position:fixed;left:2.5vw;top:calc(var(--top) + 3vh);width:min(20vw,260px);z-index:3;display:flex;flex-direction:column;gap:4px}
+.team h3{font:700 12px 'Oswald';letter-spacing:3px;color:var(--m);margin-bottom:4px}
+.slot{display:flex;align-items:center;gap:10px;height:62px;padding:0 10px 0 0;background:linear-gradient(90deg,#ffffff0d,transparent);border-left:3px solid #ffffff1a}
+.slot .av{width:62px;height:62px;flex:none;background:#0b131a;overflow:hidden}
+.slot .av img{width:100%;height:100%;object-fit:cover;object-position:top}
+.slot b{display:block;font:700 15px 'Oswald';letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot small{font:400 12px 'Roboto Condensed';letter-spacing:1px;color:var(--m)}
+.slot.me{border-left-color:var(--t);background:linear-gradient(90deg,#19e6c122,transparent)}
+.slot.me small{color:var(--t)}
+.slot>div:last-child{min-width:0}
+.slot.empty .av{display:grid;place-items:center;color:#ffffff22;font:700 22px 'Oswald'}
+
+/* справа: имя, роль, биография, умения = действия */
+.info{position:fixed;right:3vw;top:calc(var(--top) + 9vh);width:min(30vw,420px);z-index:3}
+.role{display:flex;align-items:center;gap:8px;font:700 13px 'Oswald';letter-spacing:3px;color:var(--m)}
+.role svg{width:18px;height:18px}
+.nm{margin:6px 0 10px;font:700 clamp(40px,5vw,84px)/.9 'Oswald';text-transform:uppercase;letter-spacing:1px;overflow-wrap:anywhere}
+.bio{font:400 14px/1.45 'Roboto Condensed';color:#ece8e1b3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;padding-left:12px;border-left:2px solid var(--r)}
+.stats{display:flex;gap:22px;margin:16px 0 18px}
+.stats div{font:400 11px 'Roboto Condensed';letter-spacing:2px;color:var(--m);text-transform:uppercase}
+.stats b{display:block;font:700 26px 'Oswald';color:var(--w);letter-spacing:0}
+.menu{display:flex;flex-direction:column;gap:4px}
+.ab{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid transparent;background:#ffffff08;transition:.12s}
+.ab kbd{width:38px;height:38px;flex:none;display:grid;place-items:center;font:700 16px 'Oswald';background:#0b131a;border:1px solid #ece8e133}
+.ab div{min-width:0}
+.ab b{display:block;font:700 16px 'Oswald';letter-spacing:1px;text-transform:uppercase}
+.ab small{display:block;font:400 12px 'Roboto Condensed';color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab .pips{display:flex;gap:3px;margin-left:auto}
+.ab .pips i{width:7px;height:7px;transform:rotate(45deg);border:1px solid #ece8e166}
+.ab .pips i.on{background:var(--t);border-color:var(--t)}
+.ab.on{border-color:var(--r);background:#ff465514}
+.ab.on kbd{background:var(--r);border-color:var(--r);color:#fff}
+
+/* низ: кнопка фиксации и строгая сетка */
+.pickz{position:fixed;left:46%;bottom:2.5vh;transform:translateX(-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:10px}
+.lock{position:relative;width:100%;height:50px;font:700 20px 'Oswald';letter-spacing:4px;text-align:center;background:var(--w);color:var(--bg);clip-path:polygon(0 0,100% 0,100% 70%,96% 100%,0 100%);transition:.15s}
+.lock:hover{background:var(--r);color:#fff}
+.locked .lock{background:var(--t);color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(7,64px);gap:3px;padding:3px;background:#0b131acc}
+.cell{position:relative;width:64px;height:64px;background:var(--bg2);overflow:hidden}
+.cell img{width:100%;height:100%;object-fit:cover;object-position:50% 15%;filter:grayscale(.5) brightness(.75)}
+.cell:hover img{filter:none}
+.cell.on{outline:2px solid var(--w);outline-offset:-2px}
+.cell.on img{filter:none}
+.locked .cell:not(.on){opacity:.35}
+.locked .cell.on{outline-color:var(--t)}
+
+@media (max-width:760px){
+  .ghost{font-size:40vw;top:30%;left:50%}
+  .head{top:calc(var(--top) + 6px);white-space:nowrap}.head b{font-size:16px;letter-spacing:3px}.head small{font-size:10px;letter-spacing:2px}
+  .team{display:none}
+  .hero{left:50%;width:90vw;top:calc(var(--top) + 54px);bottom:auto;height:42vh}
+  .hero .frm{width:auto;height:94%;margin:0}
+  .info{left:4vw;right:4vw;width:auto;top:calc(var(--top) + 54px + 42vh + 10px)}
+  .role{font-size:11px}.nm{font-size:30px;margin:2px 0 6px}
+  .bio{display:none}
+  .stats{margin:0 0 8px;gap:16px}.stats div{font-size:9px;letter-spacing:1px}.stats b{font-size:18px}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .ab{padding:5px 6px;gap:6px}.ab kbd{width:28px;height:28px;font-size:13px}.ab b{font-size:12px}.ab small,.ab .pips{display:none}
+  .pickz{left:4vw;right:4vw;transform:none;bottom:10px;align-items:stretch}
+  .lock{height:42px;font-size:16px}
+  .grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:54px;overflow-x:auto;scrollbar-width:none}
+  .cell{width:54px;height:54px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="ghost"></div>
+
+<div class="head"><b>ВЫБОР АГЕНТА</b><small>СОРЕВНОВАТЕЛЬНЫЙ · КАРТА <i class="map"></i></small></div>
+<div class="hero"></div>
+
+<div class="team">
+  <h3>ВАША КОМАНДА</h3>
+  <div class="slot me"><div class="av"><img decoding="async" alt=""></div><div><b class="mename"></b><small class="st">Выбирает агента</small></div></div>
+  <div class="slot empty"><div class="av">2</div><div><b>Свободно</b><small>Ожидание игрока</small></div></div>
+  <div class="slot empty"><div class="av">3</div><div><b>Свободно</b><small>Ожидание игрока</small></div></div>
+  <div class="slot empty"><div class="av">4</div><div><b>Свободно</b><small>Ожидание игрока</small></div></div>
+  <div class="slot empty"><div class="av">5</div><div><b>Свободно</b><small>Ожидание игрока</small></div></div>
+</div>
+
+<div class="info">
+  <div class="role"><svg viewBox="0 0 20 20" class="ri"></svg><span class="rn"></span></div>
+  <div class="nm"></div>
+  <div class="bio"></div>
+  <div class="stats"><div><b class="s1"></b><span class="l1"></span></div><div><b class="s2"></b><span class="l2"></span></div><div><b class="s3"></b>последний раунд</div></div>
+  <div class="menu">
+    <button class="ab on" data-a="continue"><kbd>Q</kbd><div><b>Продолжить</b><small class="d1"></small></div></button>
+    <button class="ab" data-a="new"><kbd>E</kbd><div><b>Новый чат</b><small>Сигнатурное: начать с чистого листа</small></div></button>
+    <button class="ab" data-a="all"><kbd>C</kbd><div><b>Все чаты</b><small class="d3"></small></div></button>
+    <button class="ab" data-a="png"><kbd>X</kbd><div><b>Своя картинка</b><small>Абсолютное: свой облик в полный рост</small></div><span class="pips"></span></button>
+  </div>
+</div>
+
+<div class="pickz">
+  <button class="lock">ЗАФИКСИРОВАТЬ</button>
+  <div class="grid"></div>
+</div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const pl = PL;
+// роль по манере разговора: долгие чаты — дуэлянт, много чатов — контролёр, мало слов — страж
+const ROLES = {
+  duel: [tt('ДУЭЛЯНТ'), '<path d="M3 17 15 5l2-2v4L5 19Z M12 3h5v5" fill="none" stroke="currentColor" stroke-width="2"/>'],
+  ctrl: [tt('КОНТРОЛЁР'), '<circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="10" r="2.5" fill="currentColor"/>'],
+  sent: [tt('СТРАЖ'), '<path d="M10 2 17 5v5c0 4-3 7-7 8-4-1-7-4-7-8V5Z" fill="none" stroke="currentColor" stroke-width="2"/>'],
+  init: [tt('ИНИЦИАТОР'), '<path d="M10 2v16M2 10h16M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.6"/>'],
+};
+const roleOf = (c) => c.msgs / c.chats >= 15 ? ROLES.duel : c.chats >= 10 ? ROLES.ctrl : c.msgs <= 5 ? ROLES.sent : ROLES.init;
+const MAPS = [tt('ХЕЙВЕН'), tt('БИНД'), tt('СПЛИТ'), tt('АСЦЕНТ'), tt('ЛОТУС'), tt('САНСЕТ'), tt('ПЕРЛ')];
+
+$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+
+let cur = 0, sel = 0;
+// фиксация — только подсветка выбора, чат не открывает
+function lock(on) {
+  document.body.classList.toggle('locked', on); $('.ghost').classList.toggle('lk', on);
+  $('.lock').textContent = on ? tt('ЗАФИКСИРОВАНО') : tt('ЗАФИКСИРОВАТЬ');
+  $('.st').textContent = on ? tt('Агент зафиксирован') : tt('Выбирает агента');
+}
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], r = roleOf(c);
+  $('.slot.me .av img').src = meOf(cur).img; $('.mename').textContent = meOf(cur).name;
+  lock(false);
+  const hero = $('.hero'); hero.innerHTML = figHTML(c, 'frm'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.ghost').textContent = c.name.split(' ')[0];
+  // имя не рвём посреди слова: размер по самому длинному слову
+  const nm = $('.nm'), longest = Math.max(...c.name.split(' ').map((w) => w.length));
+  nm.textContent = c.name; nm.style.fontSize = ''; nm.style.fontSize = Math.min(parseFloat(getComputedStyle(nm).fontSize), nm.clientWidth / (longest * .56)) + 'px';
+  $('.ri').innerHTML = r[1]; $('.rn').textContent = r[0];
+  $('.bio').textContent = c.snip || tt('Досье пустое. Агент ждёт первого задания.');
+  $('.s1').textContent = c.msgs; $('.s2').textContent = c.chats;
+  $('.l1').textContent = pl(c.msgs, 'сообщение', 'сообщения', 'сообщений'); $('.l2').textContent = pl(c.chats, 'чат', 'чата', 'чатов'); $('.s3').textContent = ago(c.ts);
+  $('.d1').textContent = tt`Вернуться в раунд · ${ago(c.ts)}`;
+  $('.d3').textContent = tt`Разведка: ${c.chats} ${pl(c.chats, 'чат', 'чата', 'чатов')} на карте`;
+  // очки ульты = чаты, максимум 7
+  $('.pips').innerHTML = Array.from({ length: 7 }, (_, k) => `<i class="${k < c.chats ? 'on' : ''}"></i>`).join('');
+  $('.map').textContent = MAPS[Math.floor(seeded(c.name, 4) * MAPS.length)];
+  $('.slot.me .av img').src = c.img;
+  $$('.cell').forEach((x, k) => x.classList.toggle('on', k === cur));
+  const el = $$('.cell')[cur], p = el.parentElement;
+  if (p.scrollWidth > p.clientWidth) p.scrollLeft = el.offsetLeft - p.clientWidth / 2 + el.offsetWidth / 2;
+}
+function pick(k) { sel = mod(k, 4); $$('.ab').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.ab').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$('.lock').onclick = () => lock(!document.body.classList.contains('locked'));
+$$('.cell').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.ab')[sel].dataset.a, ITEMS[cur]);
+});
+const H = parseInt(location.hash.slice(1));
+show(Number.isInteger(H) ? H : START);
+</script>
+</body>
+</html>

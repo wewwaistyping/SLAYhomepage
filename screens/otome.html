@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600;1,800&family=Montserrat:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--pk:#ff7eb6;--vi:#9d7bff;--deep:#140b2b;--gl:#ffffff14;--ln:#ffffff2a;--tx:#f7efff;--mu:#bfaee0;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--deep);color:var(--tx);font-family:'Montserrat',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: ночной космос, розово-фиолетовые туманности, мерцающие звёзды */
+.bg{position:fixed;inset:0;background:radial-gradient(60vw 50vh at 50% 108%,#ff7eb655,transparent 70%),radial-gradient(40vw 40vh at 85% 10%,#9d7bff44,transparent 70%),radial-gradient(35vw 35vh at 10% 30%,#ff5fa233,transparent 70%),linear-gradient(#0d0820,#241243 60%,#3b1a52)}
+.stars{position:fixed;inset:0;pointer-events:none}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px #fff;animation:tw 3s ease-in-out infinite}
+.stars i.x{width:12px;height:12px;background:none;box-shadow:none}
+.stars i.x::before,.stars i.x::after{content:'';position:absolute;left:50%;top:0;width:2px;height:100%;margin-left:-1px;background:linear-gradient(#fff0,#fff,#fff0)}
+.stars i.x::after{transform:rotate(90deg)}
+@keyframes tw{50%{opacity:.2;transform:scale(.6)}}
+.orbit{position:fixed;left:50%;bottom:-38vh;width:110vh;height:110vh;transform:translateX(-50%);border-radius:50%;border:1px solid #ffffff1c;box-shadow:0 0 0 46px #ffffff05,0 0 0 47px #ffffff12;pointer-events:none}
+
+.glass{background:linear-gradient(160deg,#ffffff1f,#ffffff08);border:1px solid var(--ln);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 20px 50px #0006,inset 0 1px 0 #ffffff33}
+
+/* персонаж */
+.hero{position:fixed;left:48%;bottom:0;height:calc(100% - var(--top) - 1vh);width:42vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero img.full{max-height:100%;max-width:42vw;object-fit:contain;filter:drop-shadow(0 0 30px #ff7eb633);-webkit-mask:linear-gradient(#000 84%,#0000);mask:linear-gradient(#000 84%,#0000)}
+/* без PNG — «карточка воспоминания»: глянцевая рамка с градиентом и звёздами редкости */
+.hero .frm{position:relative;align-self:center;width:min(22vw,330px);aspect-ratio:2/3;padding:6px;border-radius:20px;background:linear-gradient(150deg,#ffd1e6,var(--pk) 30%,var(--vi) 75%,#d7c8ff);box-shadow:0 0 40px #ff7eb655,0 24px 50px #0008;transform:rotate(-2deg)}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:15px}
+.hero .frm{overflow:hidden}.hero .frm::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,#fff0 40%,#ffffff40 50%,#fff0 60%);transform:translateX(-100%);animation:shine 4s ease-in-out infinite}
+@keyframes shine{40%,100%{transform:translateX(100%)}}
+.hero .frm .rr{position:absolute;left:0;right:0;bottom:16px;text-align:center;font:700 22px 'Unbounded';color:#ffe48a;text-shadow:0 0 10px #ffb84d,0 2px 0 #7a3b00;z-index:2;letter-spacing:2px}
+.hero.in{animation:heroIn .5s cubic-bezier(.2,.9,.2,1)}
+@keyframes heroIn{from{opacity:0;transform:translateX(-50%) scale(1.04);filter:blur(6px)}}
+
+/* слева: контакты — карточки с рамкой редкости */
+.roster{position:fixed;left:22px;top:calc(var(--top) + 18px);bottom:18px;width:96px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:none;padding:4px;z-index:3}
+.ch{flex:none;position:relative;width:86px;height:86px;border-radius:20px;padding:3px;background:var(--gl);border:1px solid var(--ln);transition:transform .15s}
+.ch img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:16px}
+.ch b{position:absolute;left:3px;right:3px;bottom:3px;padding:10px 4px 4px;border-radius:0 0 16px 16px;background:linear-gradient(#0000,#140b2bdd);font:600 10px 'Montserrat';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.ch:hover{transform:scale(1.04)}
+.ch.on{background:linear-gradient(150deg,#ffd1e6,var(--pk),var(--vi));border-color:transparent;box-shadow:0 0 18px #ff7eb688}
+.ch .dot{position:absolute;right:-2px;top:-2px;width:12px;height:12px;border-radius:50%;background:var(--pk);border:2px solid var(--deep);box-shadow:0 0 8px var(--pk)}
+
+/* телефон: входящий звонок; принять — только кликом */
+.phone{position:fixed;left:150px;top:50%;transform:translateY(-46%);width:236px;padding:26px 20px 22px;border-radius:34px;text-align:center;z-index:4;transition:.35s cubic-bezier(.2,.9,.2,1)}
+.phone::before{content:'';position:absolute;left:50%;top:9px;width:64px;height:6px;margin-left:-32px;border-radius:9px;background:#ffffff30}
+.ph-top{font:600 11px 'Montserrat';letter-spacing:2px;color:var(--mu);text-transform:uppercase}
+.ava{position:relative;width:104px;height:104px;margin:22px auto 16px}
+.ava img{position:relative;width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top;border:3px solid #fff;z-index:1}
+.ava i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--pk);animation:ring 2s ease-out infinite}
+.ava i:nth-child(2){animation-delay:.66s}.ava i:nth-child(3){animation-delay:1.33s}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.ph-name{font:italic 800 24px/1.1 'Playfair Display';overflow-wrap:anywhere}
+.ph-sub{margin-top:6px;font:500 12px 'Montserrat';color:var(--mu)}
+.ph-sub::after{content:'';animation:dots 1.5s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+.ph-btns{display:flex;justify-content:space-around;margin-top:26px}
+.ph-btns button{display:flex;flex-direction:column;align-items:center;gap:8px;font:600 11px 'Montserrat';color:var(--mu)}
+.ph-btns span{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;transition:transform .15s}
+.ph-btns svg{width:26px;height:26px;fill:#fff}
+.no span{background:linear-gradient(#ff8a9a,#e2445f);box-shadow:0 8px 20px #e2445f66}
+.no svg{transform:rotate(135deg)}
+.yes span{background:linear-gradient(#ffa6cf,var(--pk) 50%,var(--vi));box-shadow:0 8px 24px #ff7eb688;animation:wig 1.6s ease-in-out infinite}
+@keyframes wig{0%,60%,100%{transform:none}65%,75%,85%{transform:rotate(-12deg)}70%,80%{transform:rotate(12deg)}}
+.ph-btns button:hover span{transform:scale(1.1)}
+/* отклонён: телефон сворачивается в плашку «пропущенный» */
+.missed{display:none;align-items:center;gap:10px;font:600 12px 'Montserrat'}
+.missed svg{width:16px;height:16px;fill:#ff8a9a;transform:rotate(135deg)}
+.missed u{text-decoration:none;color:var(--pk)}
+.phone.off{width:236px;padding:14px 18px;border-radius:99px;cursor:pointer}
+.phone.off>*:not(.missed){display:none}
+.phone.off .missed{display:flex}
+.phone.off::before{display:none}
+
+/* справа: имя, уровень связи, истории, меню */
+.side{position:fixed;right:28px;top:calc(var(--top) + 18px);bottom:18px;width:min(400px,30vw);padding:24px 24px 20px;display:flex;flex-direction:column;gap:16px;z-index:3}
+.cap{font:600 11px 'Montserrat';letter-spacing:3px;color:var(--mu);text-transform:uppercase;display:flex;justify-content:space-between}
+.nm{font:italic 800 clamp(28px,2.6vw,40px)/1.05 'Playfair Display';background:linear-gradient(90deg,#fff,#ffc4df);-webkit-background-clip:text;background-clip:text;color:transparent;overflow-wrap:anywhere}
+.lv{display:flex;align-items:center;gap:12px}
+.lv .n{font:700 15px 'Unbounded';padding:6px 12px;border-radius:12px;background:linear-gradient(135deg,var(--pk),var(--vi));box-shadow:0 4px 14px #ff7eb655;white-space:nowrap}
+.lv .bar{flex:1}
+.lv .hrt{display:flex;gap:3px;margin-bottom:6px}
+.lv .hrt i{width:16px;height:14px;background:#ffffff25;clip-path:path('M8 14C3.3 10.5 0 8 0 4.2A4 4 0 0 1 8 2.8A4 4 0 0 1 16 4.2C16 8 12.7 10.5 8 14Z')}
+.lv .hrt i.on{background:var(--pk);filter:drop-shadow(0 0 3px var(--pk))}
+.track{height:6px;border-radius:9px;background:#ffffff1c;overflow:hidden}
+.track b{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--pk),var(--vi));box-shadow:0 0 10px var(--pk);transition:width .5s}
+.lv small{display:block;margin-top:5px;font:500 11px 'Montserrat';color:var(--mu)}
+.msg{position:relative;padding:12px 16px;border-radius:18px 18px 18px 4px;background:#ffffff12;border:1px solid var(--ln);font:500 13px/1.5 'Montserrat';color:#eadff8}
+.msg span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.stories{display:flex;flex-direction:column;gap:6px}
+.st{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14;font:500 13px 'Montserrat'}
+.st em{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:#ffffff14;font:700 11px 'Unbounded';font-style:normal}
+.st div{flex:1;min-width:0}
+.st b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st small{font-size:11px;color:var(--mu)}
+.st.now{background:linear-gradient(90deg,#ff7eb633,#9d7bff22);border-color:#ff7eb666}
+.st.now em{background:linear-gradient(135deg,var(--pk),var(--vi))}
+.st.lock{opacity:.55}
+.st svg{width:14px;height:14px;fill:var(--mu);flex:none}
+.menu{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.menu button{position:relative;display:flex;align-items:center;gap:12px;height:46px;padding:0 18px;border-radius:99px;background:#ffffff10;border:1px solid var(--ln);font:600 14px 'Montserrat';overflow:hidden;transition:background .15s,box-shadow .15s}
+.menu svg{width:18px;height:18px;fill:currentColor;flex:none}
+.menu button.on{background:linear-gradient(90deg,var(--pk),var(--vi));border-color:#ffffff66;box-shadow:0 8px 24px #ff7eb655}
+.menu button.on::after{content:'';position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(#ffffff40,#fff0)}
+
+@media (max-width:760px){
+  .orbit{display:none}
+  .roster{left:0;right:0;top:calc(var(--top) + 4px);bottom:auto;width:auto;height:72px;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:4px 12px;gap:8px}
+  .ch{width:62px;height:62px;border-radius:16px}.ch img{border-radius:13px}.ch b{font-size:9px;border-radius:0 0 13px 13px}
+  .phone{left:12px;right:12px;top:calc(var(--top) + 82px);transform:none;width:auto;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:22px;text-align:left}
+  .phone::before,.ph-top{display:none}
+  .ava{width:46px;height:46px;margin:0;flex:none}
+  .ph-name{font-size:17px}.ph-sub{margin-top:2px;font-size:11px}
+  .ph-txt{flex:1;min-width:0}
+  .ph-btns{margin:0;gap:10px}.ph-btns button{font-size:0;gap:0}
+  .ph-btns span{width:42px;height:42px}.ph-btns svg{width:20px;height:20px}
+  .phone.off{width:auto;padding:12px 16px}
+  .hero{top:calc(var(--top) + 156px);bottom:290px;height:auto;width:96vw;left:50%}
+  .hero img.full{max-width:96vw}
+  .hero .frm{width:min(38vw,170px)}
+  .hero .frm .rr{font-size:14px;bottom:8px}
+  .side{left:10px;right:10px;bottom:10px;top:auto;width:auto;height:auto;padding:14px 14px;gap:10px;overflow:hidden;border-radius:22px}
+  .nm{font-size:24px}
+  .side .cap{display:none}
+  .menu{order:2;margin-top:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .menu button{height:40px;padding:0 12px;font-size:12px;gap:8px}
+  .msg{order:3;font-size:12px}.stories{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="stars"></div>
+<div class="orbit"></div>
+<div class="hero"></div>
+<div class="roster"></div>
+
+<div class="phone glass">
+  <div class="ph-top">Входящий видеовызов</div>
+  <div class="ava"><i></i><i></i><i></i><img decoding="async" src="" alt=""></div>
+  <div class="ph-txt"><div class="ph-name"></div><div class="ph-sub">звонит тебе</div></div>
+  <div class="ph-btns">
+    <button class="no" title="Отклонить"><span><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>Отклонить</button>
+    <button class="yes" title="Ответить"><span><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>Ответить</button>
+  </div>
+  <div class="missed"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span>Пропущенный вызов · <u>показать</u></span></div>
+</div>
+
+<div class="side glass">
+  <div class="cap"><span>Связь</span><span class="rar"></span></div>
+  <h1 class="nm"></h1>
+  <div class="lv"><span class="n"></span><div class="bar"><div class="hrt"></div><div class="track"><b></b></div><small></small></div></div>
+  <div class="msg"><span></span></div>
+  <div class="stories"></div>
+  <div class="menu">
+    <button data-a="continue" class="on"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Продолжить</button>
+    <button data-a="new"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>Новый чат</button>
+    <button data-a="all"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"/></svg>Все чаты</button>
+    <button data-a="png"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zm2 2v8.5l3.5-3.5 2.5 2.5 3-3.5L18 15V7zm3 1.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>Сменить картинку</button>
+  </div>
+</div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const pl = PL;
+// уровень связи: корень из «очков» (сообщения + чаты), до следующего — дробная часть
+const ptsOf = (c) => c.msgs * 2 + c.chats * 10;
+const lvOf = (c) => Math.floor(Math.sqrt(ptsOf(c)));
+const rarOf = (c) => c.msgs >= 100 ? 5 : c.msgs >= 20 ? 4 : 3;
+const TITLES = [tt('Ночной звонок'), tt('Под одним зонтом'), tt('Свидание у моря'), tt('Тихий космос'), tt('Обещание до рассвета'), tt('Шрам на ладони'), tt('Звёздная пыль'), tt('Первая ссора'), tt('Утро вдвоём'), tt('Неотправленное'), tt('Танец в невесомости'), tt('Чужой город'), tt('Тёплый шарф'), tt('Секрет на крыше'), tt('Последний поезд'), tt('Голос в эфире')];
+const title = (c, k) => TITLES[(Math.floor(seeded(c.name, 40) * TITLES.length) + k * 5) % TITLES.length]; // шаг 5 и 16 взаимно просты — соседние главы не повторяются
+
+// звёзды фона
+$('.stars').innerHTML = Array.from({ length: 46 }, (_, k) => `<i class="${k % 7 ? '' : 'x'}" style="left:${(seeded('s', k) * 100).toFixed(1)}%;top:${(seeded('t', k) * 100).toFixed(1)}%;animation-delay:${(seeded('d', k) * 3).toFixed(2)}s"></i>`).join('');
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b>${(NOW - c.ts) < 3 * 36e5 ? '<i class="dot"></i>' : ''}</button>`).join('');
+
+const LOCK = '<svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1v11H6V10zm2 0h6V7a3 3 0 0 0-6 0z"/></svg>';
+let cur = 0, sel = 0;
+const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frm"><img decoding="async" src="${c.img}" alt=""><div class="rr">${'★'.repeat(rarOf(c))}</div></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], lv = lvOf(c), p = Math.sqrt(ptsOf(c)) - lv;
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  // звонок каждый раз заново «звонит»
+  $('.phone').classList.remove('off'); $('.ava img').src = c.img; $('.ph-name').textContent = c.name;
+  $('.nm').textContent = c.name; $('.rar').textContent = '★'.repeat(rarOf(c));
+  $('.lv .n').textContent = 'Lv.' + lv;
+  $('.hrt').innerHTML = Array.from({ length: 5 }, (_, k) => `<i class="${k < Math.min(5, Math.ceil(lv / 8)) ? 'on' : ''}"></i>`).join('');
+  $('.track b').style.width = Math.round(p * 100) + '%';
+  $('.lv small').textContent = tt`${c.msgs} ${pl(c.msgs, 'сообщение', 'сообщения', 'сообщений')} · до Lv.${lv + 1} — ${Math.round((1 - p) * 100)}%`;
+  $('.msg span').textContent = c.snip || tt('Пока ни слова. Может, напишешь?');
+  // истории связи: главы = чаты; последняя — текущая, следующая закрыта
+  const n = c.chats, rows = [];
+  rows.push(`<div class="st lock"><em>${n + 1}</em><div><b>${title(c, n + 1)}</b><small>${tt("Откроется на Lv.")}${lv + 1}</small></div>${LOCK}</div>`);
+  for (let k = n; k >= Math.max(1, n - 2); k--) rows.push(`<div class="st ${k === n ? 'now' : ''}"><em>${k}</em><div><b>${title(c, k)}</b><small>${k === n ? tt('Последняя · ') + ago(c.ts) : tt('Прочитано')}</small></div></div>`);
+  $('.stories').innerHTML = `<div class="cap"><span>${tt("Истории связи")}</span><span>${n} ${pl(n, 'глава', 'главы', 'глав')}</span></div>` + rows.join('');
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+// принять звонок = продолжить чат (только по клику); отклонить = свернуть в «пропущенный»
+$('.yes').onclick = (e) => { e.stopPropagation(); ACT('continue', ITEMS[cur]); };
+$('.no').onclick = (e) => { e.stopPropagation(); $('.phone').classList.add('off'); };
+$('.phone').onclick = () => $('.phone').classList.remove('off');
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+// #N в адресе — открыть сразу N-го (для проверки)
+show(location.hash ? +location.hash.slice(1) : START);
+</script>
+</body>
+</html>

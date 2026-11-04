@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Rubik:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--c:#ff2e88;--k:#0c0c11;--w:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--k);color:var(--w);font-family:'Rubik',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: тёмный бетон и краска цвета персонажа */
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 50%,#1c1c26,#0a0a0e 70%)}
+.splash{position:fixed;left:34%;top:52%;width:min(92vh,980px);aspect-ratio:1;transform:translate(-50%,-50%);color:var(--c);transition:color .35s;pointer-events:none}
+.splash.in{animation:spl .4s cubic-bezier(.2,1.4,.4,1)}
+@keyframes spl{from{transform:translate(-50%,-50%) scale(.6) rotate(-10deg);opacity:.2}}
+.drips{position:fixed;left:0;right:0;top:var(--top);height:70px;color:var(--c);opacity:.85;transition:color .35s;pointer-events:none}
+
+/* персонаж */
+.hero{position:fixed;left:34%;bottom:0;top:calc(var(--top) + 2vh);width:48vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(10px 0 0 var(--k)) drop-shadow(0 0 2px #000)}
+.hero .frm{align-self:center;width:min(26vw,360px);aspect-ratio:2/3;padding:8px;background:var(--w);transform:skewX(-6deg);box-shadow:14px 14px 0 var(--k),14px 14px 0 3px var(--c)}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top}
+.hero.in{animation:slam .35s cubic-bezier(.2,1.2,.4,1)}
+@keyframes slam{from{opacity:0;transform:translateX(-62%)}}
+
+/* справа: имя огромным, стиль управления, шкала «Драйв», меню */
+.side{position:fixed;right:3.5vw;top:calc(var(--top) + 3vh);width:min(520px,40vw);display:flex;flex-direction:column;align-items:flex-end;text-align:right;z-index:3}
+.p1{padding:3px 12px;background:#e8202a;font:900 16px 'Unbounded';transform:skewX(-12deg);margin-bottom:8px}
+.nm{font:900 clamp(30px,3.6vw,64px)/.95 'Unbounded';text-transform:uppercase;letter-spacing:-1px;text-shadow:5px 5px 0 var(--c);transition:text-shadow .35s;overflow-wrap:anywhere}
+.style{margin-top:14px;display:flex;gap:6px}
+.style span{padding:4px 12px;font:800 12px 'Unbounded';letter-spacing:1px;border:2px solid #fff3;color:#fff6;transform:skewX(-12deg)}
+.style span.on{border-color:var(--c);background:var(--c);color:var(--k)}
+.drive{margin-top:14px;display:flex;align-items:center;gap:10px;font:800 12px 'Unbounded';letter-spacing:2px}
+.drive div{display:flex;gap:3px}
+.drive i{width:30px;height:12px;background:#ffffff1a;transform:skewX(-20deg)}
+.drive i.on{background:linear-gradient(90deg,#3ce07a,#b6ff3c);box-shadow:0 0 8px #6cff5a88}
+.last{margin-top:8px;font:500 14px 'Rubik';color:#fff9}
+.menu{margin-top:22px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.menu button{position:relative;padding:6px 18px;font:800 clamp(16px,1.4vw,22px) 'Unbounded';text-transform:uppercase;color:#fffa;transform:skewX(-10deg);z-index:0}
+.menu button::before{content:'';position:absolute;inset:0 -6px;background:var(--c);z-index:-1;clip-path:polygon(3% 12%,40% 0,100% 8%,97% 88%,60% 100%,0 92%);transform:scaleX(0);transform-origin:right;transition:transform .15s}
+.menu button.on{color:var(--k)}
+.menu button.on::before{transform:scaleX(1)}
+
+/* сетка выбора, как в игре: косые ячейки, у выбранной метка 1P */
+.grid{position:fixed;right:3.5vw;bottom:3vh;display:grid;grid-template-columns:repeat(7,64px);gap:6px;z-index:4;transform:skewX(-8deg)}
+.cell{position:relative;height:64px;background:#1a1a22;outline:2px solid #ffffff22;overflow:hidden}
+.cell img{width:100%;height:100%;object-fit:cover;object-position:top;filter:grayscale(.6) brightness(.75);transform:skewX(8deg) scale(1.15)}
+.cell:hover img{filter:none}
+.cell.on{outline:3px solid #e8202a;outline-offset:1px;overflow:visible;z-index:2}
+.cell.on img{filter:none}
+.cell.on::after{content:'1P';position:absolute;left:-6px;top:-12px;padding:0 6px;background:#e8202a;font:900 11px/18px 'Unbounded'}
+
+@media (max-width:760px){
+  .splash{left:50%;top:38%;width:110vw}
+  .hero{left:50%;width:96vw;top:calc(var(--top) + 6px);bottom:46%}
+  .hero .frm{width:46vw}
+  .side{left:4vw;right:4vw;width:auto;top:auto;bottom:156px;align-items:flex-start;text-align:left}
+  .p1{display:none}.nm{font-size:26px;text-shadow:3px 3px 0 var(--c)}
+  .style,.last{display:none}.drive{margin-top:8px}.drive i{width:20px}
+  .menu{display:grid;grid-template-columns:1fr 1fr;width:100%;margin-top:10px}.menu button{font-size:12px;padding:6px 8px}
+  .grid{left:3vw;right:3vw;bottom:12px;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:52px;overflow-x:auto;scrollbar-width:none;padding:12px 6px 4px;transform:none}
+  .cell{height:52px}.cell img{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<!-- клякса краски: круг с рваными краями (шум) и брызги вокруг -->
+<svg class="splash" viewBox="0 0 400 400"><defs><filter id="rag"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="8"/><feDisplacementMap in="SourceGraphic" scale="46"/></filter></defs>
+  <g fill="currentColor" filter="url(#rag)"><circle cx="200" cy="200" r="120"/><ellipse cx="300" cy="140" rx="40" ry="18" transform="rotate(-30 300 140)"/><ellipse cx="96" cy="290" rx="44" ry="16" transform="rotate(30 96 290)"/></g>
+  <g fill="currentColor"><circle cx="340" cy="250" r="9"/><circle cx="360" cy="216" r="5"/><circle cx="70" cy="140" r="8"/><circle cx="56" cy="170" r="4"/><circle cx="250" cy="352" r="7"/><circle cx="140" cy="60" r="6"/><circle cx="320" cy="80" r="4"/></g></svg>
+<svg class="drips" viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v10c-20 0-22 30-30 30s-8-26-30-26-12 50-24 50-10-48-40-48-24 14-40 14-14-6-60-6-20 40-34 40-12-38-40-38-60 6-90 6-30 22-44 22-12-20-50-20-40 52-54 52-10-50-50-50-70 8-110 8-26 30-40 30-16-28-60-28-50 12-80 12-30 34-46 34-14-32-60-32S20 14 0 14Z"/></svg>
+<div class="hero"></div>
+<div class="side">
+  <div class="p1">1P</div>
+  <div class="nm"></div>
+  <div class="style"><span class="s1">Классика</span><span class="s2">Современное</span></div>
+  <div class="drive">ДРАЙВ <div class="seg"></div></div>
+  <div class="last"></div>
+  <div class="menu">
+    <button data-a="continue" class="on">Продолжить</button>
+    <button data-a="new">Новый чат</button>
+    <button data-a="all">Все чаты</button>
+    <button data-a="png">Своя картинка</button>
+  </div>
+</div>
+<div class="grid"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// у каждого бойца свой цвет краски (стабильно по имени)
+const PAINT = ['#ff2e88', '#ffd400', '#00d2ff', '#a6ff00', '#ff6a00', '#8a5cff', '#ff3b3b'];
+const paintOf = (c) => PAINT[Math.floor(seeded(c.name, 61) * PAINT.length)];
+const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs));
+// «Классика» — давние собеседники (3+ чата), «Современное» — новенькие
+const classic = (c) => c.chats >= 3;
+
+$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+
+let cur = 0, sel = 0;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  document.documentElement.style.setProperty('--c', paintOf(c));
+  const sp = $('.splash'); sp.classList.remove('in'); void sp.getBoundingClientRect(); sp.classList.add('in');
+  const hero = $('.hero'); hero.innerHTML = figHTML(c, 'frm'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.nm').textContent = c.name;
+  $('.s1').classList.toggle('on', classic(c)); $('.s2').classList.toggle('on', !classic(c));
+  const seg = Math.max(1, Math.round(c.msgs / maxMsgs * 6));
+  $('.seg').innerHTML = Array.from({ length: 6 }, (_, k) => `<i class="${k < seg ? 'on' : ''}"></i>`).join('');
+  $('.last').textContent = tt`Последний бой — ${ago(c.ts)} · чатов ${c.chats} · сообщений ${c.msgs}`;
+  $$('.cell').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.cell')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.cell').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

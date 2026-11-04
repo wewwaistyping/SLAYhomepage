@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Oswald:wght@500;700&family=PT+Serif:ital,wght@1,700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{--r:#e3121b;--k:#0b0b0b;--w:#f4f1ea;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--r);color:var(--w);font-family:'Oswald',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: красный с растром, слева чёрный осколок под текст, белая кромка */
+.bg{position:fixed;inset:0;background:radial-gradient(circle,#0000002e 1.3px,transparent 1.7px) 0 0/9px 9px,var(--r)}
+.shard{position:fixed;left:0;top:0;width:58vw;height:100%;background:var(--k);clip-path:polygon(0 0,100% 0,72% 100%,0 100%)}
+.edge{position:fixed;left:0;top:0;width:59.2vw;height:100%;background:var(--w);clip-path:polygon(98% 0,100% 0,73.4% 100%,71.6% 100%)}
+.ray{position:fixed;left:62%;top:50%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(#0000 0 8deg,#00000014 8deg 16deg);animation:spin 80s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* персонаж: сама PNG + чёрный «двойник» со сдвигом */
+.hero{position:fixed;left:70%;bottom:0;height:calc(100% - var(--top) - 2vh);width:46vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero .fig{position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.hero img.full,.hero img.sh{max-height:100%;max-width:46vw;object-fit:contain}
+.hero img.sh{position:absolute;bottom:0;filter:brightness(0);transform:translate(26px,-10px)}
+.hero img.full{position:relative}
+.hero .frm{align-self:center;width:min(25vw,360px);aspect-ratio:2/3;padding:10px;background:var(--w);transform:rotate(4deg);box-shadow:-18px 14px 0 var(--k)}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top}
+.hero.in{animation:heroIn .45s cubic-bezier(.2,.9,.2,1)}
+@keyframes heroIn{from{opacity:0;transform:translateX(-30%) skewX(-12deg)}}
+
+/* левая колонка */
+.left{position:fixed;left:3.5vw;top:calc(var(--top) + 3vh);bottom:150px;width:min(560px,42vw);display:flex;flex-direction:column;gap:18px;z-index:3}
+.name{font-size:clamp(30px,3.3vw,54px);line-height:1.25;text-transform:uppercase;transform:rotate(-3deg);transform-origin:left;filter:drop-shadow(4px 4px 0 var(--r))}
+.name .wd{display:inline-block;white-space:nowrap;margin-right:.35em}
+.name b{display:inline-block;padding:0 .1em;margin:0 1px;line-height:1.1;font-weight:400}
+.name b.w{background:var(--w);color:var(--k)}
+.name b.k{background:var(--k);color:var(--w);box-shadow:inset 0 0 0 2px var(--w)}
+.name b.r{background:var(--r);color:var(--w)}
+
+.arc{display:flex;align-items:center;gap:14px;align-self:flex-start;padding:8px 22px 8px 12px;background:var(--w);color:var(--k);transform:skewX(-12deg);margin-left:8px}
+.arc>*{transform:skewX(12deg)}
+.arc .num{font:400 30px 'Russo One';color:var(--r);min-width:46px;text-align:center}
+.arc .an{font:700 13px 'Oswald';letter-spacing:2px;line-height:1.2}
+.arc .an big{display:block;font:400 22px 'Russo One';letter-spacing:0}
+.rank{display:flex;align-items:center;gap:4px;margin-left:8px}
+.rank s{text-decoration:none;font:700 12px 'Oswald';letter-spacing:2px;margin-right:6px}
+.pips{display:flex;gap:4px}
+.rank i{width:12px;height:18px;background:#ffffff2e;transform:skewX(-14deg)}
+.rank i.on{background:var(--r)}
+.rank em{font:400 18px 'Russo One';font-style:normal;margin-left:8px;color:var(--r)}
+
+.talk{position:relative;align-self:flex-start;max-width:100%;margin:10px 0 0 6px;padding:18px 22px 16px;background:var(--k);border:3px solid var(--w);transform:rotate(-1.5deg);clip-path:polygon(0 4%,100% 0,98% 100%,2% 96%)}
+.talk p{font:500 16px/1.5 'Oswald';display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+
+/* меню: каждая строка левее предыдущей, выбранная — на белом рваном куске */
+.menu{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.menu button{position:relative;align-self:flex-start;padding:4px 18px;font:400 clamp(24px,2.4vw,38px)/1.15 'Russo One';text-transform:uppercase;transform:rotate(-4deg) skewX(-8deg);transition:transform .12s,color .12s;z-index:0}
+.menu button:nth-child(2){margin-left:28px}.menu button:nth-child(3){margin-left:56px}.menu button:nth-child(4){margin-left:84px;font-size:clamp(18px,1.7vw,26px)}
+.menu button::before,.menu button::after{content:'';position:absolute;inset:-4px -14px;z-index:-1;opacity:0;transition:opacity .1s}
+.menu button::before{background:var(--r);transform:translate(8px,6px);clip-path:polygon(0 18%,94% 0,100% 82%,4% 100%)}
+.menu button::after{background:var(--w);clip-path:polygon(2% 10%,100% 0,96% 92%,0 100%)}
+.menu button.on{color:var(--k);transform:rotate(-4deg) skewX(-8deg) scale(1.06)}
+.menu button.on::before,.menu button.on::after{opacity:1}
+
+/* справа сверху: дата как в игре */
+.hud{position:fixed;right:3vw;top:calc(var(--top) + 1vh);display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:3;transform:rotate(-4deg)}
+.date{display:flex;align-items:flex-end;gap:8px;font:400 64px/1 'Russo One';color:var(--w);-webkit-text-stroke:2px var(--k);text-shadow:5px 5px 0 var(--k)}
+.date small{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--k);color:var(--w);font:700 16px 'Oswald';-webkit-text-stroke:0;text-shadow:none;margin-bottom:6px}
+.tod{padding:2px 16px;background:var(--k);font:700 18px 'Oswald';letter-spacing:4px;transform:skewX(-14deg)}
+.last{padding:2px 12px;background:var(--w);color:var(--k);font:700 13px 'Oswald';letter-spacing:1px;transform:skewX(-14deg)}
+
+/* лента персонажей на чёрной полосе */
+.roster{position:fixed;left:0;right:0;bottom:0;height:128px;padding:22px 3.5vw 0;background:var(--k);clip-path:polygon(0 22%,100% 0,100% 100%,0 100%);display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;z-index:4}
+.ch{flex:none;position:relative;width:70px;height:88px;transform:skewX(-10deg);background:var(--w);padding:3px;transition:transform .12s;margin-top:6px}
+.ch img{width:100%;height:100%;object-fit:cover;object-position:top}
+.ch b{position:absolute;left:-4px;bottom:-3px;max-width:86px;padding:0 5px;background:var(--k);font:700 10px 'Oswald';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch:hover{transform:skewX(-10deg) translateY(-4px)}
+.ch.on{background:var(--r);transform:skewX(-10deg) translateY(-8px) scale(1.08);box-shadow:6px 6px 0 var(--w)}
+.ch.on b{background:var(--r)}
+
+@media (max-width:760px){
+  .shard{width:120vw;height:58%;clip-path:polygon(0 0,100% 0,100% 62%,0 100%)}
+  .edge{display:none}
+  .hero{left:68%;width:78vw;height:62%;bottom:108px}
+  .hero img.full,.hero img.sh{max-width:78vw}
+  .hero .frm{width:44vw}
+  .left{left:4vw;right:4vw;width:auto;top:calc(var(--top) + 64px);bottom:118px;gap:10px}
+  .name{font-size:26px}
+  .arc .num{font-size:22px;min-width:32px}.arc .an big{font-size:16px}
+  .talk{max-width:70%;padding:10px 12px}.talk p{font-size:13px;-webkit-line-clamp:3}
+  .menu button{font-size:20px;padding:2px 10px}
+  .menu button:nth-child(4){font-size:15px}
+  .menu button:nth-child(n){margin-left:0}
+  .hud{top:calc(var(--top) + 4px);right:4vw;flex-direction:row;align-items:center;transform:rotate(-3deg)}
+  .date{font-size:32px;text-shadow:3px 3px 0 var(--k)}.date small{width:30px;height:30px;font-size:12px;margin:0}
+  .tod{font-size:12px;letter-spacing:2px}.last{display:none}
+  .roster{height:108px;padding-top:18px;gap:10px}
+  .ch{width:58px;height:74px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="ray"></div>
+<div class="edge"></div>
+<div class="shard"></div>
+<div class="hero"></div>
+<div class="left">
+  <h1 class="name"></h1>
+  <div class="arc"><span class="num"></span><span class="an">КОНФИДЕНТ<big class="aname"></big></span></div>
+  <div class="rank"><s>РАНГ</s><span class="pips"></span><em class="rv"></em></div>
+  <div class="talk"><p></p></div>
+  <div class="menu">
+    <button data-a="continue" class="on">Продолжить</button>
+    <button data-a="new">Новый чат</button>
+    <button data-a="all">Все чаты</button>
+    <button data-a="png">Своя картинка</button>
+  </div>
+</div>
+<div class="hud"><div class="date"></div><div class="tod"></div><div class="last"></div></div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// Старшие арканы: у каждого бота свой (стабильно по имени), ранг — от чатов и сообщений
+const ARC = [tt('Шут'),tt('Маг'),tt('Жрица'),tt('Императрица'),tt('Император'),tt('Иерофант'),tt('Влюблённые'),tt('Колесница'),tt('Справедливость'),tt('Отшельник'),tt('Фортуна'),tt('Сила'),tt('Повешенный'),tt('Смерть'),tt('Умеренность'),tt('Дьявол'),tt('Башня'),tt('Звезда'),tt('Луна'),tt('Солнце'),tt('Суд')];
+const ROMAN = (n) => n === 0 ? '0' : ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX'][n];
+const arcOf = (c) => Math.floor(seeded(c.name, 5) * ARC.length);
+const rankOf = (c) => Math.min(10, c.chats + Math.floor(c.msgs / 100));
+
+// имя «из вырезок»: у каждой буквы свой шрифт, цвет и наклон — одинаковые при каждом показе
+const FONTS = ["'Russo One'", "'Rubik Mono One'", "'Oswald'", "'PT Serif'", "'Playfair Display'"];
+function ransom(name) {
+  let k = 0;
+  return name.split(' ').map((w) => `<span class="wd">${[...w].map((ch) => {
+    k++; const r = (n) => seeded(name + k, n);
+    const st = ['w', 'k', 'r', 'w'][Math.floor(r(8) * 4)];
+    const it = FONTS[Math.floor(r(7) * FONTS.length)] === "'PT Serif'" ? 'font-style:italic;' : '';
+    return `<b class="${st}" style="font-family:${FONTS[Math.floor(r(7) * FONTS.length)]};${it}transform:rotate(${((r(9) - .5) * 14).toFixed(1)}deg) translateY(${((r(11) - .5) * 6).toFixed(1)}px);font-size:${(.86 + r(10) * .3).toFixed(2)}em">${esc(ch)}</b>`;
+  }).join('')}</span>`).join('');
+}
+
+// дата и время суток, как в верхнем углу игры
+const d = new Date(), DOW = [tt('ВС'),tt('ПН'),tt('ВТ'),tt('СР'),tt('ЧТ'),tt('ПТ'),tt('СБ')], h = d.getHours();
+$('.date').innerHTML = `${d.getMonth() + 1}/${d.getDate()}<small>${DOW[d.getDay()]}</small>`;
+$('.tod').textContent = h < 5 ? tt('НОЧЬ') : h < 11 ? tt('УТРО') : h < 17 ? tt('ДЕНЬ') : h < 22 ? tt('ВЕЧЕР') : tt('НОЧЬ');
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+
+let cur = 0, sel = 0;
+const fig = (c) => c.render ? `<div class="fig"><img decoding="async" class="sh" src="${c.render}" alt=""><img decoding="async" class="full" src="${c.render}" alt=""></div>` : `<div class="frm"><img decoding="async" src="${c.img}" alt=""></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], a = arcOf(c), rk = rankOf(c);
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.name').innerHTML = ransom(c.name);
+  $('.num').textContent = ROMAN(a); $('.aname').textContent = ARC[a].toUpperCase();
+  $('.pips').innerHTML = Array.from({ length: 10 }, (_, k) => `<i class="${k < rk ? 'on' : ''}"></i>`).join('');
+$('.rv').textContent = rk >= 10 ? 'MAX' : rk;
+  $('.talk p').textContent = c.snip; $('.talk').style.display = c.snip ? '' : 'none';
+  $('.last').textContent = tt`${ago(c.ts).toUpperCase()} · ЧАТОВ ${c.chats} · СООБЩЕНИЙ ${c.msgs}`;
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

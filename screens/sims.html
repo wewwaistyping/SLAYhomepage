@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1b7fe0;--blue2:#0a5fc0;--pb:#3fd45a;--ink:#1d2b3c;--mute:#6a8199}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;color:var(--ink);background:#cfe6f7}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ── студия как в редакторе персонажа: светлый «свет из окна», подиум, мягкие блики ── */
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 70% 80% at 48% 40%,#ffffff 0,#eaf5fd 35%,#c6e1f5 70%,#a9d0ee 100%)}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.7;animation:orb 16s ease-in-out infinite alternate}
+.orb.a{width:46vw;height:46vw;left:-12vw;top:-18vw;background:#fff}
+.orb.b{width:34vw;height:34vw;right:-8vw;bottom:-14vw;background:#bfe6ff;animation-delay:-6s}
+.orb.c{width:22vw;height:22vw;left:38vw;top:8vh;background:#fdfbff;animation-delay:-11s;opacity:.55}
+@keyframes orb{to{transform:translate(3vw,2vh) scale(1.06)}}
+.rays{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(115deg,#ffffff00 0 6vw,#ffffff2a 6vw 9vw,#ffffff00 9vw 16vw);mask-image:linear-gradient(#000,transparent 70%);-webkit-mask-image:linear-gradient(#000,transparent 70%)}
+
+.stage{position:fixed;left:50%;bottom:0;width:min(46vw,640px);height:100%;transform:translateX(-50%)}
+.pad{position:absolute;left:50%;bottom:11vh;width:min(30vw,420px);aspect-ratio:3.4/1;transform:translateX(-50%)}
+.pad i{position:absolute;inset:0;border-radius:50%}
+.pad .sh{inset:18% -8% -30%;background:radial-gradient(ellipse,#2a5a8a33,transparent 70%);filter:blur(6px)}
+.pad .top{background:linear-gradient(#ffffff,#e4f1fb 70%,#d2e8f7);box-shadow:0 10px 0 #bcd8ee,0 18px 30px #5a8ab455,inset 0 -6px 14px #ffffff}
+.pad .ring{inset:9%;border:2px solid #ffffffcc;box-shadow:0 0 0 1px #9fd6ff66,0 0 22px #8fd8ff88,inset 0 0 18px #8fd8ff55}
+/* пульс свечения — прозрачностью готового слоя, без перерисовки тени каждый кадр */
+.pad .ring::after{content:'';position:absolute;inset:-2px;border-radius:inherit;box-shadow:0 0 0 1px #9fd6ff99,0 0 32px #8fd8ffbb,inset 0 0 24px #8fd8ff77;opacity:0;animation:ring 3s ease-in-out infinite alternate}
+@keyframes ring{to{opacity:1}}
+
+/* персонаж: своя картинка стоит на подиуме; без неё — портрет в рамке */
+.sim{position:absolute;left:50%;bottom:calc(11vh + min(30vw,420px)/3.4*.42);height:min(68vh,calc(100vh - 11vh - 150px));width:100%;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.sim.in{animation:simIn .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes simIn{from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.98)}}
+.sim img.full{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 18px 14px #2a4a6a40);-webkit-mask-image:linear-gradient(0deg,transparent,#000 9%);mask-image:linear-gradient(0deg,transparent,#000 9%)}
+.pb{transition:opacity .3s}
+.sim .frame{width:min(26vw,360px);aspect-ratio:3/4;margin-bottom:2vh;padding:12px;background:#fff;border-radius:22px;box-shadow:0 20px 40px #2a4a6a33,0 0 0 1px #ffffff;transform:rotate(-2deg)}
+.sim .frame img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:12px}
+.contact{position:absolute;left:50%;bottom:calc(11vh + min(30vw,420px)/3.4*.38);width:min(14vw,200px);height:20px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,#1b3a5a55,transparent 70%);filter:blur(3px)}
+
+/* пламбоб: восемь граней с градиентами, крутится и покачивается */
+.pb{position:absolute;left:50%;width:46px;margin-left:-23px;animation:bob 2.6s ease-in-out infinite alternate;filter:drop-shadow(0 0 12px #58ff6a99) drop-shadow(0 6px 8px #1a7a2a55);pointer-events:none;z-index:3}
+@keyframes spin{to{transform:rotateY(360deg)}}
+@keyframes bob{to{transform:translateY(-10px)}}
+
+/* ── левая колонка: логотип, «Играть», кнопки ── */
+.left{position:fixed;left:3.2vw;top:5vh;width:min(360px,27vw);display:flex;flex-direction:column;gap:14px;z-index:5}
+/* приветствие как в Sims 4: аватарка игрока и «Привет, имя!» */
+.hello{align-self:flex-start;display:flex;align-items:center;gap:12px;padding:6px 20px 6px 6px;border-radius:99px;background:#ffffffd9;backdrop-filter:blur(14px);box-shadow:0 8px 22px #2a5a8a26,inset 0 0 0 1px #fff;margin-bottom:2px}
+.hello img{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:top;box-shadow:0 0 0 3px #3fd45a}
+.hello b{font:900 clamp(20px,1.6vw,26px)/1 'Nunito';letter-spacing:-.01em;color:var(--ink)}
+.hello .uname{color:var(--blue)}
+.card{background:#ffffffd9;backdrop-filter:blur(14px);border-radius:22px;box-shadow:0 14px 34px #2a5a8a26,inset 0 0 0 1px #ffffff;padding:16px}
+.play .fam{display:flex;align-items:center;gap:12px}
+.play .stack{display:flex}
+.play .stack img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:top;border:3px solid #fff;margin-left:-12px;box-shadow:0 2px 6px #0002}
+.play .stack img:first-child{margin-left:0}
+.play .fam small{display:block;font:800 11px 'Nunito';letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.play .fam b{display:block;font:900 20px/1.1 'Nunito';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+.play .fam span{font:700 12px 'Nunito';color:var(--mute)}
+.go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:14px;padding:16px;border-radius:16px;font:900 24px 'Nunito';color:#fff;text-transform:uppercase;letter-spacing:.03em;background:linear-gradient(#3aa0ff,var(--blue) 55%,var(--blue2));box-shadow:0 6px 0 #0848a0,0 14px 26px #1b7fe055,inset 0 1px 0 #ffffff66;transition:transform .1s,box-shadow .1s}
+.go:hover{transform:translateY(-1px)}
+.go:active{transform:translateY(5px);box-shadow:0 1px 0 #0848a0,0 6px 14px #1b7fe044}
+.go i{width:0;height:0;border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent}
+.sec{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sec button{padding:13px 8px;border-radius:14px;background:#ffffffd9;backdrop-filter:blur(14px);font:800 15px 'Nunito';color:var(--blue);box-shadow:0 4px 0 #c7dcef,0 10px 20px #2a5a8a1f;transition:transform .1s}
+.sec button:hover{transform:translateY(-1px)}
+
+/* ── правая колонка: уведомление и отношения ── */
+.right{position:fixed;right:3.2vw;top:5vh;width:min(340px,25vw);display:flex;flex-direction:column;gap:14px;z-index:5}
+.note{padding:0;overflow:hidden}
+.note .hd{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(#3aa0ff,var(--blue));color:#fff}
+.note .hd img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid #fff}
+.note .hd b{font:900 15px 'Nunito';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note .hd small{display:block;font:700 11px 'Nunito';opacity:.85}
+.note .bd{padding:14px 16px 0;margin-bottom:16px;font:600 15px/1.55 'Nunito';color:#2a3a4c;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
+.rel h6{font:800 11px 'Nunito';letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.rel .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.rel .row b{font:900 17px 'Nunito'}
+.rel .row span{font:800 12px 'Nunito';color:#27a046}
+.rel .bar{height:12px;border-radius:99px;background:#e3edf5;box-shadow:inset 0 1px 2px #0001;overflow:hidden}
+.rel .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7be06a,#2fbf4a);transition:width .5s}
+.rel .facts{display:flex;gap:14px;margin-top:12px;font:700 12px 'Nunito';color:var(--mute)}
+.rel .facts b{color:var(--ink)}
+
+/* ── низ: семья ── */
+.family{position:fixed;left:50%;bottom:2.2vh;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:99px;background:#ffffffb3;backdrop-filter:blur(14px);box-shadow:0 10px 26px #2a5a8a26;z-index:5;max-width:calc(100% - 2*min(360px,27vw) - 10vw)}
+.family .list{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:14px 4px 4px}
+.family .mem{position:relative;flex:none;width:52px;height:52px;border-radius:50%;padding:3px;background:#fff;box-shadow:0 3px 8px #0002;transition:transform .15s}
+.family .mem img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top}
+.family .mem:hover{transform:translateY(-2px)}
+.family .mem.on{background:linear-gradient(#7be06a,#2fbf4a)}
+.family .mem.on::before{content:'';position:absolute;left:50%;top:-14px;width:12px;height:16px;margin-left:-6px;background:linear-gradient(90deg,#2bb83a,#8cff7a 50%,#1f9a2e);clip-path:polygon(50% 0,100% 45%,50% 100%,0 45%);filter:drop-shadow(0 0 4px #58ff6a)}
+.family .arr{flex:none;width:36px;height:36px;border-radius:50%;background:#fff;color:var(--blue);font:900 18px 'Nunito';box-shadow:0 3px 8px #0002}
+
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-30px);z-index:99;background:#fff;color:var(--ink);padding:11px 20px;border-radius:99px;font:800 14px 'Nunito';box-shadow:0 10px 30px #0003;opacity:0;pointer-events:none;transition:.25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1000px){
+  .stage{width:100%}
+  /* снизу вверх: кнопки, отношения, семья, подиум с персонажем */
+  .pad{bottom:400px;width:70vw}
+  .sim{bottom:calc(400px + 70vw/3.4*.42);height:30vh}
+  .contact{bottom:calc(400px + 70vw/3.4*.38);width:30vw}
+  .sim .frame{width:42vw}
+  .left{left:12px;right:12px;top:auto;bottom:12px;width:auto;gap:8px}
+  .hello{position:fixed;left:14px;top:12px}
+  .hello img{width:32px;height:32px}
+  .hello b{font-size:18px}
+  .play{padding:12px}
+  .go{padding:12px;font-size:20px;margin-top:10px}
+  .right{left:12px;right:12px;top:auto;bottom:calc(12px + 200px);width:auto}
+  .note,.rel .facts{display:none}
+  .rel{padding:10px 14px}
+  .family{left:12px;right:12px;transform:none;max-width:none;bottom:306px;justify-content:center}
+}
+
+/* пламбоб — настоящий 3D-кристалл: две четырёхгранные пирамиды, грани разной яркости, вращение вокруг вертикали */
+.pb{width:34px;height:76px;margin-left:-17px;perspective:600px;filter:none}
+.pb .glow{position:absolute;left:50%;top:50%;width:102px;height:102px;margin:-51px 0 0 -51px;border-radius:50%;background:radial-gradient(circle,#7dff7a88,#3fd45a33 40%,transparent 70%);filter:blur(6px);animation:pglow 2.6s ease-in-out infinite alternate}
+@keyframes pglow{to{transform:scale(1.18);opacity:.75}}
+.pb .gem{position:absolute;inset:0;transform-style:preserve-3d;animation:pspin 5s linear infinite}
+@keyframes pspin{from{transform:rotateX(-14deg) rotateY(0)}to{transform:rotateX(-14deg) rotateY(360deg)}}
+.pb .f{position:absolute;left:0;width:34px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pb .f.t{top:-4.48px;height:34.48px;transform-origin:50% 100%;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.pb .f.b{top:30px;height:49.04px;transform-origin:50% 0;clip-path:polygon(0 0,100% 0,50% 100%)}
+.pb .f.t:nth-child(1){transform:rotateY(0) translateZ(17.0px) rotateX(29.54deg);background:linear-gradient(170deg,#eaffdc,#8ff07a 45%,#3cc24c)}
+.pb .f.t:nth-child(2){transform:rotateY(90deg) translateZ(17.0px) rotateX(29.54deg);background:linear-gradient(170deg,#b6ff9e,#4fd65a 50%,#26a338)}
+.pb .f.t:nth-child(3){transform:rotateY(180deg) translateZ(17.0px) rotateX(29.54deg);background:linear-gradient(170deg,#7fe86c,#2fb043 55%,#18832a)}
+.pb .f.t:nth-child(4){transform:rotateY(270deg) translateZ(17.0px) rotateX(29.54deg);background:linear-gradient(170deg,#a8ff90,#44cc52 50%,#209a33)}
+.pb .f.b:nth-child(5){transform:rotateY(0) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0f6a1e,#2db042 55%,#6be35e)}
+.pb .f.b:nth-child(6){transform:rotateY(90deg) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0c5c19,#24a038 55%,#58d652)}
+.pb .f.b:nth-child(7){transform:rotateY(180deg) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0a4f15,#1d8c30 55%,#45c446)}
+.pb .f.b:nth-child(8){transform:rotateY(270deg) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0d5a1b,#27a63a 55%,#62dc58)}
+.pb .f::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,#ffffff55 46%,transparent 56%)}
+</style>
+</head>
+<body>
+<div class="bg"></div><i class="orb a"></i><i class="orb b"></i><i class="orb c"></i><div class="rays"></div>
+
+<div class="stage"><div class="pad"><i class="sh"></i><i class="top"></i><i class="ring"></i></div><div class="contact"></div><div class="sim"></div><div class="pb"></div></div>
+
+<div class="left">
+  <div class="hello"><img decoding="async" src="" alt=""><b>Привет, <span class="uname"></span>!</b></div>
+  <div class="card play">
+    <div class="fam"><div class="stack"></div><div><small>Семья</small><b class="fname"></b><span class="fwhen"></span></div></div>
+    <button class="go" data-a="continue"><i></i>Играть</button>
+  </div>
+  <div class="sec"><button data-a="new">Новая игра</button><button data-a="all">Загрузить игру</button></div>
+</div>
+
+<div class="right">
+  <div class="card note"><div class="hd"><img decoding="async" alt=""><div><b class="nname"></b><small class="nwhen"></small></div></div><div class="bd"></div></div>
+  <div class="card rel"><h6>Отношения</h6><div class="row"><b class="rname"></b><span class="rlabel"></span></div><div class="bar"><i></i></div>
+    <div class="facts"><span><b class="rm"></b> сообщ.</span><span><b class="rc"></b> чатов</span></div></div>
+</div>
+
+<div class="family"><button class="arr" data-d="-1">‹</button><div class="list"></div><button class="arr" data-d="1">›</button></div>
+<div class="toast"></div>
+
+<script src="bridge.js"></script>
+<script>
+const C = CHARS.slice(0, 14).map(c => ({...c, name: c.name.replace(/\s+/g,' ').trim(), render: c.render || ''}));
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const NOW = Date.now();
+const ago = t => { const m=(NOW-t)/60e3; if(m<60) return Math.round(m)+tt(' мин назад'); if(m<1440) return Math.round(m/60)+tt(' ч назад'); const d=Math.round(m/1440); return d===1?tt('вчера'):d+tt(' дн назад'); };
+const esc = s => (s||'').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const mod = (a,n) => (a%n+n)%n;
+const toast = (() => { const t=$('.toast'); let h; return s => { t.textContent=s; t.classList.add('show'); clearTimeout(h); h=setTimeout(()=>t.classList.remove('show'),1700); }; })();
+
+// пламбоб: восемь граней, свет сверху-слева
+const PB = id => `<svg viewBox="0 0 40 72"><defs>
+  <linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8ffb8"/><stop offset="1" stop-color="#5ee05a"/></linearGradient>
+  <linearGradient id="${id}b" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fea6e"/><stop offset="1" stop-color="#2fae3c"/></linearGradient>
+  <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3cc64a"/><stop offset="1" stop-color="#1a8a2a"/></linearGradient>
+  <linearGradient id="${id}d" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a9e36"/><stop offset="1" stop-color="#11651c"/></linearGradient></defs>
+  <path d="M20 0 0 31h20Z" fill="url(#${id}a)"/><path d="M20 0 40 31H20Z" fill="url(#${id}b)"/>
+  <path d="M0 31 20 72V31Z" fill="url(#${id}c)"/><path d="M40 31 20 72V31Z" fill="url(#${id}d)"/>
+  <path d="M20 0v72M0 31h40" stroke="#ffffff55" stroke-width=".8"/><path d="M20 2 6 27" stroke="#ffffffaa" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+$('.pb').innerHTML = '<div class="glow"></div><div class="gem">' + '<i class="f t"></i>'.repeat(4) + '<i class="f b"></i>'.repeat(4) + '</div>';
+
+const rel = n => n >= 10 ? tt('Лучшие друзья') : n >= 5 ? tt('Хорошие друзья') : n >= 2 ? tt('Друзья') : tt('Знакомые');
+const maxChats = Math.max(...C.map(c => c.chats));
+$('.family .list').innerHTML = C.map((c,i)=>`<button class="mem" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}"></button>`).join('');
+let cur = 0;
+
+function show(i){
+  cur = mod(i, C.length); const c = C[cur];
+  $('.hello img').src = meOf(cur).img; $('.uname').textContent = meOf(cur).name;
+  const sim = $('.sim');
+  sim.innerHTML = c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frame"><img decoding="async" src="${c.img}" alt=""></div>`;
+  sim.classList.remove('in'); void sim.offsetWidth; sim.classList.add('in');
+  // пламбоб — над головой: считаем, когда картинка раскодирована и знает свой размер
+  const pb = $('.pb'); pb.style.opacity = 0;
+  const place = () => { const top = sim.firstElementChild.getBoundingClientRect().top, st = $('.stage').getBoundingClientRect().top;
+    pb.style.top = Math.max(48, top - st - 98) + 'px'; pb.style.opacity = 1; };
+  sim.querySelector('img').decode().catch(() => {}).then(() => requestAnimationFrame(place));
+  clearTimeout(show._t); show._t = setTimeout(place, 560); // после анимации появления — точное место
+  // карточка «Играть»: выбранный и двое соседей стопкой
+  $('.play .stack').innerHTML = [0,1,2].map(k => `<img decoding="async" src="${C[mod(cur+k, C.length)].img}">`).join('');
+  $('.fname').textContent = c.name; $('.fwhen').textContent = tt('последний раз ') + ago(c.last);
+  $('.note .hd img').src = c.img; $('.nname').textContent = c.name; $('.nwhen').textContent = ago(c.last); $('.note .bd').textContent = c.snip || tt('Давно не виделись. Заглянешь?');
+  $('.rname').textContent = c.name.split(' ')[0]; $('.rlabel').textContent = rel(c.chats); $('.rel .bar i').style.width = Math.max(8, c.chats / maxChats * 100) + '%';
+  $('.rm').textContent = c.msgs; $('.rc').textContent = c.chats;
+  $$('.mem').forEach((m,k) => m.classList.toggle('on', k === cur)); $$('.mem')[cur].scrollIntoView({block:'nearest', inline:'center'});
+}
+$$('.mem').forEach(m => m.onclick = () => +m.dataset.i === cur ? SH.act('continue', cur) : show(+m.dataset.i));
+$$('.arr').forEach(b => b.onclick = () => show(cur + +b.dataset.d));
+$$('[data-a]').forEach(b => b.onclick = () => SH.act(b.dataset.a, cur));
+addEventListener('keydown', e => { if (e.key==='ArrowRight') show(cur+1); if (e.key==='ArrowLeft') show(cur-1); if (e.key==='Enter') SH.act('continue', cur); });
+addEventListener('resize', () => show(cur));
+show(START);
+</script>
+</body>
+</html>

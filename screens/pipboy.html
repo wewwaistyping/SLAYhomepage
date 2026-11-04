@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--g:#1aff80;--gd:#0c9a4c;--gb:#06301a;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#000;color:var(--g);font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-transform:inherit}
+
+/* ламповый экран: скругление, свечение, сканлайны, мерцание */
+.crt{position:fixed;left:1.6vw;right:1.6vw;top:calc(var(--top) + 6px);bottom:1.6vw;border-radius:26px;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#073a1c,#03170b 70%,#010804);box-shadow:inset 0 0 80px #000,inset 0 0 18px #1aff8033,0 0 0 3px #0a2a14,0 0 40px #1aff8022;text-shadow:0 0 6px #1aff8099;animation:flick 6s infinite}
+@keyframes flick{0%,96%,100%{filter:none}97%{filter:brightness(1.25)}98%{filter:brightness(.85)}}
+.crt::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:20;background:repeating-linear-gradient(#0000 0 2px,#00000055 2px 4px)}
+.crt::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:21;background:radial-gradient(ellipse at 50% 50%,transparent 60%,#000a 100%);border-radius:26px}
+.roll{position:absolute;left:0;right:0;top:0;height:18%;background:linear-gradient(transparent,#1aff800d,transparent);animation:roll 7s linear infinite;pointer-events:none;z-index:19}
+@keyframes roll{from{transform:translateY(-111%)}to{transform:translateY(611%)}}
+
+/* вкладки */
+.tabs{position:absolute;left:3%;right:3%;top:22px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--g);padding-bottom:6px;font:800 clamp(16px,1.5vw,22px) 'JetBrains Mono'}
+.tabs span{opacity:.45;padding:0 8px}
+.tabs span.on{opacity:1;position:relative}
+.tabs span.on::before,.tabs span.on::after{content:'';position:absolute;bottom:-10px;width:12px;height:12px;border-top:2px solid var(--g)}
+.tabs span.on::before{left:-14px;border-left:2px solid var(--g);border-top:0;border-bottom:2px solid var(--g);bottom:-8px;height:8px}
+.sub{position:absolute;left:3%;top:72px;display:flex;gap:26px;font:700 14px 'JetBrains Mono';opacity:.55}
+.sub b{opacity:1;color:var(--g);text-decoration:underline;text-underline-offset:5px}
+
+/* список персонажей */
+.list{position:absolute;left:3%;top:118px;bottom:84px;width:min(300px,23vw);display:flex;flex-direction:column;gap:2px;overflow-y:auto;scrollbar-width:none}
+.row{text-align:left;padding:6px 10px;font:700 15px 'JetBrains Mono';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid transparent}
+.row:hover{border-color:var(--gd)}
+.row.on{background:var(--g);color:#031a0c;text-shadow:none}
+.row.on::before{content:'▸ '}
+
+/* голограмма */
+.holo{position:absolute;left:calc(3% + min(300px,23vw) + 2%);right:calc(3% + min(360px,27vw) + 2%);top:110px;bottom:84px;padding-top:56px;display:flex;align-items:flex-end;justify-content:center}
+.holo img.full,.holo .frm img{filter:grayscale(1) sepia(1) hue-rotate(78deg) saturate(3.2) brightness(.95) contrast(1.15);opacity:.92}
+.holo img.full{max-height:100%;max-width:100%;object-fit:contain;-webkit-mask-image:linear-gradient(0deg,transparent,#000 10%);mask-image:linear-gradient(0deg,transparent,#000 10%);animation:holo 3s ease-in-out infinite}
+@keyframes holo{50%{opacity:.8;transform:translateX(1px)}}
+.holo .frm{align-self:center;height:78%;aspect-ratio:3/4;border:2px solid var(--g);padding:8px;box-shadow:0 0 18px #1aff8044}
+.holo .frm img{width:100%;height:100%;object-fit:cover;object-position:top}
+.holo .cap{position:absolute;left:0;right:0;top:0;text-align:center;font:800 clamp(18px,1.7vw,26px) 'JetBrains Mono'}
+.holo .cap small{display:block;font:500 12px 'JetBrains Mono';opacity:.7;margin-top:4px}
+.holo.in{animation:boot .5s steps(6)}
+@keyframes boot{0%{opacity:0;clip-path:inset(48% 0 48% 0)}60%{opacity:1;clip-path:inset(0 0 0 0)}}
+
+/* S.P.E.C.I.A.L. и журнал */
+.special{position:absolute;right:3%;top:118px;width:min(360px,27vw)}
+.sp{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:5px 8px;font:700 15px 'JetBrains Mono'}
+.sp i{grid-column:1/-1;height:6px;background:var(--gb);box-shadow:inset 0 0 0 1px var(--gd)}
+.sp i b{display:block;height:100%;background:var(--g);box-shadow:0 0 6px var(--g)}
+.log{margin-top:16px;border:2px solid var(--gd);padding:10px 12px;font:500 13px/1.5 'JetBrains Mono';text-transform:none;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
+.log::before{content:'ЗАПИСЬ В ЖУРНАЛЕ:';display:block;font-weight:800;margin-bottom:6px;text-transform:uppercase}
+
+/* нижняя полоса */
+.bar{position:absolute;left:3%;right:3%;bottom:22px;display:flex;gap:12px;align-items:stretch;font:700 15px 'JetBrains Mono'}
+.bar .st{flex:1;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--gb);box-shadow:inset 0 0 0 1px var(--gd)}
+.bar .st i{flex:1;height:8px;background:#03170b;box-shadow:inset 0 0 0 1px var(--gd)}
+.bar .st i b{display:block;height:100%;background:var(--g)}
+.cmd{display:flex;gap:6px}
+.cmd button{padding:8px 12px;font:800 14px 'JetBrains Mono';box-shadow:inset 0 0 0 1px var(--gd)}
+.cmd button:hover,.cmd button.go{background:var(--g);color:#031a0c;text-shadow:none}
+
+@media (max-width:1000px){
+  .tabs{font-size:12px;top:14px}
+  .tabs span:nth-child(n+4){display:none}
+  .sub{top:50px;font-size:11px;gap:12px}
+  .list{left:3%;right:3%;width:auto;top:auto;bottom:138px;height:auto;flex-direction:row;overflow-x:auto;gap:4px}
+  .row{flex:none;font-size:12px}
+  .holo{left:3%;right:3%;top:76px;bottom:178px}
+  .special{display:none}
+  .bar{flex-direction:column;bottom:14px;gap:6px}
+  .bar .st{padding:6px 10px;font-size:12px}
+  .cmd button{flex:1 1 auto;font-size:11px;padding:8px 3px;white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<div class="crt">
+  <div class="roll"></div>
+  <div class="tabs"><span class="on">Стат</span><span>Инв</span><span>Данные</span><span>Карта</span><span>Радио</span></div>
+  <div class="sub"><span>Состояние</span><b>S.P.E.C.I.A.L.</b><span>Навыки</span></div>
+  <div class="list"></div>
+  <div class="holo"></div>
+  <div class="special"><div class="sps"></div><p class="log"></p></div>
+  <div class="bar">
+    <div class="st">ОЗ <span class="hp"></span><i><b class="hpb"></b></i></div>
+    <div class="st">УР <span class="lv"></span><i><b class="lvb"></b></i></div>
+    <div class="cmd"><button class="go" data-a="continue">[ Продолжить ]</button><button data-a="new">[ Новый ]</button><button data-a="all">[ Все чаты ]</button><button data-a="png">[ PNG ]</button></div>
+  </div>
+</div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const STATS = [tt('Сила'), tt('Восприятие'), tt('Выносливость'), tt('Харизма'), tt('Интеллект'), tt('Ловкость'), tt('Удача')];
+const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs)), maxChats = Math.max(...ITEMS.map((c) => c.chats));
+$('.list').innerHTML = ITEMS.map((c, i) => `<button class="row" data-i="${i}">${esc(c.name)}</button>`).join('');
+let cur = 0;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  const h = $('.holo');
+  h.innerHTML = `<div class="cap">${esc(c.name)}<small>${ago(c.ts)}</small></div>` + figHTML(c, 'frm');
+  h.classList.remove('in'); void h.offsetWidth; h.classList.add('in');
+  // характеристики «по мотивам»: харизма — от сообщений, удача — от свежести, остальное своё у каждого
+  const vals = STATS.map((s, k) => k === 3 ? Math.max(1, Math.round(c.msgs / maxMsgs * 10)) : k === 6 ? Math.max(1, Math.round(10 - (NOW - c.ts) / 864e5 / 3)) : 1 + Math.floor(seeded(c.name, k + 3) * 10));
+  $('.sps').innerHTML = STATS.map((s, k) => `<div class="sp"><span>${s}</span><span>${Math.min(10, vals[k])}</span><i><b style="width:${Math.min(10, vals[k]) * 10}%"></b></i></div>`).join('');
+  $('.log').textContent = c.snip || tt('Записей нет.');
+  $('.hp').textContent = `${c.msgs}/${maxMsgs}`; $('.hpb').style.width = Math.max(4, c.msgs / maxMsgs * 100) + '%';
+  $('.lv').textContent = c.chats; $('.lvb').style.width = Math.max(6, c.chats / maxChats * 100) + '%';
+  $$('.row').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.row')[cur].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+$$('.row').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+$$('[data-a]').forEach((b) => b.onclick = () => ACT(b.dataset.a, ITEMS[cur]));
+addEventListener('keydown', (e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'Enter') ACT('continue', ITEMS[cur]); });
+show(START);
+</script>
+</body>
+</html>

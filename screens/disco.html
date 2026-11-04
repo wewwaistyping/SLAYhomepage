@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--o:#d2592e;--txt:#c9c1ae;--dim:#7d776b;--int:#5b9dc4;--psy:#8b62b3;--fys:#bb4a3c;--mot:#c9a23e}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#121617;color:var(--txt);font-family:'PT Serif',serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон «маслом»: тёмная бирюза, охристый свет, мазки и холст */
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 40% 50% at 18% 85%,#a3683a55,transparent 70%),radial-gradient(ellipse 60% 70% at 34% 38%,#5d6f63 0,#2c3b37 40%,#121718 80%)}
+.strokes{position:fixed;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.canvas{position:fixed;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay}
+
+/* персонаж: PNG чуть «прописана» — смещение краёв шумом, приглушённый цвет */
+.hero{position:fixed;left:calc(70px + 3vw);right:min(560px,38vw);bottom:0;top:calc(var(--top) + 2vh);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;filter:url(#paint) saturate(.78) contrast(1.06) sepia(.12);-webkit-mask-image:linear-gradient(0deg,transparent,#000 14%);mask-image:linear-gradient(0deg,transparent,#000 14%)}
+.hero .frm{align-self:center;margin-bottom:12vh;width:min(24vw,340px);aspect-ratio:2/3;padding:12px;background:#2a2620;box-shadow:inset 0 0 0 1px #6b5a3e,0 20px 50px #000a}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;filter:url(#paint) saturate(.75) sepia(.15)}
+.hero.in{animation:fade .7s ease}
+@keyframes fade{from{opacity:0}}
+
+/* лист персонажа: имя и 4 атрибута с клетками, как при создании героя */
+.sheet{position:fixed;left:calc(70px + 3vw);bottom:3vh;z-index:3;padding:14px 18px 12px;background:linear-gradient(90deg,#0d1010ee,#0d101099 80%,transparent);min-width:min(460px,40vw)}
+.sheet h1{font:700 clamp(26px,2.4vw,38px)/1 'PT Sans Narrow';text-transform:uppercase;letter-spacing:1px;color:#e6dcc6}
+.sheet .sub{font:400 13px 'PT Sans Narrow';letter-spacing:3px;color:var(--dim);margin:4px 0 12px;text-transform:uppercase}
+.atts{display:grid;grid-template-columns:repeat(4,auto);gap:6px 18px;justify-content:start}
+.att{font:700 12px 'PT Sans Narrow';letter-spacing:2px;color:var(--c)}
+.att div{display:flex;gap:3px;margin-top:4px}
+.att i{width:11px;height:11px;border:1px solid var(--c);opacity:.5}
+.att i.on{background:var(--c);opacity:1}
+.att b{font:700 22px 'PT Sans Narrow';color:#e6dcc6;margin-right:6px}
+
+/* список слева: квадратные портреты в тонких рамках */
+.roster{position:fixed;left:2vw;top:calc(var(--top) + 2vh);bottom:3vh;width:58px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;scrollbar-width:none;z-index:4}
+.ch{flex:none;width:58px;height:58px;padding:2px;background:#1b1f1f;box-shadow:inset 0 0 0 1px #4a4a40;opacity:.62;transition:opacity .15s}
+.ch img{width:100%;height:100%;object-fit:cover;object-position:top;filter:saturate(.7) sepia(.15)}
+.ch:hover{opacity:.9}
+.ch.on{opacity:1;box-shadow:inset 0 0 0 2px var(--o)}
+
+/* диалог справа: лог растёт снизу вверх, ниже — пронумерованные реплики */
+.panel{position:fixed;right:0;top:var(--top);bottom:0;width:min(560px,38vw);padding:4vh 3vw 4vh 4.5vw;background:linear-gradient(90deg,transparent,#0b0d0de6 16%,#0b0d0d);display:flex;flex-direction:column;z-index:3}
+.log{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;overflow:hidden;font:400 16px/1.55 'PT Serif';-webkit-mask-image:linear-gradient(transparent,#000 22%);mask-image:linear-gradient(transparent,#000 22%)}
+.log p{animation:line .5s ease both}
+.log p:nth-child(2){animation-delay:.25s}.log p:nth-child(3){animation-delay:.5s}
+@keyframes line{from{opacity:0;transform:translateY(8px)}}
+.log .sys{font:400 13px 'PT Sans Narrow';letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.log b{font:700 15px 'PT Sans Narrow';letter-spacing:1.5px;text-transform:uppercase}
+.log .nm{color:#e6dcc6}
+.log .chk{color:var(--dim);font-size:14px}
+.log .q{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
+.opts{margin-top:22px;display:flex;flex-direction:column;gap:6px;border-top:1px solid #ffffff14;padding-top:16px}
+.opts button{display:flex;gap:10px;font:400 16px/1.45 'PT Serif';color:var(--o);padding:2px 0;transition:color .1s}
+.opts button span{color:var(--dim);font-size:14px}
+.opts button.on{color:#f2ebdc}
+.opts button.on span{color:#b8ad98}
+.opts button em{font-style:normal}
+.opts button u{text-decoration:none;flex:none;width:18px}
+
+@media (max-width:760px){
+  .roster{left:3vw;right:3vw;top:calc(var(--top) + 6px);bottom:auto;width:auto;height:52px;flex-direction:row;overflow-x:auto}
+  .ch{width:52px;height:52px}
+  .hero{left:0;right:0;top:calc(var(--top) + 64px);bottom:48%}
+  .hero .frm{width:38vw;margin:0}
+  .sheet{left:3vw;bottom:auto;top:calc(52% - 72px);min-width:0;padding:8px 10px}
+  .sheet .sub,.atts{display:none}
+  .panel{left:0;width:auto;top:52%;padding:16px 5vw 18px;background:linear-gradient(transparent,#0b0d0df0 8%)}
+  .log{font-size:14px;gap:10px}.log .q{-webkit-line-clamp:4}
+  .opts{margin-top:12px;padding-top:10px}.opts button{font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<!-- несколько широких мазков; фильтр рвёт их края, чтобы были похожи на кисть -->
+<svg class="strokes" viewBox="0 0 1000 600" preserveAspectRatio="none">
+  <defs><filter id="brush"><feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="3" seed="4"/><feDisplacementMap in="SourceGraphic" scale="38"/></filter></defs>
+  <g filter="url(#brush)" fill="none" stroke-linecap="round">
+    <path d="M-20 120 C200 60 420 140 640 90" stroke="#3f5651" stroke-width="70"/>
+    <path d="M80 520 C260 450 400 500 560 430" stroke="#7a5233" stroke-width="60" opacity=".7"/>
+    <path d="M300 300 C420 240 520 300 700 230" stroke="#516a61" stroke-width="44" opacity=".6"/>
+    <path d="M-40 330 C100 300 160 360 260 320" stroke="#24302d" stroke-width="80"/>
+  </g>
+</svg>
+<svg class="canvas" width="100%" height="100%"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<svg width="0" height="0" style="position:absolute"><filter id="paint"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter></svg>
+
+<div class="hero"></div>
+<div class="roster"></div>
+<div class="sheet"><h1></h1><div class="sub"></div><div class="atts"></div></div>
+<div class="panel">
+  <div class="log"></div>
+  <div class="opts">
+    <button data-a="continue" class="on"><u>1.</u><em>— Продолжить разговор.</em></button>
+    <button data-a="new"><u>2.</u><em>«Давай начнём сначала». <span>[Новый чат]</span></em></button>
+    <button data-a="all"><u>3.</u><em>Вспомнить, о чём говорили раньше. <span>[Все чаты]</span></em></button>
+    <button data-a="png"><u>4.</u><em><span>[Внешность]</span> Сменить облик. <span>[Своя картинка]</span></em></button>
+  </div>
+</div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// атрибуты: Интеллект — от сообщений, Психика — от числа чатов, остальное своё у каждого (1–6)
+const ATT = [[tt('ИНТ'), tt('Интеллект'), '--int'], [tt('ПСИ'), tt('Психика'), '--psy'], [tt('ФИЗ'), tt('Физиология'), '--fys'], [tt('МОТ'), tt('Моторика'), '--mot']];
+const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs)), maxChats = Math.max(...ITEMS.map((c) => c.chats));
+const attOf = (c) => [Math.max(1, Math.round(c.msgs / maxMsgs * 6)), Math.max(1, Math.round(c.chats / maxChats * 6)), 1 + Math.floor(seeded(c.name, 21) * 6), 1 + Math.floor(seeded(c.name, 22) * 6)];
+// навык, который «вмешивается» в разговор, и его проверка — по сути это просто статистика чата
+const SKILLS = [[tt('Энциклопедия'), '--int'], [tt('Логика'), '--int'], [tt('Эмпатия'), '--psy'], [tt('Внутренняя империя'), '--psy'], [tt('Драма'), '--int'], [tt('Электрохимия'), '--fys'], [tt('Восприятие'), '--mot']];
+const pl = PL;
+const DIFF = (c) => c.chats >= 5 ? [tt('Легко'), tt('Успех')] : c.chats >= 2 ? [tt('Средне'), tt('Успех')] : [tt('Сложно'), tt('Провал')];
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+
+let cur = 0, sel = 0;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  const hero = $('.hero'); hero.innerHTML = figHTML(c, 'frm'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.sheet h1').textContent = c.name;
+  $('.sheet .sub').textContent = tt`Последний раз — ${ago(c.ts)}`;
+  const v = attOf(c);
+  $('.atts').innerHTML = ATT.map(([s, , col], k) => `<div class="att" style="--c:var(${col})" title="${ATT[k][1]}"><b>${v[k]}</b>${s}<div>${Array.from({ length: 6 }, (_, j) => `<i class="${j < v[k] ? 'on' : ''}"></i>`).join('')}</div></div>`).join('');
+  const sk = SKILLS[Math.floor(seeded(c.name, 23) * SKILLS.length)], [df, res] = DIFF(c);
+  $('.log').innerHTML =
+    `<p class="sys">${tt("Вы снова здесь. Последний раз —")} ${ago(c.ts)}.</p>`
+    + `<p><b style="color:var(${sk[1]})">${sk[0]}</b> <span class="chk">[${df}: ${res}]</span> — ${c.msgs} ${pl(c.msgs, 'сообщение', 'сообщения', 'сообщений')} ${tt("в")} ${c.chats} ${c.chats % 10 === 1 && c.chats % 100 !== 11 ? tt('разговоре') : tt('разговорах')}. ${res === tt('Успех') ? tt('Ты помнишь, на чём остановились.') : tt('Ты почти ничего не помнишь.')}</p>`
+    + `<p class="q"><b class="nm">${esc(c.name)}</b> — ${esc(c.snip || '…')}</p>`;
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.opts button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.opts button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (/^[1-4]$/.test(e.key)) { pick(+e.key - 1); ACT($$('.opts button')[sel].dataset.a, ITEMS[cur]); }
+  if (e.key === 'Enter') ACT($$('.opts button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--el:#5fe0c4;--el2:#1d6a63;--gold:#f2d48a;--cream:#f3ecdc;--ink:#3b4255;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Montserrat',sans-serif;color:#fff;background:#0d1a2a}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* небо: рассвет над горами, верх подкрашен стихией */
+.sky{position:fixed;inset:0;background:
+  linear-gradient(180deg,color-mix(in srgb,var(--el) 28%,#243f6e) 0,#5a8fc2 30%,#9ac2dc 52%,#f1d3a6 70%,#f7e2bd 78%,#e8c48e 100%);transition:background .7s}
+.sun{position:fixed;left:70%;top:60%;width:70vmax;height:70vmax;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff6d6cc 0,#ffe9b880 14%,#ffd79a33 28%,transparent 50%);pointer-events:none}
+.vista{position:fixed;left:0;top:0;width:100%;height:100%}
+.vista .cl{animation:drift 160s linear infinite;will-change:transform}
+@keyframes drift{to{transform:translateX(-120px)}}
+@media (max-height:880px){.quote{display:none}}
+.attrs{align-self:stretch}
+.motes{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.motes i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:#fff;box-shadow:0 0 6px 2px #fff8,0 0 14px 4px color-mix(in srgb,var(--el) 60%,transparent);opacity:0;animation:mote var(--d) ease-in-out var(--dl) infinite;will-change:transform,opacity}
+@keyframes mote{0%{opacity:0;transform:translate(0,0)}25%{opacity:.9}75%{opacity:.7}100%{opacity:0;transform:translate(var(--dx),-28vh)}}
+
+/* персонаж стоит на ближнем гребне */
+.hero{position:fixed;left:61%;bottom:0;height:calc(100% - var(--top) - 1vh);width:46vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;z-index:2}
+.hero.in{animation:heroIn .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes heroIn{from{opacity:0;transform:translateX(-47%)}}
+.hero img.full{max-height:96%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 1px #fffa) drop-shadow(0 18px 24px #1c2a4055);-webkit-mask-image:linear-gradient(0deg,transparent 0,#000 10%);mask-image:linear-gradient(0deg,transparent 0,#000 10%)}
+/* без PNG: карточка персонажа как в сундуке — золотая рамка, портрет, звёзды */
+.hero .card{position:relative;align-self:center;width:min(27vw,380px);aspect-ratio:2/3;margin-bottom:8vh;padding:7px;border-radius:14px;background:linear-gradient(160deg,#fff4cf,#d2a65a 35%,#f7e3b0 60%,#b7873a);box-shadow:0 30px 60px #1c2a4066,0 0 0 1px #fff6 inset}
+.hero .card img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:9px}
+.hero .card::after{content:'';position:absolute;left:7px;right:7px;bottom:7px;height:28%;border-radius:0 0 9px 9px;background:linear-gradient(transparent,#3b425588)}
+
+/* слева: стихия, имя, звёзды, уровень, характеристики */
+.info{position:fixed;left:4vw;top:calc(var(--top) + 4vh);bottom:5vh;width:min(400px,30vw);z-index:3;text-shadow:0 1px 2px #0005;display:flex;flex-direction:column;align-items:flex-start}
+.elw{position:relative;display:inline-block}
+.elem{display:inline-flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:99px;font:700 14px 'Montserrat';color:#fff;background:#1b2a4a66;backdrop-filter:blur(6px);transition:background .15s}
+.elem:hover{background:#1b2a4a99}
+.elem:hover .ename::after{content:' ✎';opacity:.6}
+.eicon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c,var(--el)) 55%,#fff),var(--c,var(--el)) 45%,color-mix(in srgb,var(--c,var(--el)) 60%,#000) 100%);box-shadow:0 0 12px color-mix(in srgb,var(--c,var(--el)) 70%,transparent),inset 0 0 0 1px #fff5}
+.eicon svg{width:70%;height:70%;fill:#fff;filter:drop-shadow(0 1px 1px #0004)}
+.elpick{position:absolute;left:0;top:calc(100% + 8px);display:flex;flex-wrap:wrap;width:max-content;max-width:92vw;gap:6px;padding:8px;border-radius:14px;background:#1b2a4acc;backdrop-filter:blur(10px);border:1px solid #ffffff26;box-shadow:0 10px 30px #0007;opacity:0;transform:translateY(-6px);pointer-events:none;transition:.15s;z-index:5}
+.elpick.on{opacity:1;transform:none;pointer-events:auto}
+.elpick button{display:flex;flex-direction:column;align-items:center;gap:5px;width:56px;padding:5px 0;border-radius:10px;font:600 10px 'Montserrat';color:#ffffffcc}
+.elpick button:hover,.elpick button.on{background:#ffffff1f;color:#fff}
+.elpick button.on .eicon{outline:2px solid #fff;outline-offset:2px}
+.elpick .rnd .eicon{background:conic-gradient(#5fe0c4,#ff8a4a,#4ab8ff,#b77aff,#f2c14e,#8ed65a,#9fe6ff,#5fe0c4);box-shadow:none}
+.name{font:700 clamp(34px,3.2vw,52px)/1.05 'Philosopher',serif;margin:12px 0 6px;text-shadow:0 2px 14px #1c2a4088}
+.stars{display:flex;gap:2px}
+.stars svg{width:20px;height:20px;fill:#ffd14a;filter:drop-shadow(0 0 4px #ffb84a99)}
+.lvl{margin:16px 0 0;font:700 20px 'Montserrat'}
+.lvl small{font:600 13px 'Montserrat';color:#ffffffbb}
+.exp{position:relative;height:6px;margin:8px 0 18px;border-radius:3px;background:#1b2a4a66;overflow:hidden}
+.exp i{position:absolute;inset:0;transform-origin:left;background:linear-gradient(90deg,#ffe9a6,var(--gold));transition:transform .4s}
+.attrs{background:#1b2a4a66;backdrop-filter:blur(8px);border-radius:12px;padding:4px 16px;border:1px solid #ffffff22}
+.attrs div{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #ffffff18;font:600 14px 'Montserrat'}
+.attrs div:last-child{border:0}
+.attrs span{display:flex;align-items:center;gap:10px;color:#ffffffdd}
+.attrs span::before{content:'';width:7px;height:7px;transform:rotate(45deg);background:var(--gold);box-shadow:0 0 4px #ffd76a88}
+.attrs b{font-weight:700}
+.attrs .fr{display:flex;align-items:center;gap:8px}
+.attrs .fr i{width:60px;height:5px;border-radius:3px;background:#ffffff22;overflow:hidden}
+.attrs .fr i::after{content:'';display:block;height:100%;width:var(--w);background:var(--gold)}
+.quote{margin-top:16px;font:italic 500 14px/1.55 'Montserrat';color:#ffffffdd;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;padding-left:12px;border-left:2px solid var(--gold)}
+
+/* действия: кремовые пилюли с тёмным кружком, главная золотая */
+.acts{margin-top:auto;padding-top:16px;display:flex;flex-direction:column;gap:12px;width:min(300px,22vw);text-shadow:none}
+.acts button{display:flex;align-items:center;gap:14px;padding:6px 22px 6px 6px;border-radius:99px;background:var(--cream);color:var(--ink);font:700 16px 'Montserrat';box-shadow:0 6px 16px #1c2a4055;transition:transform .12s,box-shadow .12s}
+.acts button:hover{transform:translateY(-2px);box-shadow:0 0 0 3px #fff8,0 8px 20px #1c2a4066}
+.acts button i{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--gold)}
+.acts button i svg{width:18px;height:18px;fill:currentColor}
+.acts .go{background:linear-gradient(#fff8e2,#f2d48a)}
+.acts .png{background:#f3ecdccc}
+
+/* справа: вертикальный список персонажей, как в игре */
+.roster{position:fixed;right:1.6vw;top:calc(var(--top) + 64px);bottom:3vh;width:92px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;overflow-y:auto;scrollbar-width:none;z-index:3;-webkit-mask-image:linear-gradient(transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(transparent,#000 8%,#000 92%,transparent)}
+.ch{flex:none;position:relative;width:72px;height:88px;border-radius:7px 7px 18px 7px;overflow:hidden;box-shadow:0 4px 10px #1c2a4055;transition:transform .15s}
+.ch.r5{background:linear-gradient(160deg,#9a6a3a,#d9a24a 60%,#f2d48a)}
+.ch.r4{background:linear-gradient(160deg,#5a4a8a,#8a6ac8 60%,#c0a8f0)}
+.ch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 12%}
+.ch b{position:absolute;left:0;right:0;bottom:0;padding:3px 4px;background:var(--cream);color:var(--ink);font:700 9.5px 'Montserrat';text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch .eicon{position:absolute;left:3px;top:3px;width:18px;height:18px;box-shadow:0 0 4px #0008}
+.ch:hover{transform:translateX(-3px)}
+.ch.on{outline:3px solid #fff;outline-offset:2px;transform:translateX(-4px)}
+
+@media (max-width:1000px){
+  .sun{left:50%;top:40%}
+  .hero{left:50%;width:100%;height:42vh;bottom:auto;top:calc(var(--top) + 4vh)}
+  .hero img.full{max-height:100%}
+  .hero .card{width:40vw;margin-bottom:0}
+  .info{left:14px;right:14px;top:calc(var(--top) + 46vh + 6px);bottom:auto;width:auto;display:block}
+  .elem{font-size:12px;padding:3px 10px 3px 3px}.eicon{width:28px;height:28px}
+  .name{font-size:30px;margin:6px 0 4px}
+  .stars svg{width:16px;height:16px}
+  .lvl,.exp,.attrs,.quote{display:none}
+  .acts{position:fixed;left:14px;right:14px;width:auto;bottom:124px;display:grid;padding:0;grid-template-columns:1fr 1fr;gap:8px}
+  .acts .go{grid-column:1/-1}
+  .acts button{font-size:13px;padding:4px 12px 4px 4px;gap:8px;white-space:nowrap}
+  .acts button i{width:30px;height:30px}.acts button i svg{width:15px;height:15px}
+  .acts .png{display:none}
+  .roster{left:0;right:0;top:auto;bottom:0;width:auto;height:112px;flex-direction:row;padding:10px 14px 14px;overflow:auto hidden;background:linear-gradient(transparent,#1c2a4066);-webkit-mask-image:none;mask-image:none}
+  .ch{width:60px;height:76px}
+  .ch:hover,.ch.on{transform:translateY(-3px)}
+}
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="sun"></div>
+<svg class="vista" preserveAspectRatio="xMidYMax slice"></svg>
+<div class="motes"></div>
+<div class="hero"></div>
+<div class="info">
+  <div class="elw"><button class="elem" title="Сменить стихию"><span class="eicon"></span><span class="ename"></span></button><div class="elpick"></div></div>
+  <h1 class="name"></h1>
+  <div class="stars"></div>
+  <div class="lvl">Ур. <span class="lv"></span><small> / 90</small></div>
+  <div class="exp"><i></i></div>
+  <div class="attrs">
+    <div><span>Сообщений</span><b class="a1"></b></div>
+    <div><span>Чатов</span><b class="a2"></b></div>
+    <div><span>Последний раз</span><b class="a3"></b></div>
+    <div><span>Дружба</span><b class="fr"><i></i><em class="a4"></em></b></div>
+  </div>
+  <p class="quote"></p>
+<div class="acts">
+  <button class="go" data-a="continue"><i><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg></i>Продолжить</button>
+  <button data-a="new"><i><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg></i>Новый чат</button>
+  <button data-a="all"><i><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h11v2H4z"/></svg></i>Все чаты</button>
+  <button class="png" data-a="png"><i><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zm2 2v8.5l3.5-3.5 2.5 2.5 3-3.5L18 15V7zm3 1.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg></i>Своя картинка</button>
+</div>
+</div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// ── рисование: ленты переменной ширины (как у Hollow Knight), из них собираются знаки стихий ──
+const f2 = (v) => +v.toFixed(2);
+function ribbon(pts, w, prof = (t) => Math.sin(Math.PI * t ** .7) ** .8) {
+  const L = [], R = [], n = pts.length - 1;
+  pts.forEach((p, i) => {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, h = w * prof(i / n) / 2;
+    L.push([p[0] - dy / l * h, p[1] + dx / l * h]); R.push([p[0] + dy / l * h, p[1] - dx / l * h]);
+  });
+  return 'M' + [...L, ...R.reverse()].map((p) => `${f2(p[0])} ${f2(p[1])}`).join('L') + 'Z';
+}
+const spiral = (cx, cy, r0, a0, turns, dir = 1, end = .18, n = 70) => Array.from({ length: n + 1 }, (_, i) => { const t = i / n, r = r0 * end ** t, a = a0 + dir * t * turns * 2 * Math.PI; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+const rot = (pts, cx, cy, ang) => pts.map(([x, y]) => [cx + (x - cx) * Math.cos(ang) - (y - cy) * Math.sin(ang), cy + (x - cx) * Math.sin(ang) + (y - cy) * Math.cos(ang)]);
+const line = (a, b, n = 12) => Array.from({ length: n + 1 }, (_, i) => [a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]);
+const rotPath = (d, ang) => `<path fill-rule="evenodd" d="${d}" transform="rotate(${ang} 32 32)"/>`;
+const ICON = {
+  // Анемо: три вихря, каждый закручен из широкого хвоста в тонкий центр
+  anemo: [0, 120, 240].map((a) => rotPath(ribbon(spiral(32, 32, 28, -Math.PI / 2, .95, 1, .2, 60), 8, (t) => (1 - t) ** .55 * Math.min(1, t * 5 + .2)), a)).join('') + '<circle cx="32" cy="32" r="3.5"/>',
+  // Пиро: язык пламени с внутренним языком
+  pyro: `<path fill-rule="evenodd" d="M33 4c3 9 12 15 15 25 3 12-4 25-16 27C20 57 11 48 12 37c1-8 7-11 8-19 4 4 6 8 5 13 6-6 9-16 8-27zM32 30c2 6 7 9 6 15-1 5-5 8-9 7-5-1-7-6-5-11 1-4 5-6 8-11z"/>`,
+  // Гидро: капля с бликом-полумесяцем
+  hydro: `<path fill-rule="evenodd" d="M32 4c6 11 18 20 18 34a18 18 0 0 1-36 0C14 24 26 15 32 4zM21 38c-1 7 3 13 9 15-7 0-13-7-11-15 0-1 2-1 2 0z"/>`,
+  // Электро: три острых лепестка вокруг пустого центра
+  electro: [0, 120, 240].map((a) => rotPath('M32 30C22 24 18 12 32 3c14 9 10 21 0 27zM32 22c-3-4-3-9 0-13 3 4 3 9 0 13z', a)).join('') + '<circle cx="32" cy="32" r="4"/>',
+  // Гео: гранёный камень, грани прорезаны цветом стихии
+  geo: `<path d="M20 8h24l12 16-24 34L8 24z"/><path d="M8 24h48M20 8l12 16 12-16M32 24v34M20 8l-6 16 18 34M44 8l6 16-18 34" stroke="var(--c,#000)" stroke-width="2" fill="none" opacity=".85"/>`,
+  // Дендро: лист с жилкой и усиком
+  dendro: `<path fill-rule="evenodd" d="M31 59C9 48 8 22 30 5c24 9 27 38 1 54zM31 54c3-12 2-28 0-42-2 14-3 30 0 42z"/>` + '<path d="' + ribbon(spiral(44, 14, 7, Math.PI * .9, 1.1, -1, .25), 2.2, (t) => (1 - t) ** .5) + '"/>',
+  // Крио: снежинка из сужающихся лучей с веточками
+  cryo: [0, 60, 120, 180, 240, 300].map((a) => rotPath(ribbon(line([32, 30], [32, 5]), 3.4, (t) => (1 - t * .7)) + ribbon(line([32, 14], [25, 8]), 2, (t) => 1 - t * .6) + ribbon(line([32, 14], [39, 8]), 2, (t) => 1 - t * .6), a)).join('') + '<circle cx="32" cy="32" r="4.5"/>',
+};
+const icon = (k) => `<svg viewBox="0 0 64 64">${ICON[k]}</svg>`;
+const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.7l-6.1 3.4 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>';
+
+// ── пейзаж: слои гор от дымки к ближнему гребню, облака, трава у ног ──
+(() => {
+  const W = 1600, H = 900;
+  // высота гребня в точке x: и для контура, и чтобы трава росла ровно на нём
+  const ry = (x, y0, amp, freq, k) => y0 + Math.sin(x * freq + k) * amp + Math.sin(x * freq * 2.7 + k * 3) * amp * .45 + Math.sin(x * freq * 6.3 + k * 7) * amp * .18 + Math.sin(x * freq * 15 + k * 11) * amp * .06;
+  const ridge = (L, step = 10) => { const pts = []; for (let x = -40; x <= W + 40; x += step) pts.push(`${x} ${f2(ry(x, ...L))}`); return `M-40 ${H + 10}L` + pts.join('L') + `L${W + 40} ${H + 10}Z`; };
+  // дымка — часть заливки самого слоя: к подножию он светлеет и растворяется, ровных границ нет
+  const LAY = [
+    [[470, 70, .006, 1.3], '#b9cfe0', '#f0e6d4'],
+    [[540, 85, .0045, 2.1], '#9bb6cf', '#e6e0d6'],
+    [[610, 90, .0075, 3.7], '#6f8aa3', '#cdd6d8'],
+    [[700, 70, .0055, 5.2], '#50677d', '#a9bcc0'],
+    [[800, 40, .009, 7.9], '#38503f', '#223326'],
+  ];
+  let g = `<defs>${LAY.map(([L, a, b], i) => `<linearGradient id="g${i}" gradientUnits="userSpaceOnUse" x1="0" y1="${L[0] - L[1] * 1.3}" x2="0" y2="${i < 4 ? L[0] + L[1] * 1.5 : H}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`).join('')}
+    <filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs>`;
+  // облака: кучки эллипсов, размыты один раз
+  const cloud = (x, y, s, k) => { let c = ''; for (let i = 0; i < 7; i++) { const r = seeded('c' + k, i); c += `<ellipse cx="${f2(x + (i - 3) * 38 * s)}" cy="${f2(y - Math.abs(i - 3) * 6 * s + r * 10)}" rx="${f2((40 + r * 30) * s)}" ry="${f2((14 + r * 12) * s)}"/>`; } return c; };
+  g += `<g class="cl" fill="#fff" fill-opacity=".55" filter="url(#soft)">${cloud(240, 300, 1.2, 1)}${cloud(620, 230, .9, 2)}${cloud(1100, 330, 1.4, 3)}${cloud(1480, 250, 1, 4)}${cloud(1900, 300, 1.2, 1)}</g>`;
+  LAY.forEach(([L], i) => { g += `<path d="${ridge(L)}" fill="url(#g${i})"/>`; });
+  // трава пучками на ближнем гребне, основание каждой травинки лежит на контуре
+  let grass = '';
+  for (let k = 0; k < 26; k++) {
+    const cx = seeded('gx', k) * W;
+    for (let j = 0; j < 7; j++) {
+      const x = cx + (seeded('gj' + k, j) - .5) * 46, y = ry(x, ...LAY[4][0]) + 4, hgt = 12 + seeded('gh' + k, j) * 24, lean = (seeded('gl' + k, j) - .5) * 18;
+      grass += `<path d="${ribbon(line([x, y], [x + lean, y - hgt], 6), 3.4, (t) => 1 - t)}"/>`;
+    }
+  }
+  g += `<g fill="#38503f">${grass}</g>`;
+  const v = $('.vista'); v.setAttribute('viewBox', `0 0 ${W} ${H}`); v.innerHTML = g;
+  $('.motes').innerHTML = Array.from({ length: 12 }, (_, k) => { const r = (n) => seeded('m' + k, n); return `<i style="--x:${f2(r(1) * 100)}vw;--y:${f2(35 + r(2) * 60)}vh;--s:${f2(2 + r(3) * 3)}px;--d:${f2(7 + r(4) * 8)}s;--dl:-${f2(r(5) * 12)}s;--dx:${f2((r(6) - .5) * 12)}vw"></i>`; }).join('');
+})();
+
+const EL = [
+  { k: 'anemo', n: tt('Анемо'), c: '#5fe0c4', m: '#1d6a63' }, { k: 'pyro', n: tt('Пиро'), c: '#ff8a4a', m: '#8a3220' },
+  { k: 'hydro', n: tt('Гидро'), c: '#4ab8ff', m: '#1f4f9a' }, { k: 'electro', n: tt('Электро'), c: '#b77aff', m: '#4f2a8a' },
+  { k: 'geo', n: tt('Гео'), c: '#f2c14e', m: '#8a6220' }, { k: 'dendro', n: tt('Дендро'), c: '#8ed65a', m: '#2f6a1e' },
+  { k: 'cryo', n: tt('Крио'), c: '#9fe6ff', m: '#2f6f94' },
+];
+// стихия по умолчанию — случайная от имени (одна и та же каждый раз); выбранная вручную важнее
+const EL_KEY = 'genshin:elements';
+let elSaved = {}; try { elSaved = JSON.parse(localStorage.getItem(EL_KEY)) || {}; } catch {}
+const elOf = (c) => EL[elSaved[c.name] ?? Math.floor(seeded(c.name, 1) * EL.length)];
+function setEl(c, k) { if (k == null) delete elSaved[c.name]; else elSaved[c.name] = k; try { localStorage.setItem(EL_KEY, JSON.stringify(elSaved)); } catch {} }
+const rarity = (c) => (c.msgs >= 100 || c.chats >= 5) ? 5 : 4;
+const friend = (c) => Math.min(10, c.chats + Math.floor(c.msgs / 120));
+const badge = (e) => `<span class="eicon" style="--c:${e.c}">${icon(e.k)}</span>`;
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch r${rarity(c)}" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt="">${badge(elOf(c))}<b>${esc(c.name)}</b></button>`).join('');
+
+let cur = 0;
+function show(i, keep) {
+  $('.elpick').classList.remove('on');
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], e = elOf(c), root = document.documentElement.style;
+  root.setProperty('--el', e.c); root.setProperty('--el2', e.m);
+  const hero = $('.hero'); if (!keep) { hero.innerHTML = figHTML(c, 'card'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in'); }
+  $('.elem .eicon').outerHTML = badge(e); $('.ename').textContent = e.n;
+  $('.name').textContent = c.name; $('.stars').innerHTML = STAR.repeat(rarity(c));
+  const lv = Math.min(90, c.msgs); $('.lv').textContent = lv; $('.exp i').style.transform = `scaleX(${lv / 90})`;
+  $('.a1').textContent = c.msgs; $('.a2').textContent = c.chats; $('.a3').textContent = ago(c.ts);
+  $('.a4').textContent = friend(c); $('.fr i').style.setProperty('--w', friend(c) * 10 + '%');
+  $('.quote').textContent = c.snip || tt('Давно не виделись…');
+  $$('.ch').forEach((x, k) => { x.classList.toggle('on', k === cur); if (k === cur) x.querySelector('.eicon').outerHTML = badge(e); });
+  $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function renderPick() {
+  const own = elSaved[ITEMS[cur].name];
+  $('.elpick').innerHTML = EL.map((e, k) => `<button data-el="${k}" class="${own === k ? 'on' : ''}">${badge(e)}${e.n}</button>`).join('')
+    + `<button data-el="" class="rnd ${own == null ? 'on' : ''}" title="${tt("Вернуть случайную")}"><span class="eicon"></span>${tt("Случ.")}</button>`;
+}
+$('.elem').onclick = (ev) => { ev.stopPropagation(); renderPick(); $('.elpick').classList.toggle('on'); };
+$('.elpick').onclick = (ev) => { ev.stopPropagation(); const b = ev.target.closest('[data-el]'); if (!b) return; setEl(ITEMS[cur], b.dataset.el === '' ? null : +b.dataset.el); $('.elpick').classList.remove('on'); show(cur, true); };
+addEventListener('click', () => $('.elpick').classList.remove('on'));
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+$$('[data-a]').forEach((b) => b.onclick = () => ACT(b.dataset.a, ITEMS[cur]));
+addEventListener('keydown', (e) => { if (e.key === 'Escape') return $('.elpick').classList.remove('on'); if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(cur + 1); if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') show(cur - 1); if (e.key === 'Enter') ACT('continue', ITEMS[cur]); });
+show(START);
+</script>
+</body>
+</html>

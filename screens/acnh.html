@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--cream:#fbf4e2;--brown:#6e5233;--soft:#a58a64;--tag:#f0a23a;--go:#f29a2e}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--sky1,#8fd6f2);color:var(--brown);font-family:'Nunito',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* остров: небо по времени суток, лепные облака, море, пляж, два яруса травы (рисуется в acnh-сцене ниже) */
+.sky{position:fixed;inset:0;background:linear-gradient(var(--sky0),var(--sky1) 55%)}
+.stars{position:fixed;inset:0;pointer-events:none}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;animation:tw var(--d) ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.2}to{opacity:1}}
+.clouds .cl{position:fixed;left:0;width:calc(var(--w,200px) * var(--sc));animation:drift linear infinite;will-change:transform;pointer-events:none}
+.clouds .cl svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 6px 0 #0000000d)}
+@keyframes drift{from{transform:translateX(-40vw)}to{transform:translateX(120vw)}}
+.scene{position:fixed;left:0;top:0;width:100%;height:100%}
+.scene .shine ellipse{animation:shine 4s ease-in-out var(--dl) infinite}
+@keyframes shine{0%,100%{opacity:.15}50%{opacity:.8}}
+html[data-t=night] .dlg,html[data-t=night] .phone{box-shadow:0 6px 0 #e3d3ad,0 16px 30px #0006}
+
+/* житель стоит на траве; без PNG — фото в деревянной рамке на подставке */
+.hero{position:fixed;left:42%;bottom:14vh;height:calc(84vh - var(--top) - 2vh);width:40vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-14px;left:50%;width:min(260px,20vw);height:34px;transform:translateX(-50%);border-radius:50%;background:#2f5a1f55;z-index:-1}
+.hero img.full{max-height:100%;max-width:100%;object-fit:contain;animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) scaleY(1.01)}}
+.hero .frm{align-self:center;width:min(22vw,300px);aspect-ratio:3/4;padding:12px;background:#c98d4e;border-radius:12px;box-shadow:inset 0 0 0 4px #a8703a,0 8px 0 #8a5a2c;transform:rotate(-2deg)}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:6px}
+.hero.in{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) scale(.85)}}
+
+/* часы как на главном экране игры */
+.clock{position:fixed;left:3.5vw;top:calc(var(--top) + 2vh);color:#fff;text-shadow:0 3px 0 #0003;z-index:3}
+.clock b{display:block;font:900 64px/1 'Nunito';letter-spacing:1px}
+.clock span{font:800 18px 'Nunito'}
+
+/* окно диалога: кремовое «облачко», имя на наклонённой плашке */
+.dlg{position:fixed;left:40%;bottom:4vh;transform:translateX(-50%);width:min(720px,58vw);min-height:150px;padding:34px 46px 30px;background:var(--cream);border-radius:46px 52px 48px 44px/58px 50px 56px 52px;box-shadow:0 6px 0 #e3d3ad,0 16px 30px #0002;z-index:4}
+.tag{position:absolute;left:44px;top:-22px;padding:6px 22px;border-radius:99px;background:var(--tag);color:#fff;font:900 20px 'Nunito';transform:rotate(-5deg);box-shadow:0 3px 0 #0002;animation:wob 3s ease-in-out infinite;max-width:calc(100% - 80px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes wob{50%{transform:rotate(-2deg) translateY(-2px)}}
+.dlg p{font:800 19px/1.55 'Nunito';min-height:3.1em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.dlg .more{position:absolute;right:38px;bottom:16px;width:0;height:0;border:9px solid transparent;border-top:12px solid var(--go);animation:hop .8s ease-in-out infinite}
+@keyframes hop{50%{transform:translateY(4px)}}
+
+/* варианты ответа — отдельное облачко над правым краем диалога */
+.ch-box{position:absolute;right:-18px;bottom:calc(100% + 14px);padding:16px 26px 16px 20px;background:var(--cream);border-radius:30px;box-shadow:0 5px 0 #e3d3ad,0 12px 24px #0002;display:flex;flex-direction:column;gap:4px}
+.ch-box button{display:flex;align-items:center;gap:8px;font:900 18px 'Nunito';color:var(--brown);text-align:left;padding:2px 0}
+.ch-box button::before{content:'';width:0;height:0;border:8px solid transparent;border-left:12px solid var(--go);border-right:0;opacity:0;transition:opacity .1s}
+.ch-box button.on::before{opacity:1}
+.ch-box button.on{color:#3d2a12}
+
+/* телефон справа — список жителей */
+.phone{position:fixed;right:3vw;top:calc(var(--top) + 3vh);width:min(260px,20vw);height:min(470px,calc(100vh - var(--top) - 6vh));padding:14px 12px;border-radius:38px;background:#f6efdc;box-shadow:inset 0 0 0 6px #fff,0 10px 0 #d9c9a1,0 18px 30px #0003;display:flex;flex-direction:column;z-index:4}
+.phone h2{align-self:center;padding:4px 20px;border-radius:99px;background:#f7cf49;color:#5a4318;font:900 16px 'Nunito';margin-bottom:10px}
+.vil{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:grid;grid-template-columns:repeat(3,1fr);gap:10px 6px;align-content:start}
+.v{display:flex;flex-direction:column;align-items:center;gap:3px;font:800 10px 'Nunito';color:var(--soft);min-width:0}
+.v i{width:54px;height:54px;border-radius:50%;padding:3px;background:var(--c);transition:transform .15s}
+.v img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:top}
+.v span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v:hover i{transform:scale(1.08)}
+.v.on i{box-shadow:0 0 0 4px #f7cf49;animation:hop2 .9s ease-in-out infinite}
+.v.on{color:var(--brown)}
+@keyframes hop2{50%{transform:translateY(-3px)}}
+
+@media (max-width:760px){
+  .clock{display:none}
+  .phone{left:3vw;right:3vw;width:auto;top:calc(var(--top) + 6px);height:96px;padding:8px 10px;border-radius:26px}
+  .phone h2{display:none}
+  .vil{display:flex;overflow-x:auto;gap:8px}
+  .v{flex:none;width:58px}.v i{width:48px;height:48px}
+  .hero{left:50%;width:90vw;bottom:30vh;height:calc(70vh - var(--top) - 120px)}
+  .hero .frm{width:46vw}
+  .dlg{left:50%;width:94vw;bottom:2vh;padding:28px 22px 22px;min-height:0}
+  .dlg p{font-size:15px}
+  .tag{left:22px;font-size:16px}
+  .ch-box{right:6px;padding:10px 16px 10px 12px}.ch-box button{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="clouds"></div>
+<svg class="scene" preserveAspectRatio="xMidYMax slice"></svg>
+<div class="clock"><b class="hm"></b><span class="dm"></span></div>
+<div class="hero"></div>
+<div class="dlg">
+  <div class="tag"></div>
+  <p></p>
+  <i class="more"></i>
+  <div class="ch-box">
+    <button data-a="continue" class="on">Продолжить</button>
+    <button data-a="new">Новый чат</button>
+    <button data-a="all">Все чаты</button>
+    <button data-a="png">Сменить картинку</button>
+  </div>
+</div>
+<div class="phone"><h2>Жители</h2><div class="vil"></div></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// Остров для экрана Animal Crossing: море, пляж с пеной, два яруса травы с обрывом, деревья с плодами, кусты, цветы.
+// Всё рисуется один раз в SVG; двигаются только облака (отдельные элементы, transform) и блики на воде.
+// Палитра по времени суток: день, вечер, ночь.
+(() => {
+  const W = 1600, H = 900, hr = new Date().getHours(), q = new URLSearchParams(location.search).get('time');
+  const T = ['day', 'eve', 'night'].includes(q) ? q : hr >= 20 || hr < 6 ? 'night' : hr >= 17 ? 'eve' : 'day';
+  const PAL = {
+    day: { sky0: '#6ec6f2', sky1: '#c6ecfb', sea0: '#2fa9d6', sea1: '#79d2ec', sand: '#f3e3b6', sand2: '#e4cf9a', grass: '#7fc95b', grass2: '#68b24a', cliff: '#d9c29a', cliff2: '#bda075', leaf: '#4f9e3e', leaf2: '#79c55a', trunk: '#8c5a33', cloud: '#fff', cloud2: '#dfeef9', bush: '#5faa47' },
+    eve: { sky0: '#f2a66a', sky1: '#8fb4e6', sea0: '#4f7fc0', sea1: '#9ab8e4', sand: '#f0d4a3', sand2: '#d9b67f', grass: '#79b85a', grass2: '#5e9c47', cliff: '#d0b088', cliff2: '#ad8a5f', leaf: '#4a8e3c', leaf2: '#78b557', trunk: '#7d4f2c', cloud: '#ffe8d2', cloud2: '#f3c7ae', bush: '#579a44' },
+    night: { sky0: '#17254f', sky1: '#3b5188', sea0: '#1c3566', sea1: '#2f5490', sand: '#b9ad8c', sand2: '#9b8d6e', grass: '#3d7a44', grass2: '#2f6238', cliff: '#8f7c5c', cliff2: '#6f5d44', leaf: '#2c5e33', leaf2: '#3f7f45', trunk: '#4a3220', cloud: '#5b6a95', cloud2: '#4a577e', bush: '#356b3c' },
+  }[T];
+  const st = document.documentElement.style;
+  for (const [k, v] of Object.entries(PAL)) st.setProperty('--' + k, v);
+  document.documentElement.dataset.t = T;
+  const R = (k, i) => seeded('ac' + k, i), f = (v) => +v.toFixed(1);
+
+  // волнистый край: от (x0,y) до (x1,y), amp — высота волны
+  const wavy = (x0, x1, y, amp, n, k) => { let d = `M${x0} ${y}`; const w = (x1 - x0) / n; for (let i = 0; i < n; i++) { const a = x0 + i * w, b = a + w, up = i % 2 ? -1 : 1; d += `C${f(a + w * .35)} ${f(y + up * amp * (.7 + R(k, i) * .6))} ${f(b - w * .35)} ${f(y + up * amp * (.7 + R(k, i + 50) * .6))} ${f(b)} ${y}`; } return d; };
+  const tree = (x, y, s, fruit) => `<g transform="translate(${x} ${y}) scale(${s})">
+    <ellipse cx="0" cy="4" rx="46" ry="9" fill="#0002"/>
+    <path d="M-9 0c0-30-4-60-4-90h26c0 30-4 60-4 90z" fill="var(--trunk)"/>
+    <circle cx="-34" cy="-98" r="34" fill="var(--leaf)"/><circle cx="34" cy="-98" r="34" fill="var(--leaf)"/><circle cx="0" cy="-128" r="40" fill="var(--leaf)"/><circle cx="0" cy="-92" r="38" fill="var(--leaf)"/>
+    <circle cx="-26" cy="-108" r="26" fill="var(--leaf2)"/><circle cx="12" cy="-136" r="28" fill="var(--leaf2)"/><circle cx="30" cy="-102" r="22" fill="var(--leaf2)"/>
+    ${fruit ? [[-30, -88], [20, -120], [34, -84], [-6, -70]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="6.5" fill="${fruit}"/><circle cx="${a - 2}" cy="${b - 2}" r="2" fill="#fff8"/>`).join('') : ''}
+  </g>`;
+  const bush = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="2" rx="40" ry="7" fill="#0002"/><circle cx="-22" cy="-16" r="20" fill="var(--bush)"/><circle cx="22" cy="-16" r="20" fill="var(--bush)"/><circle cx="0" cy="-26" r="24" fill="var(--bush)"/><circle cx="-6" cy="-30" r="14" fill="var(--leaf2)"/></g>`;
+  const flower = (x, y, c, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-6 6c-6 2-12-2-10-8M6 6c6 2 12-2 10-8" stroke="var(--leaf2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>${[0, 90, 180, 270].map((a) => `<ellipse cx="0" cy="-7" rx="5" ry="7" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="3.5" fill="#ffe27a"/></g>`;
+  const FL = ['#ff8fb0', '#fff', '#ffd04a', '#ff7a5a', '#b48be0', '#ff9ec4'];
+
+  let g = `<defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sea1)"/><stop offset="1" stop-color="var(--sea0)"/></linearGradient>
+    <linearGradient id="cliff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--cliff)"/><stop offset="1" stop-color="var(--cliff2)"/></linearGradient>
+    <pattern id="rock" width="140" height="46" patternUnits="userSpaceOnUse"><g fill="#00000012"><rect x="6" y="8" width="38" height="9" rx="4.5"/><rect x="62" y="14" width="26" height="8" rx="4"/><rect x="104" y="6" width="30" height="9" rx="4.5"/><rect x="28" y="30" width="30" height="8" rx="4"/><rect x="84" y="32" width="40" height="9" rx="4.5"/></g></pattern>
+  </defs>`;
+  // море с полосами ряби и далёкий островок
+  g += `<rect x="0" y="380" width="${W}" height="260" fill="url(#sea)"/>`;
+  for (let i = 0; i < 9; i++) g += `<ellipse cx="${f(R('rx', i) * W)}" cy="${f(420 + R('ry', i) * 150)}" rx="${f(60 + R('rw', i) * 120)}" ry="3" fill="#fff" opacity=".35"/>`;
+  g += `<g class="shine">${Array.from({ length: 10 }, (_, i) => `<ellipse cx="${f(R('sx', i) * W)}" cy="${f(430 + R('sy', i) * 130)}" rx="${f(10 + R('sw', i) * 22)}" ry="2.2" fill="#fff" opacity=".7" style="--dl:-${f(R('sd', i) * 4)}s"/>`).join('')}</g>`;
+  g += `<g transform="translate(1250 392)"><ellipse cx="0" cy="0" rx="70" ry="14" fill="var(--sand2)"/><ellipse cx="0" cy="-5" rx="52" ry="12" fill="var(--grass2)"/>${tree(-6, -6, .32)}</g>`;
+  // пляж: песок с двумя линиями пены
+  g += `<path d="${wavy(-20, W + 20, 600, 14, 18, 'f1')}V${H}H-20Z" fill="#fff" opacity=".7"/>`;
+  g += `<path d="${wavy(-20, W + 20, 612, 12, 18, 'f2')}V${H}H-20Z" fill="var(--sand)"/>`;
+  g += `<path d="${wavy(-20, W + 20, 640, 8, 22, 'f3')}V${H}H-20Z" fill="var(--sand2)" opacity=".5"/>`;
+  // нижний ярус травы
+  g += `<path d="${wavy(-20, W + 20, 690, 10, 16, 'g1')}V${H}H-20Z" fill="var(--grass2)"/><path d="${wavy(-20, W + 20, 702, 8, 16, 'g1')}V${H}H-20Z" fill="var(--grass)"/>`;
+  // верхний ярус слева: обрыв со слоистым камнем и травяной крышкой
+  const cliffTop = `M-20 520C120 500 200 540 330 520S520 470 640 500 760 560 760 620C760 700 600 760 420 760H-20Z`;
+  g += `<path d="${cliffTop}" transform="translate(0 70)" fill="url(#cliff)"/><path d="${cliffTop}" transform="translate(0 70)" fill="url(#rock)"/>`;
+  g += `<path d="${cliffTop}" fill="var(--grass2)"/><path d="${cliffTop}" transform="translate(0 -10) scale(1 .98)" fill="var(--grass)"/>`;
+  // деревья: пара плодовых на верхнем ярусе, одно большое справа, кусты по кромке
+  g += tree(150, 560, 1, '#e54848') + tree(560, 540, .8, '#f2a93b') + tree(1420, 720, 1.1, null) + tree(1250, 650, .55, null);
+  g += bush(320, 760, .9) + bush(1000, 700, .8) + bush(1540, 690, .7) + bush(60, 880, 1);
+  // цветы кучками и травинки
+  for (let i = 0; i < 26; i++) { const onTop = R('ft', i) < .45; g += flower(f(onTop ? 40 + R('fx', i) * 640 : 100 + R('fx', i) * 1450), f(onTop ? 540 + R('fy', i) * 180 : 720 + R('fy', i) * 160), FL[Math.floor(R('fc', i) * FL.length)], .8 + R('fs', i) * .5); }
+  for (let i = 0; i < 70; i++) { const x = f(R('bx', i) * W), y = f(700 + R('by', i) * 190); g += `<path d="M${x} ${y}l3-9 3 9" stroke="var(--grass2)" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; }
+  const v = document.querySelector('.scene'); v.setAttribute('viewBox', `0 0 ${W} ${H}`); v.innerHTML = g;
+
+  // облака: лепные, с плоским низом; ночью — звёзды и светлячки
+  const cloud = (k) => { let d = '', x = 0; for (let i = 0; i < 5; i++) { const r = 18 + R('cr' + k, i) * 16; d += `<circle cx="${x}" cy="${-r * .55}" r="${r}"/>`; x += r * 1.1; } return `<svg class="cloud" viewBox="-30 -60 ${x + 30} 70" style="--w:${x + 60}px"><g fill="var(--cloud)">${d}<rect x="-10" y="-22" width="${x + 10}" height="22" rx="11"/></g><rect x="-10" y="-12" width="${x + 10}" height="12" rx="6" fill="var(--cloud2)" opacity=".7"/></svg>`; };
+  document.querySelector('.clouds').innerHTML = [[9, 130, 1.3, 0], [20, 170, .9, 50], [4, 150, 1.6, 100], [15, 190, 1.1, 150]].map(([top, dur, sc, dl], k) => `<div class="cl" style="top:calc(var(--top) + ${top}vh);--sc:${sc};animation-duration:${dur}s;animation-delay:-${dl}s">${cloud(k)}</div>`).join('');
+  if (T === 'night') document.querySelector('.clouds').insertAdjacentHTML('beforebegin', `<div class="stars">${Array.from({ length: 40 }, (_, i) => `<i style="left:${f(R('stx', i) * 100)}%;top:${f(R('sty', i) * 40)}%;--d:${f(2 + R('std', i) * 3)}s"></i>`).join('')}</div>`);
+})();
+
+// у каждого жителя свой цвет плашки (стабильно по имени)
+const COLORS = ['#f0a23a', '#e8728a', '#5fb6e0', '#8bc15a', '#b48be0', '#e6c23c', '#ef8a5a', '#4fc0b0'];
+const colOf = (c) => COLORS[Math.floor(seeded(c.name, 31) * COLORS.length)];
+
+const MON = [tt('янв.'), tt('февр.'), tt('марта'), tt('апр.'), tt('мая'), tt('июня'), tt('июля'), tt('авг.'), tt('сент.'), tt('окт.'), tt('нояб.'), tt('дек.')], DOW = [tt('вс'), tt('пн'), tt('вт'), tt('ср'), tt('чт'), tt('пт'), tt('сб')];
+function tick() { const d = new Date(); $('.hm').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); $('.dm').textContent = `${d.getDate()} ${MON[d.getMonth()]} · ${DOW[d.getDay()]}`; }
+tick(); setInterval(tick, 10e3);
+
+$('.vil').innerHTML = ITEMS.map((c, i) => `<button class="v" data-i="${i}" style="--c:${colOf(c)}"><i><img decoding="async" src="${c.img}" alt=""></i><span>${esc(c.name)}</span></button>`).join('');
+
+// текст печатается по буквам, как реплики жителей
+let typing;
+function typeInto(el, text) {
+  clearInterval(typing); el.textContent = ''; let k = 0;
+  typing = setInterval(() => { el.textContent = text.slice(0, k += 2); if (k >= text.length) clearInterval(typing); }, 22);
+}
+
+let cur = 0, sel = 0;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  const hero = $('.hero'); hero.innerHTML = figHTML(c, 'frm'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  const tag = $('.tag'); tag.textContent = c.name; tag.style.background = colOf(c);
+  typeInto($('.dlg p'), c.snip || tt`О, привет, ${meOf(cur).name}! Давно не виделись.`);
+  $$('.v').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.v')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.ch-box button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.ch-box button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.v').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.ch-box button')[sel].dataset.a, ITEMS[cur]);
+});
+show(START);
+</script>
+</body>
+</html>

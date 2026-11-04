@@ -1,0 +1,682 @@
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&family=Unbounded:wght@800&family=JetBrains+Mono:wght@400;600&family=Literata:ital,opsz,wght@1,7..72,400&family=Onest:wght@400;500;700&family=Spectral:ital,wght@0,300;1,300&family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@800;900&family=Tektur:wght@500;700;800&family=Exo+2:wght@500&family=Tiny5&family=Press+Start+2P&family=Nunito:wght@600;700;800;900&display=swap');
+
+#slayhome {
+    --sh-bg: #0d0b0c;
+    --sh-fg: #eee7e1;
+    --sh-dim: #8a8079;
+    --sh-acc: #d8a35b;
+    position: fixed;
+    /* не inset:0 — в мобильной раскладке ST контейнер у fixed-слоёв нулевой высоты */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    padding-top: var(--topBarBlockSize);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden auto;
+    background: var(--sh-bg);
+    color: var(--sh-fg);
+    font-family: 'Golos Text', var(--mainFontFamily), sans-serif;
+}
+body.slayhome-on #slayhome { display: flex; }
+body.slayhome-on #sheld { visibility: hidden; }
+/* чат спрятан под стартовым экраном — его анимации (например, у темы) не крутятся впустую */
+body.slayhome-on #sheld, body.slayhome-on #sheld *, body.slayhome-on #sheld *::before, body.slayhome-on #sheld *::after { animation-play-state: paused !important; }
+body.slayhome-on .stlp--container { display: none !important; }
+/* «Прятать верхнее меню»: на стартовом экране меню уезжает вверх и возвращается, пока мышь у края или на самом меню, или открыта его панель */
+#slayhome-barzone { display: none; }
+body.slayhome-on.slayhome-nobar #slayhome-barzone { display: block; position: fixed; left: 0; right: 0; top: 0; height: 12px; z-index: 3004; }
+body.slayhome-on.slayhome-nobar #slayhome { --topBarBlockSize: 0px; }
+body.slayhome-on.slayhome-nobar :is(#top-bar, #top-settings-holder) { transition: opacity .2s, translate .2s; }
+body.slayhome-on.slayhome-nobar:not(:has(#slayhome-barzone:hover, #top-bar:hover, #top-settings-holder:hover, #top-settings-holder .openDrawer)) :is(#top-bar, #top-settings-holder) { opacity: 0; translate: 0 -100%; pointer-events: none; }
+@media (hover: none) { body.slayhome-on.slayhome-nobar #slayhome-barzone { height: 20px; } }
+
+/* общий сброс: тема ST не должна лезть внутрь экрана */
+#slayhome h1, #slayhome h3, #slayhome h6, #slayhome p { margin: 0; }
+#slayhome img { display: block; max-width: none; }
+#slayhome button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+#slayhome.sh-empty > * { display: none; }
+
+#slayhome.sh-l-kino .sh-amb {
+    position: fixed;
+    inset: -80px;
+    z-index: -1;
+    background-size: cover;
+    background-position: center 20%;
+    filter: blur(70px) saturate(1.4);
+    opacity: .38;
+    pointer-events: none;
+}
+#slayhome.sh-l-kino .sh-amb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, var(--sh-bg) 85%);
+}
+
+/* Высота героя задана жёстко, чтобы портрет и лента не прыгали от длины имени/цитаты */
+#slayhome.sh-l-kino .sh-hero {
+    --sh-h: clamp(360px, 60vh, 700px);
+    position: relative;
+    flex: none;
+    display: grid;
+    grid-template-columns: calc(var(--sh-h) * 2 / 3) minmax(0, 1fr);
+    grid-template-rows: var(--sh-h);
+    gap: 56px;
+    padding: 6vh 90px 0;
+}
+#slayhome.sh-l-kino .sh-por {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #1a1617;
+    box-shadow: 0 30px 80px #000c;
+}
+#slayhome.sh-l-kino .sh-por img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-kino .sh-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
+    max-width: 820px;
+    height: 100%;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+#slayhome.sh-l-kino .sh-k {
+    font: 500 12px 'JetBrains Mono', monospace;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--sh-acc);
+}
+#slayhome.sh-l-kino .sh-name {
+    font: 800 clamp(40px, 5.6vw, 96px) / .95 'Unbounded', sans-serif;
+    letter-spacing: -.03em;
+    margin: 14px 0 22px;
+    color: var(--sh-fg);
+    /* размер подбирает fitName() в index.js: максимум 2 строки, слова не рвём */
+    flex: none;
+}
+#slayhome.sh-l-kino .sh-q {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    flex: none;
+    font: italic 400 19px / 1.55 'Literata', serif;
+    color: #d6cdc6;
+    quotes: none;
+    border-left: 2px solid var(--sh-acc);
+    padding-left: 18px;
+    max-width: 640px;
+}
+#slayhome.sh-l-kino .sh-q[hidden] { display: none; }
+#slayhome.sh-l-kino .sh-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+#slayhome.sh-l-kino .sh-btns button {
+    padding: 13px 24px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--sh-fg);
+    background: transparent;
+    border: 1px solid #ffffff30;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+#slayhome.sh-l-kino .sh-btns button:hover { border-color: #ffffff80; }
+#slayhome.sh-l-kino .sh-btns .sh-go { background: var(--sh-fg); color: #111; border-color: var(--sh-fg); }
+#slayhome.sh-l-kino .sh-btns .sh-go:hover { background: #fff; }
+#slayhome.sh-l-kino .sh-stats { display: flex; gap: 28px; margin-top: 22px; font: 400 12px 'JetBrains Mono', monospace; color: var(--sh-dim); }
+#slayhome.sh-l-kino .sh-stats b { color: var(--sh-fg); font-weight: 600; }
+
+#slayhome.sh-l-kino .sh-row { position: relative; padding: 40px 90px 40px; }
+#slayhome.sh-l-kino .sh-row h3 {
+    font: 500 12px 'JetBrains Mono', monospace;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--sh-dim);
+    margin: 0 0 14px;
+}
+/* сверху запас под подъём карточки (−4px) и рамку (outline 2px + отступ 3px), иначе прокрутка полосы её срезает */
+#slayhome.sh-l-kino .sh-strip { display: flex; gap: 14px; overflow-x: auto; padding: 12px 6px 8px; margin-top: -6px; scrollbar-width: thin; }
+#slayhome.sh-l-kino .sh-c { flex: none; width: 118px; min-width: 0; cursor: pointer; opacity: .6; transition: opacity .2s, transform .2s; }
+#slayhome.sh-l-kino .sh-c:hover, #slayhome.sh-l-kino .sh-c.on { opacity: 1; transform: translateY(-4px); }
+#slayhome.sh-l-kino .sh-c img { width: 118px; height: 160px; object-fit: cover; object-position: top; border-radius: 4px; background: #1a1617; }
+#slayhome.sh-l-kino .sh-c.on img { outline: 2px solid var(--sh-acc); outline-offset: 3px; }
+#slayhome.sh-l-kino .sh-c span { display: block; font-size: 12px; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#slayhome.sh-l-kino .sh-c i { font: normal 10px 'JetBrains Mono', monospace; color: var(--sh-dim); }
+
+#slayhome.sh-empty .sh-hero, #slayhome.sh-empty .sh-row { display: none; }
+
+/* Телефон: портрет — баннер во всю ширину, имя наезжает на его низ, лента сразу под кнопками */
+@media (max-width: 1000px) {
+    #slayhome.sh-l-kino .sh-amb { display: none; }
+    #slayhome.sh-l-kino .sh-hero { display: block; height: auto; padding: 0; }
+    #slayhome.sh-l-kino .sh-por { width: 100%; height: min(52vh, 480px); border-radius: 0; box-shadow: none; }
+    #slayhome.sh-l-kino .sh-por::after { content: ''; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, var(--sh-bg)); }
+    #slayhome.sh-l-kino .sh-por { position: relative; }
+    #slayhome.sh-l-kino .sh-meta { position: relative; height: auto; max-width: none; margin-top: -96px; padding: 0 16px; overflow: visible; }
+    #slayhome.sh-l-kino .sh-name { margin: 10px 0 14px; }
+    #slayhome.sh-l-kino .sh-q { font-size: 15px; -webkit-line-clamp: 3; padding-left: 14px; }
+    #slayhome.sh-l-kino .sh-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+    #slayhome.sh-l-kino .sh-btns .sh-go { grid-column: 1 / -1; }
+    #slayhome.sh-l-kino .sh-btns button { padding: 12px 10px; }
+    #slayhome.sh-l-kino .sh-stats { margin-top: 14px; }
+    #slayhome.sh-l-kino .sh-row { padding: 24px 0 32px; }
+    #slayhome.sh-l-kino .sh-row h3 { padding: 0 16px; }
+    #slayhome.sh-l-kino .sh-strip { gap: 10px; padding: 6px 16px 8px; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; }
+    #slayhome.sh-l-kino .sh-c { width: 88px; scroll-snap-align: start; opacity: .75; }
+    #slayhome.sh-l-kino .sh-c img { width: 88px; height: 120px; }
+    #slayhome.sh-l-kino .sh-c:hover, #slayhome.sh-l-kino .sh-c.on { transform: none; }
+}
+
+/* ═══════════ Субтитры ═══════════ */
+#slayhome.sh-l-subs { background: #000; color: #fff; font-family: 'Onest', sans-serif; }
+/* Оригиналы карточек ~512×768: растянутые на всю ширину, они мылятся. Портрет — по высоте экрана (≈1.2×),
+   по бокам — его же размытая копия, края портрета растворяются в ней */
+#slayhome.sh-l-subs .shs-fill { position: absolute; inset: -60px; background-size: cover; background-position: center 25%; filter: blur(40px) brightness(.45) saturate(1.2); }
+#slayhome.sh-l-subs .shs-bg { position: absolute; top: 0; left: 50%; height: 100%; width: auto; aspect-ratio: 2 / 3; transform: translateX(-50%); object-fit: cover; object-position: top; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+#slayhome.sh-l-subs .shs-shade { position: absolute; inset: 0; background: linear-gradient(180deg, #000a 0, transparent 22%, transparent 45%, #000e 88%); }
+#slayhome.sh-l-subs .shs-top { position: absolute; left: 40px; right: 40px; top: calc(var(--topBarBlockSize) + 20px); display: flex; justify-content: space-between; align-items: center; gap: 20px; font: 500 12px 'IBM Plex Mono', monospace; letter-spacing: .08em; color: #fffa; }
+#slayhome.sh-l-subs .shs-rec { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+#slayhome.sh-l-subs .shs-rec img { flex: none; width: 38px; height: 38px; object-fit: cover; object-position: top; border-radius: 3px; opacity: .45; cursor: pointer; transition: .2s; }
+#slayhome.sh-l-subs .shs-rec img:hover, #slayhome.sh-l-subs .shs-rec img.on { opacity: 1; transform: translateY(2px); }
+#slayhome.sh-l-subs .shs-sub { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); width: min(980px, 86vw); text-align: center; }
+#slayhome.sh-l-subs .shs-who { font: 700 13px 'Onest', sans-serif; letter-spacing: .24em; text-transform: uppercase; color: #ffd75e; margin-bottom: 14px; }
+#slayhome.sh-l-subs .shs-line { font: 400 28px/1.45 'Onest', sans-serif; text-shadow: 0 2px 2px #000, 0 0 24px #000c; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+#slayhome.sh-l-subs .shs-acts { position: absolute; left: 0; right: 0; bottom: 44px; display: flex; justify-content: center; gap: 34px; font: 500 14px 'Onest', sans-serif; color: #fffb; }
+#slayhome.sh-l-subs .shs-acts button:hover { color: #fff; }
+#slayhome.sh-l-subs .shs-acts .sh-go { color: #fff; border-bottom: 1px solid #ffd75e; padding-bottom: 3px; }
+
+/* ═══════════ Колода ═══════════ */
+#slayhome.sh-l-deck { background: #16181d; color: #eef0f4; font-family: 'Onest', sans-serif; }
+#slayhome.sh-l-deck .shd-txt { position: absolute; left: 7vw; top: 50%; transform: translateY(-50%); width: 34vw; max-width: 520px; z-index: 60; }
+#slayhome.sh-l-deck .shd-when { font: 500 12px 'IBM Plex Mono', monospace; color: #8b93a5; letter-spacing: .06em; }
+#slayhome.sh-l-deck .shd-name { font: 900 clamp(40px, 4.6vw, 76px)/.95 'Inter Tight', sans-serif; letter-spacing: -.04em; margin: 16px 0 20px; color: #eef0f4; }
+#slayhome.sh-l-deck .shd-q { font: 400 17px/1.6 'Onest', sans-serif; color: #b9bfcc; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+#slayhome.sh-l-deck .shd-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+#slayhome.sh-l-deck .shd-btns button { padding: 12px 20px; border-radius: 10px; background: #252932; font-weight: 500; font-size: 14px; }
+#slayhome.sh-l-deck .shd-btns .sh-go { background: #eef0f4; color: #16181d; }
+#slayhome.sh-l-deck .shd-fan { position: absolute; right: 4vw; top: calc(46% + var(--topBarBlockSize) / 2); width: 52vw; height: 60vh; transform: translateY(-50%); }
+#slayhome.sh-l-deck .shd-card { --w: min(17vw, 250px); position: absolute; left: 50%; bottom: 0; width: var(--w); aspect-ratio: 2 / 3; margin-left: calc(var(--w) / -2); transform-origin: 50% 260%; border-radius: 12px; overflow: hidden; background: #252932; box-shadow: 0 14px 40px #0009; cursor: pointer; filter: brightness(.6); will-change: transform; transition: transform .24s cubic-bezier(.25, .7, .3, 1), filter .18s, z-index 0s linear .1s; }
+/* на широком экране веер шире: отодвигаем от края, слева под него есть место */
+@media (min-width: 1600px) { #slayhome.sh-l-deck .shd-fan { right: 7vw; } }
+#slayhome.sh-l-deck .shd-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+/* z-index меняется с задержкой: прошлая карта успевает опуститься, а не проваливается мгновенно; новая поднимается сразу */
+#slayhome.sh-l-deck .shd-card.on { filter: none; transition-delay: 0s; }
+
+/* ═══════════ Переписка ═══════════ */
+#slayhome.sh-l-msgr { background: #0f1216; color: #e8ebef; font-family: 'Onest', sans-serif; }
+body.slayhome-on #slayhome.sh-l-msgr { display: grid; grid-template-columns: 320px minmax(0, 1fr); }
+#slayhome.sh-l-msgr .shm-list { border-right: 1px solid #ffffff10; padding: 20px 10px; overflow-y: auto; scrollbar-width: none; }
+#slayhome.sh-l-msgr .shm-list h6 { font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #6c7480; padding: 0 12px 10px; }
+#slayhome.sh-l-msgr .shm-ct { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 9px 12px; border-radius: 12px; cursor: pointer; }
+#slayhome.sh-l-msgr .shm-ct:hover { background: #ffffff08; }
+#slayhome.sh-l-msgr .shm-ct.on { background: #2b5bd7; }
+#slayhome.sh-l-msgr .shm-ct img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-msgr .shm-ct b { display: flex; justify-content: space-between; gap: 8px; font: 500 14px 'Onest', sans-serif; white-space: nowrap; overflow: hidden; }
+#slayhome.sh-l-msgr .shm-ct b i { flex: none; font: normal 11px 'Onest', sans-serif; opacity: .55; }
+#slayhome.sh-l-msgr .shm-ct span { display: block; font-size: 13px; opacity: .55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+#slayhome.sh-l-msgr .shm-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding-top: 20px; }
+#slayhome.sh-l-msgr header { display: flex; align-items: center; gap: 14px; padding: 0 40px 18px; border-bottom: 1px solid #ffffff10; }
+#slayhome.sh-l-msgr .shm-av { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-msgr .shm-name { font: 700 18px 'Onest', sans-serif; }
+#slayhome.sh-l-msgr .shm-sub { display: block; font-size: 12px; color: #6c7480; margin-top: 2px; }
+#slayhome.sh-l-msgr .shm-sm { margin-left: auto; display: flex; gap: 16px; font-size: 13px; color: #8d96a3; }
+#slayhome.sh-l-msgr .shm-sm button:hover { color: #fff; }
+#slayhome.sh-l-msgr .shm-feed { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px 40px; overflow: hidden; }
+#slayhome.sh-l-msgr .shm-day { align-self: center; font: 500 11px 'Onest', sans-serif; color: #6c7480; background: #ffffff0a; padding: 4px 10px; border-radius: 99px; margin-bottom: 18px; }
+#slayhome.sh-l-msgr .shm-msg { max-width: 640px; }
+#slayhome.sh-l-msgr .shm-pic { width: auto; height: min(400px, 42vh); aspect-ratio: 3 / 4; object-fit: cover; object-position: top; border-radius: 18px 18px 18px 4px; }
+#slayhome.sh-l-msgr .shm-bub { background: #1c2129; border-radius: 18px 18px 18px 4px; padding: 14px 18px; font: 400 16px/1.55 'Onest', sans-serif; margin-top: 8px; }
+#slayhome.sh-l-msgr .shm-bub time { display: block; text-align: right; font-size: 11px; color: #6c7480; margin-top: 6px; }
+#slayhome.sh-l-msgr .shm-input { display: flex; gap: 10px; padding: 16px 40px 26px; }
+#slayhome.sh-l-msgr .shm-field { flex: 1; background: #1c2129; border-radius: 99px; padding: 14px 22px; color: #6c7480; font-size: 15px; cursor: text; }
+#slayhome.sh-l-msgr .shm-input button { flex: none; width: 50px; height: 50px; border-radius: 50%; background: #2b5bd7; color: #fff; font-size: 20px; }
+
+/* ═══════════ Карусель ═══════════ */
+#slayhome.sh-l-flow { background: radial-gradient(ellipse at 50% 35%, #2a2420, #0c0a09 70%); color: #fff; font-family: 'Onest', sans-serif; perspective: 1400px; }
+/* сцена — плоскость z=0; карты, ушедшие вглубь, оказываются за ней, поэтому клики сцена пропускает */
+#slayhome.sh-l-flow .shf-stage { pointer-events: none; position: absolute; left: 0; right: 0; top: calc(var(--topBarBlockSize) + 30px); height: 54vh; transform-style: preserve-3d; }
+#slayhome.sh-l-flow .shf-card { pointer-events: auto; position: absolute; left: 50%; top: 0; height: 100%; aspect-ratio: 2 / 3; border-radius: 8px; overflow: hidden; background: #2a2420; cursor: pointer; transition: transform .55s cubic-bezier(.2, .8, .2, 1), opacity .4s, filter .4s; filter: brightness(.55); -webkit-box-reflect: below 6px linear-gradient(transparent 70%, #fff3); }
+#slayhome.sh-l-flow .shf-card.on { filter: none; }
+#slayhome.sh-l-flow .shf-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-flow .shf-meta { position: absolute; left: 50%; transform: translateX(-50%); bottom: 56px; width: min(760px, 90vw); text-align: center; }
+#slayhome.sh-l-flow .shf-when { font: 400 12px 'IBM Plex Mono', monospace; color: #a99f95; }
+#slayhome.sh-l-flow .shf-name { font: 800 clamp(34px, 3.6vw, 58px)/1 'Inter Tight', sans-serif; letter-spacing: -.035em; margin: 10px 0 12px; color: #fff; }
+#slayhome.sh-l-flow .shf-q { font: italic 300 18px/1.5 'Spectral', serif; color: #cfc6bc; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+#slayhome.sh-l-flow .shf-btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+#slayhome.sh-l-flow .shf-btns button { padding: 11px 20px; border-radius: 99px; border: 1px solid #ffffff30; font-size: 14px; font-weight: 500; }
+#slayhome.sh-l-flow .shf-btns .sh-go { background: #fff; color: #000; border-color: #fff; }
+#slayhome.sh-l-flow .shf-arr { position: absolute; top: calc(var(--topBarBlockSize) + 30px + 27vh); transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%; background: #ffffff14; font-size: 22px; z-index: 200; }
+#slayhome.sh-l-flow .shf-arr:hover { background: #ffffff26; }
+#slayhome.sh-l-flow .shf-l { left: 30px; }
+#slayhome.sh-l-flow .shf-r { right: 30px; }
+
+/* ═══════════ новые раскладки на телефоне ═══════════ */
+@media (max-width: 1000px) {
+    #slayhome.sh-l-subs .shs-top { left: 16px; right: 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+    #slayhome.sh-l-subs .shs-rec { max-width: 100%; }
+    #slayhome.sh-l-subs .shs-shade { background: linear-gradient(180deg, #000a 0, transparent 16%, transparent 58%, #000d 90%); }
+    #slayhome.sh-l-subs .shs-sub { bottom: 62px; }
+    #slayhome.sh-l-subs .shs-who { margin-bottom: 8px; }
+    #slayhome.sh-l-subs .shs-line { font-size: 19px; }
+    #slayhome.sh-l-subs .shs-acts { bottom: 20px; gap: 20px; font-size: 13px; }
+
+    #slayhome.sh-l-deck .shd-txt { left: 16px; right: 16px; top: auto; bottom: 28px; transform: none; width: auto; max-width: none; }
+    #slayhome.sh-l-deck .shd-fan { left: 0; right: 0; width: auto; top: calc(var(--topBarBlockSize) + 70px); height: 40vh; transform: none; }
+    #slayhome.sh-l-deck .shd-card { --w: 140px; }
+    #slayhome.sh-l-deck .shd-name { font-size: 40px; margin: 10px 0 12px; }
+    #slayhome.sh-l-deck .shd-q { -webkit-line-clamp: 3; font-size: 15px; }
+    #slayhome.sh-l-deck .shd-btns { display: grid; grid-template-columns: 1fr 1fr; margin-top: 18px; }
+    #slayhome.sh-l-deck .shd-btns .sh-go { grid-column: 1 / -1; }
+
+    body.slayhome-on #slayhome.sh-l-msgr { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+    #slayhome.sh-l-msgr .shm-list { display: flex; gap: 4px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid #ffffff10; overflow-x: auto; }
+    #slayhome.sh-l-msgr .shm-list h6, #slayhome.sh-l-msgr .shm-ct div { display: none; }
+    #slayhome.sh-l-msgr .shm-ct { display: block; padding: 4px; border-radius: 50%; flex: none; }
+    #slayhome.sh-l-msgr .shm-ct.on { background: none; box-shadow: 0 0 0 2px #2b5bd7; }
+    #slayhome.sh-l-msgr .shm-main { padding-top: 12px; }
+    #slayhome.sh-l-msgr header { padding: 0 16px 12px; }
+    #slayhome.sh-l-msgr .shm-sm { gap: 12px; font-size: 12px; }
+    #slayhome.sh-l-msgr .shm-feed { padding: 16px; }
+    #slayhome.sh-l-msgr .shm-pic { height: 30vh; }
+    #slayhome.sh-l-msgr .shm-bub { font-size: 15px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; overflow: hidden; }
+    #slayhome.sh-l-msgr .shm-input { padding: 10px 16px 20px; }
+
+    /* карта и подпись идут одной колонкой по центру: между ними нет пустоты при любой высоте экрана */
+    #slayhome.sh-l-flow { flex-direction: column; justify-content: center; gap: 22px; padding: calc(var(--topBarBlockSize) + 14px) 0 16px; }
+    #slayhome.sh-l-flow .shf-stage { position: relative; top: auto; left: auto; right: auto; flex: 1 1 0; min-height: 0; max-height: 122vw; }
+    #slayhome.sh-l-flow .shf-arr { display: none; }
+    #slayhome.sh-l-flow .shf-meta { position: relative; left: auto; bottom: auto; transform: none; width: auto; flex: none; padding: 0 16px; }
+    #slayhome.sh-l-flow .shf-q { font-size: 16px; }
+    #slayhome.sh-l-flow .shf-btns { flex-wrap: nowrap; gap: 8px; }
+    #slayhome.sh-l-flow .shf-btns button { padding: 11px 15px; white-space: nowrap; }
+}
+
+/* веер и 3D-лента выходят за края — не даём им крутить экран */
+#slayhome.sh-l-subs, #slayhome.sh-l-deck, #slayhome.sh-l-flow { overflow: hidden; }
+#slayhome.sh-l-msgr .shm-sm button { white-space: nowrap; }
+
+/* ═════════════ Игровые меню ═════════════ */
+#slayhome kbd { font: 400 11px 'IBM Plex Mono', monospace; border: 1px solid #ffffff33; border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+
+/* ── Новелла ── */
+#slayhome.sh-l-novel { background: #000; color: #fff; font-family: 'Onest', sans-serif; overflow: hidden; }
+#slayhome.sh-l-novel .shv-fill { position: absolute; inset: -60px; background-size: cover; background-position: center 25%; filter: blur(46px) brightness(.35) saturate(1.15); }
+#slayhome.sh-l-novel .shv-art { position: absolute; left: 50%; bottom: 0; height: calc(100% - var(--topBarBlockSize)); aspect-ratio: 2 / 3; transform: translateX(-10%); object-fit: cover; object-position: top;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
+#slayhome.sh-l-novel .shv-logo { position: absolute; left: 8vw; top: calc(var(--topBarBlockSize) + 16vh); max-width: 44vw; }
+#slayhome.sh-l-novel .shv-name { font: italic 300 clamp(54px, 6.6vw, 116px)/.95 'Spectral', serif; letter-spacing: -.02em; color: #fff; text-shadow: 0 4px 30px #000a; }
+#slayhome.sh-l-novel .shv-sub { display: block; margin-top: 18px; font: 500 12px 'IBM Plex Mono', monospace; letter-spacing: .3em; color: #ffffffa0; text-transform: uppercase; }
+#slayhome.sh-l-novel .shv-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 8vw 26px; background: linear-gradient(transparent, #000000d0 45%); display: flex; align-items: flex-end; justify-content: space-between; }
+#slayhome.sh-l-novel .shv-keys { font: 400 12px 'IBM Plex Mono', monospace; color: #ffffff80; }
+#slayhome.sh-l-novel .shv-keys span { margin-right: 18px; }
+#slayhome.sh-l-novel .shv-menu { display: flex; gap: 6px; }
+#slayhome.sh-l-novel .shv-menu button { padding: 10px 20px; font: 500 15px 'Onest', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #ffffffa6; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+#slayhome.sh-l-novel .shv-menu button.on { color: #fff; border-color: #f3c9d8; }
+#slayhome.sh-l-novel .shv-gal { position: absolute; inset: 0; padding: calc(var(--topBarBlockSize) + 6vh) 8vw 40px; background: #000000d9; backdrop-filter: blur(6px); display: none; overflow-y: auto; z-index: 5; }
+#slayhome.sh-l-novel .shv-gal.open { display: block; }
+#slayhome.sh-l-novel .shv-gal h2 { font: italic 300 44px 'Spectral', serif; margin-bottom: 24px; color: #fff; }
+#slayhome.sh-l-novel .shv-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; max-width: 1100px; }
+#slayhome.sh-l-novel .shv-it { position: relative; aspect-ratio: 2 / 3; border-radius: 6px; overflow: hidden; outline: 2px solid transparent; outline-offset: 3px; transition: outline-color .15s; }
+#slayhome.sh-l-novel .shv-it img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-novel .shv-it span { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 10px 10px; background: linear-gradient(transparent, #000c); font-size: 13px; font-weight: 500; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#slayhome.sh-l-novel .shv-it.on { outline-color: #f3c9d8; }
+
+/* ── Минимал ── */
+#slayhome.sh-l-minimal { background: #050505; color: #fff; overflow: hidden; }
+#slayhome.sh-l-minimal .shn-art { position: absolute; left: 50%; top: var(--topBarBlockSize); height: calc(100% - var(--topBarBlockSize)); aspect-ratio: 2 / 3; transform: translateX(-50%); object-fit: cover; object-position: top; filter: brightness(.42) saturate(.6);
+    -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 38%, #000 40%, transparent 75%); mask-image: radial-gradient(ellipse 60% 70% at 50% 38%, #000 40%, transparent 75%); }
+#slayhome.sh-l-minimal .shn-name { white-space: nowrap; overflow: hidden; position: absolute; left: 4vw; right: 4vw; top: calc(var(--topBarBlockSize) + 14vh); text-align: center; font: 300 clamp(30px, 3.4vw, 58px) 'Spectral', serif; letter-spacing: .42em; padding-left: .42em; text-transform: uppercase; color: #fff; }
+#slayhome.sh-l-minimal .shn-who { position: absolute; left: 0; right: 0; top: calc(var(--topBarBlockSize) + 14vh + 70px); display: flex; justify-content: center; gap: 18px; font: 300 13px 'Spectral', serif; letter-spacing: .2em; color: #ffffff59; }
+#slayhome.sh-l-minimal .shn-who button { text-transform: uppercase; letter-spacing: .2em; }
+#slayhome.sh-l-minimal .shn-who button:hover { color: #f0e6cf; }
+#slayhome.sh-l-minimal .shn-menu { position: absolute; left: 0; right: 0; bottom: 16vh; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+#slayhome.sh-l-minimal .shn-menu button { font: 300 17px 'Spectral', serif; letter-spacing: .32em; text-transform: uppercase; color: #ffffff66; transition: color .3s, text-shadow .3s; }
+#slayhome.sh-l-minimal .shn-menu button::before, #slayhome.sh-l-minimal .shn-menu button::after { content: '—'; display: inline-block; width: 1.4em; color: #d8c9a3; opacity: 0; transition: opacity .3s; }
+#slayhome.sh-l-minimal .shn-menu button::after { text-align: right; }
+#slayhome.sh-l-minimal .shn-menu button.on { color: #f0e6cf; text-shadow: 0 0 18px #f0e6cf55; }
+#slayhome.sh-l-minimal .shn-menu button.on::before, #slayhome.sh-l-minimal .shn-menu button.on::after { opacity: .8; }
+#slayhome.sh-l-minimal .shn-line { position: absolute; left: 0; right: 0; bottom: 8vh; padding: 0 20vw; text-align: center; font: italic 300 15px 'Spectral', serif; color: #ffffff59; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+
+/* ── Ретро-пиксель ── */
+#slayhome.sh-l-retro { --w1: #2b3a9e; --w2: #0d1450; background: linear-gradient(#0a0c33, #1a1150 60%, #2a1440); color: #fff; font-family: 'Tiny5', monospace; overflow: hidden; }
+#slayhome.sh-l-retro .shr-stars i { position: absolute; width: 3px; height: 3px; background: #fff; animation: sh-tw steps(2) infinite; }
+@keyframes sh-tw { 50% { opacity: .2; } }
+#slayhome.sh-l-retro .shr-scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(#0000 0 2px, #0000002e 2px 3px); z-index: 9; }
+#slayhome.sh-l-retro .shr-win { position: absolute; background: linear-gradient(var(--w1), var(--w2)); border: 3px solid #fff; border-radius: 6px; box-shadow: 0 0 0 3px #000, inset 0 0 0 2px #0006, 6px 6px 0 3px #0008; color: #fff; }
+#slayhome.sh-l-retro .shr-title { position: absolute; left: 4vw; top: calc(var(--topBarBlockSize) + 22px); font: 400 clamp(18px, 1.7vw, 26px)/1 'Press Start 2P', monospace; color: #ffe066; text-shadow: 3px 3px 0 #a13c00; }
+#slayhome.sh-l-retro .shr-title small { display: block; margin-top: 10px; font: 400 16px 'Tiny5', monospace; color: #9fb4ff; text-shadow: none; letter-spacing: .1em; }
+#slayhome.sh-l-retro .shr-hero { left: 4vw; top: calc(var(--topBarBlockSize) + 92px); width: min(28vw, 360px); padding: 12px; }
+#slayhome.sh-l-retro .shr-hero canvas { display: block; width: 100%; aspect-ratio: 2 / 3; image-rendering: pixelated; border: 3px solid #000; background: #000; }
+#slayhome.sh-l-retro .shr-stat { left: calc(4vw + min(28vw, 360px) + 26px); top: calc(var(--topBarBlockSize) + 92px); width: min(34vw, 460px); padding: 16px 22px; }
+#slayhome.sh-l-retro .shr-name { font: 400 clamp(26px, 2.4vw, 38px)/1.05 'Tiny5', monospace; margin-bottom: 12px; color: #fff; }
+#slayhome.sh-l-retro .shr-row { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; margin: 9px 0; font: 400 20px 'Tiny5', monospace; }
+#slayhome.sh-l-retro .shr-row b { color: #ffe066; font-weight: 400; }
+#slayhome.sh-l-retro .shr-meter { height: 12px; border: 2px solid #000; background: #000; box-shadow: 0 0 0 2px #fff6; }
+#slayhome.sh-l-retro .shr-meter i { display: block; height: 100%; background: repeating-linear-gradient(90deg, #5dff8a 0 6px, #2fd164 6px 8px); transition: width .4s steps(8); }
+#slayhome.sh-l-retro .shr-meter.mp i { background: repeating-linear-gradient(90deg, #6ab8ff 0 6px, #3e86e6 6px 8px); }
+#slayhome.sh-l-retro .shr-menu { right: 4vw; top: calc(var(--topBarBlockSize) + 92px); width: min(24vw, 300px); padding: 14px 10px; }
+#slayhome.sh-l-retro .shr-menu button { position: relative; display: block; width: 100%; text-align: left; padding: 8px 10px 8px 34px; font: 400 23px 'Tiny5', monospace; color: #fff; }
+#slayhome.sh-l-retro .shr-menu button.on::before { content: '▶'; position: absolute; left: 8px; color: #ffe066; animation: sh-blink .6s steps(2) infinite; }
+@keyframes sh-blink { 50% { opacity: 0; } }
+#slayhome.sh-l-retro .shr-party { right: 4vw; top: calc(var(--topBarBlockSize) + 92px + 190px); width: min(24vw, 300px); padding: 12px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+#slayhome.sh-l-retro .shr-party h6 { grid-column: 1 / -1; font: 400 15px 'Tiny5', monospace; color: #9fb4ff; margin: 0 0 2px; }
+#slayhome.sh-l-retro .shr-party button { position: relative; aspect-ratio: 1; border: 2px solid #000; padding: 0; background: #000; }
+#slayhome.sh-l-retro .shr-party canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+#slayhome.sh-l-retro .shr-party button.on { box-shadow: 0 0 0 2px #ffe066; }
+#slayhome.sh-l-retro .shr-dlg { left: 4vw; right: 4vw; bottom: 24px; min-height: 120px; padding: 16px 24px 18px; font: 400 23px/1.45 'Tiny5', monospace; }
+#slayhome.sh-l-retro .shr-dlg b { display: block; color: #ffe066; font-weight: 400; margin-bottom: 4px; }
+#slayhome.sh-l-retro .shr-more { position: absolute; right: 16px; bottom: 8px; color: #ffe066; animation: sh-bob .5s steps(2) infinite; }
+@keyframes sh-bob { 50% { transform: translateY(3px); } }
+
+/* ── Киберпанк ── */
+#slayhome.sh-l-cyber { --y: #fcee0a; --c: #02d7f2; --r: #ff003c; background: #0a0b0f; color: #e8e8e8; font-family: 'Tektur', sans-serif; overflow: hidden; }
+#slayhome.sh-l-cyber .shc-grid { position: absolute; inset: 0; background: linear-gradient(#02d7f20d 1px, transparent 1px) 0 0/48px 48px, linear-gradient(90deg, #02d7f20d 1px, transparent 1px) 0 0/48px 48px; }
+#slayhome.sh-l-cyber .shc-haze { position: absolute; inset: -80px; background-size: cover; background-position: center 25%; filter: blur(60px) brightness(.25) saturate(1.6) hue-rotate(-20deg); opacity: .8; }
+#slayhome.sh-l-cyber .shc-sweep { position: absolute; left: 0; right: 0; top: 0; height: 120px; background: linear-gradient(transparent, #02d7f20f, transparent); animation: sh-sweep 6s linear infinite; pointer-events: none; }
+@keyframes sh-sweep { from { transform: translateY(-120px); } to { transform: translateY(100vh); } }
+#slayhome.sh-l-cyber .shc-hazard { position: absolute; left: 0; bottom: 0; width: 38vw; height: 10px; background: repeating-linear-gradient(-45deg, var(--y) 0 14px, #000 14px 28px); opacity: .85; }
+#slayhome.sh-l-cyber .shc-scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(#0000 0 2px, #00000038 2px 3px); z-index: 20; }
+#slayhome.sh-l-cyber .shc-cut { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px)); }
+#slayhome.sh-l-cyber .shc-head { position: absolute; left: 4vw; top: calc(var(--topBarBlockSize) + 28px); max-width: 46vw; z-index: 3; }
+#slayhome.sh-l-cyber .shc-lbl { display: inline-flex; gap: 10px; align-items: center; font: 500 12px 'IBM Plex Mono', monospace; letter-spacing: .18em; color: var(--c); }
+#slayhome.sh-l-cyber .shc-lbl b { background: var(--r); color: #fff; padding: 2px 8px; font-weight: 500; }
+#slayhome.sh-l-cyber .shc-name { position: relative; font: 800 clamp(44px, 5.6vw, 96px)/.92 'Tektur', sans-serif; text-transform: uppercase; color: var(--y); margin: 14px 0 10px; }
+#slayhome.sh-l-cyber .shc-name::before, #slayhome.sh-l-cyber .shc-name::after { content: attr(data-t); position: absolute; inset: 0; pointer-events: none; }
+#slayhome.sh-l-cyber .shc-name::before { color: var(--c); transform: translate(-3px, 0); clip-path: inset(0 0 100% 0); animation: sh-gl1 3.2s steps(1) infinite; mix-blend-mode: screen; }
+#slayhome.sh-l-cyber .shc-name::after { color: var(--r); transform: translate(3px, 0); clip-path: inset(100% 0 0 0); animation: sh-gl2 2.7s steps(1) infinite; mix-blend-mode: screen; }
+@keyframes sh-gl1 { 0%, 86% { clip-path: inset(0 0 100% 0); } 88% { clip-path: inset(10% 0 62% 0); transform: translate(-6px, 0); } 92% { clip-path: inset(40% 0 30% 0); transform: translate(4px, 0); } 96% { clip-path: inset(0 0 100% 0); } }
+@keyframes sh-gl2 { 0%, 80% { clip-path: inset(100% 0 0 0); } 83% { clip-path: inset(55% 0 20% 0); transform: translate(6px, 0); } 87% { clip-path: inset(20% 0 66% 0); transform: translate(-4px, 0); } 90% { clip-path: inset(100% 0 0 0); } }
+#slayhome.sh-l-cyber .shc-meta { font: 400 13px 'IBM Plex Mono', monospace; color: #9aa3ad; display: flex; gap: 18px; }
+#slayhome.sh-l-cyber .shc-meta i { font-style: normal; color: var(--y); }
+#slayhome.sh-l-cyber .shc-menu { position: absolute; left: 4vw; bottom: 206px; width: min(400px, 30vw); display: flex; flex-direction: column; gap: 6px; z-index: 3; }
+#slayhome.sh-l-cyber .shc-mi { position: relative; display: grid; grid-template-columns: 36px 1fr; align-items: center; padding: 12px 16px; text-align: left; font: 700 22px 'Tektur', sans-serif; text-transform: uppercase; color: #cfd3d8; letter-spacing: .04em; isolation: isolate; }
+#slayhome.sh-l-cyber .shc-mi small { font: 400 11px 'IBM Plex Mono', monospace; color: #6b737c; }
+#slayhome.sh-l-cyber .shc-mi::before { content: ''; position: absolute; inset: 0; background: var(--r); clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%); transform: scaleX(0); transform-origin: left; transition: transform .12s; z-index: -1; }
+#slayhome.sh-l-cyber .shc-mi.on { color: #fff; }
+#slayhome.sh-l-cyber .shc-mi.on small { color: #ffd0da; }
+#slayhome.sh-l-cyber .shc-mi.on::before { transform: scaleX(1); }
+#slayhome.sh-l-cyber .shc-mi.on::after { content: ''; position: absolute; right: -12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: var(--y); }
+#slayhome.sh-l-cyber .shc-por { position: absolute; right: calc(min(300px, 22vw) + 6vw); top: calc(var(--topBarBlockSize) + 28px); bottom: 216px; aspect-ratio: 2 / 3; max-width: 36vw; z-index: 2; }
+#slayhome.sh-l-cyber .shc-fr { position: absolute; inset: 0; background: #111; overflow: hidden; }
+#slayhome.sh-l-cyber .shc-fr img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+#slayhome.sh-l-cyber .shc-fr img.rc { opacity: 0; }
+#slayhome.sh-l-cyber .shc-por.glitch img.r1 { opacity: 1; clip-path: inset(22% 0 66% 0); transform: translateX(-14px); }
+#slayhome.sh-l-cyber .shc-por.glitch img.r2 { opacity: 1; clip-path: inset(58% 0 30% 0); transform: translateX(10px); }
+#slayhome.sh-l-cyber .shc-fr::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(#0000 0 3px, #0000004d 3px 4px), linear-gradient(transparent 60%, #0a0b0fcc); }
+#slayhome.sh-l-cyber .shc-br { position: absolute; width: 26px; height: 26px; border: 3px solid var(--y); }
+#slayhome.sh-l-cyber .shc-br.a { left: -10px; top: -10px; border-right: 0; border-bottom: 0; }
+#slayhome.sh-l-cyber .shc-br.b { right: -10px; bottom: -10px; border-left: 0; border-top: 0; }
+#slayhome.sh-l-cyber .shc-tagid { position: absolute; left: 0; bottom: -28px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font: 400 11px 'IBM Plex Mono', monospace; color: var(--c); letter-spacing: .1em; white-space: nowrap; }
+#slayhome.sh-l-cyber .shc-tagr { position: absolute; right: 0; top: -24px; font: 400 11px 'IBM Plex Mono', monospace; color: var(--y); letter-spacing: .1em; }
+#slayhome.sh-l-cyber .shc-cts { position: absolute; right: 3vw; top: calc(var(--topBarBlockSize) + 28px); bottom: 200px; width: min(300px, 22vw); display: flex; flex-direction: column; z-index: 3; }
+#slayhome.sh-l-cyber .shc-cts h6 { font: 500 12px 'IBM Plex Mono', monospace; letter-spacing: .18em; color: var(--c); padding-bottom: 10px; border-bottom: 1px solid #02d7f244; margin: 0 0 8px; display: flex; justify-content: space-between; }
+#slayhome.sh-l-cyber .shc-list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 4px; }
+#slayhome.sh-l-cyber .shc-ct { flex: none; display: grid; grid-template-columns: 40px minmax(0, 1fr) 10px; gap: 12px; align-items: center; padding: 6px 10px 6px 6px; text-align: left; background: #ffffff06; border-left: 2px solid transparent; }
+#slayhome.sh-l-cyber .shc-ct img { width: 40px; height: 40px; object-fit: cover; object-position: top; filter: grayscale(.6) contrast(1.1); }
+#slayhome.sh-l-cyber .shc-ct b { display: block; font: 700 15px 'Tektur', sans-serif; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#slayhome.sh-l-cyber .shc-ct small { font: 400 11px 'IBM Plex Mono', monospace; color: #7c858f; }
+#slayhome.sh-l-cyber .shc-ct i { width: 8px; height: 8px; background: #3a4048; }
+#slayhome.sh-l-cyber .shc-ct i.live { background: #38ff7a; box-shadow: 0 0 6px #38ff7a; }
+#slayhome.sh-l-cyber .shc-ct:hover { background: #ffffff0f; }
+#slayhome.sh-l-cyber .shc-ct.on { background: #fcee0a14; border-color: var(--y); }
+#slayhome.sh-l-cyber .shc-ct.on img { filter: none; }
+#slayhome.sh-l-cyber .shc-ct.on b { color: var(--y); }
+#slayhome.sh-l-cyber .shc-call { position: absolute; left: 4vw; right: 3vw; bottom: 34px; height: 140px; display: grid; grid-template-columns: 110px 1fr auto; gap: 22px; align-items: center; padding: 16px 22px; background: #02d7f20f; border: 1px solid #02d7f266; z-index: 3; }
+#slayhome.sh-l-cyber .shc-call img { width: 110px; height: 110px; object-fit: cover; object-position: top; filter: sepia(1) saturate(4) hue-rotate(150deg) brightness(.9); opacity: .9; }
+#slayhome.sh-l-cyber .shc-who { font: 500 12px 'IBM Plex Mono', monospace; letter-spacing: .16em; color: var(--c); }
+#slayhome.sh-l-cyber .shc-who b { color: #fff; font-weight: 500; }
+#slayhome.sh-l-cyber .shc-msg { margin-top: 8px; font: 500 18px/1.45 'Exo 2', sans-serif; color: #d8f8ff; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+#slayhome.sh-l-cyber .shc-cur { display: inline-block; width: 9px; height: 18px; background: var(--c); vertical-align: -3px; animation: sh-blink 1s steps(1) infinite; }
+#slayhome.sh-l-cyber .shc-ans { display: flex; flex-direction: column; gap: 8px; }
+#slayhome.sh-l-cyber .shc-ans button { padding: 10px 20px; font: 700 14px 'Tektur', sans-serif; text-transform: uppercase; letter-spacing: .06em; background: var(--y); color: #000; }
+#slayhome.sh-l-cyber .shc-ans button + button { background: transparent; color: var(--c); outline: 1px solid #02d7f288; }
+
+/* ── игровые меню на телефоне ── */
+@media (max-width: 1000px) {
+    #slayhome.sh-l-novel .shv-art { left: 0; top: var(--topBarBlockSize); bottom: auto; width: 100%; height: calc(100% - var(--topBarBlockSize)); aspect-ratio: auto; transform: none; -webkit-mask-image: none; mask-image: none; }
+    #slayhome.sh-l-novel .shv-logo { left: 16px; right: 16px; top: auto; bottom: 110px; max-width: none; }
+    #slayhome.sh-l-novel .shv-sub { color: #ffffffd9; text-shadow: 0 1px 3px #000, 0 0 12px #000; }
+    #slayhome.sh-l-novel .shv-name { font-size: 46px; }
+    #slayhome.sh-l-novel .shv-bar { padding: 70px 10px 16px; justify-content: center; background: linear-gradient(transparent, #000000e0 60%); }
+    #slayhome.sh-l-novel .shv-keys { display: none; }
+    #slayhome.sh-l-novel .shv-menu { flex-wrap: wrap; justify-content: center; gap: 0; }
+    #slayhome.sh-l-novel .shv-menu button { padding: 9px 12px; font-size: 12px; }
+    #slayhome.sh-l-novel .shv-gal { padding: calc(var(--topBarBlockSize) + 16px) 16px 30px; }
+    #slayhome.sh-l-novel .shv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+    #slayhome.sh-l-minimal .shn-art { height: 80%; }
+    #slayhome.sh-l-minimal .shn-name { top: calc(var(--topBarBlockSize) + 6vh); font-size: 26px; letter-spacing: .3em; }
+    #slayhome.sh-l-minimal .shn-who { top: calc(var(--topBarBlockSize) + 6vh + 46px); }
+    #slayhome.sh-l-minimal .shn-menu { bottom: 20vh; }
+    #slayhome.sh-l-minimal .shn-line { bottom: 9vh; padding: 0 24px; }
+
+    #slayhome.sh-l-retro .shr-title { left: 16px; top: calc(var(--topBarBlockSize) + 14px); font-size: 14px; }
+    #slayhome.sh-l-retro .shr-title small { font-size: 13px; }
+    #slayhome.sh-l-retro .shr-hero { left: 16px; top: calc(var(--topBarBlockSize) + 66px); width: 38vw; padding: 8px; }
+    #slayhome.sh-l-retro .shr-stat { left: calc(16px + 38vw + 14px); right: 16px; top: calc(var(--topBarBlockSize) + 66px); width: auto; padding: 10px 12px; }
+    #slayhome.sh-l-retro .shr-name { font-size: 20px; margin-bottom: 6px; }
+    #slayhome.sh-l-retro .shr-row { grid-template-columns: 36px 1fr auto; font-size: 15px; margin: 5px 0; }
+    #slayhome.sh-l-retro .shr-menu { left: 16px; right: auto; top: auto; bottom: 178px; width: calc(50% - 22px); padding: 8px 4px; }
+    #slayhome.sh-l-retro .shr-menu button { font-size: 17px; padding: 6px 8px 6px 26px; }
+    #slayhome.sh-l-retro .shr-menu button.on::before { left: 6px; }
+    #slayhome.sh-l-retro .shr-party { right: 16px; top: auto; bottom: 178px; width: calc(50% - 22px); grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px; }
+    #slayhome.sh-l-retro .shr-party button:nth-of-type(n+9) { display: none; }
+    #slayhome.sh-l-retro .shr-dlg { left: 16px; right: 16px; bottom: 16px; min-height: 140px; font-size: 17px; padding: 12px 14px; }
+
+    #slayhome.sh-l-cyber .shc-head { left: 16px; right: calc(16px + 133px + 12px); top: calc(var(--topBarBlockSize) + 16px); max-width: none; }
+    #slayhome.sh-l-cyber .shc-name { font-size: 36px; margin: 8px 0 6px; }
+    #slayhome.sh-l-cyber .shc-meta { font-size: 11px; gap: 10px; flex-wrap: wrap; }
+    #slayhome.sh-l-cyber .shc-por { right: 16px; top: calc(var(--topBarBlockSize) + 16px); bottom: auto; height: 200px; max-width: none; }
+    #slayhome.sh-l-cyber .shc-tagr, #slayhome.sh-l-cyber .shc-tagid { display: none; }
+    #slayhome.sh-l-cyber .shc-menu { left: 16px; right: 16px; top: calc(var(--topBarBlockSize) + 236px); bottom: auto; width: auto; gap: 2px; }
+    #slayhome.sh-l-cyber .shc-mi { font-size: 18px; padding: 9px 12px; }
+    #slayhome.sh-l-cyber .shc-cts { left: 0; right: 0; top: auto; bottom: 196px; width: auto; height: 58px; }
+    #slayhome.sh-l-cyber .shc-cts h6 { display: none; }
+    #slayhome.sh-l-cyber .shc-list { flex-direction: row; overflow-x: auto; padding: 0 16px; gap: 6px; }
+    #slayhome.sh-l-cyber .shc-ct { grid-template-columns: 44px; padding: 4px; border-left: 0; border-bottom: 2px solid transparent; }
+    #slayhome.sh-l-cyber .shc-ct img { width: 44px; height: 44px; }
+    #slayhome.sh-l-cyber .shc-ct div, #slayhome.sh-l-cyber .shc-ct i { display: none; }
+    #slayhome.sh-l-cyber .shc-ct.on { border-color: var(--y); }
+    #slayhome.sh-l-cyber .shc-call { left: 16px; right: 16px; bottom: 16px; height: auto; grid-template-columns: 1fr; gap: 10px; padding: 12px 14px; }
+    #slayhome.sh-l-cyber .shc-call img { display: none; }
+    #slayhome.sh-l-cyber .shc-msg { font-size: 15px; }
+    #slayhome.sh-l-cyber .shc-ans { flex-direction: row; }
+    #slayhome.sh-l-cyber .shc-ans button { flex: 1; }
+    #slayhome.sh-l-cyber .shc-hazard { width: 60vw; }
+}
+
+/* ═════════════ Уютная и Ферма ═════════════ */
+/* ═══ 5б. УЮТНАЯ v2 ═══ */
+#slayhome.sh-l-cozy{overflow:hidden;--cream:#fff6e8;--ink:#4a3a35;--peach:#ffc9a8;--rose:#f59bb0;--sage:#9cc9a4;--sky:#cfe6f2;background:linear-gradient(170deg,#ffe8d6 0%,#fde1e6 45%,#dbe9f4 100%);color:var(--ink);font-family:'Nunito',sans-serif}
+#slayhome.sh-l-cozy .shz-soft i{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55;animation:shz-drift 14s ease-in-out infinite alternate}
+@keyframes shz-drift{to{transform:translate(30px,-24px) scale(1.08)}}
+#slayhome.sh-l-cozy .shz-hello{position:absolute;left:calc(min(380px,30vw) + 10px);top:62px;font:800 15px 'Nunito',sans-serif;color:#a07f74;letter-spacing:.02em}
+#slayhome.sh-l-cozy .shz-hello b{color:var(--ink)}
+#slayhome.sh-l-cozy .shz-scene{position:absolute;left:6vw;top:104px;bottom:40px;width:min(52vw,760px);display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center}
+#slayhome.sh-l-cozy .shz-arch{height:min(68vh,620px);aspect-ratio:2/3;border-radius:999px 999px 28px 28px;overflow:hidden;background:var(--peach);border:8px solid #fff;box-shadow:0 18px 40px #c98b7a40}
+#slayhome.sh-l-cozy .shz-arch img{width:100%;height:100%;object-fit:cover;object-position:top;transition:opacity .25s}
+#slayhome.sh-l-cozy .shz-talk{min-width:0}
+#slayhome.sh-l-cozy .shz-tag{display:inline-block;background:#fff;border-radius:99px;padding:6px 14px;font:800 13px 'Nunito',sans-serif;color:#c77c8e;box-shadow:0 4px 12px #c98b7a26}
+#slayhome.sh-l-cozy h1{font:900 clamp(34px,3.6vw,60px)/1 'Nunito';letter-spacing:-.02em;margin:14px 0 18px}
+#slayhome.sh-l-cozy .shz-bubble{position:relative;background:#fff;border-radius:24px;padding:18px 22px;font:600 17px/1.55 'Nunito',sans-serif;box-shadow:0 10px 26px #c98b7a2e;max-width:460px}
+#slayhome.sh-l-cozy .shz-bubble::before{content:'';position:absolute;left:-12px;top:26px;border:12px solid transparent;border-right-color:#fff;border-left:0}
+#slayhome.sh-l-cozy .shz-bubble p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+#slayhome.sh-l-cozy .shz-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+#slayhome.sh-l-cozy .shz-acts button{display:flex;align-items:center;gap:9px;padding:13px 22px;border-radius:99px;background:#fff;font:800 15px 'Nunito',sans-serif;color:var(--ink);box-shadow:0 6px 0 #e7cbbf,0 10px 20px #c98b7a33;transition:transform .12s,box-shadow .12s}
+#slayhome.sh-l-cozy .shz-acts button:hover{transform:translateY(-2px)}
+#slayhome.sh-l-cozy .shz-acts button:active{transform:translateY(4px);box-shadow:0 2px 0 #e7cbbf}
+#slayhome.sh-l-cozy .shz-acts button i{width:10px;height:10px;border-radius:50%;background:var(--sage)}
+#slayhome.sh-l-cozy .shz-acts .shz-go{background:var(--rose);color:#fff;box-shadow:0 6px 0 #d27389,0 10px 20px #f59bb066}
+#slayhome.sh-l-cozy .shz-acts .shz-go i{background:#fff}
+#slayhome.sh-l-cozy .shz-acts .shz-go:active{box-shadow:0 2px 0 #d27389}
+#slayhome.sh-l-cozy .shz-diary{position:absolute;right:5vw;top:96px;bottom:40px;width:min(330px,28vw);background:var(--cream);border-radius:28px;padding:22px 16px 16px;box-shadow:0 18px 40px #c98b7a33;display:flex;flex-direction:column}
+#slayhome.sh-l-cozy .shz-diary h2{font:900 22px 'Nunito',sans-serif;padding:0 8px 4px}
+#slayhome.sh-l-cozy .shz-diary small{font:700 12px 'Nunito',sans-serif;color:#a07f74;padding:0 8px 14px}
+#slayhome.sh-l-cozy .shz-entries{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:8px}
+#slayhome.sh-l-cozy .shz-entry{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;padding:8px;border-radius:18px;text-align:left;transition:background .15s}
+#slayhome.sh-l-cozy .shz-entry:hover{background:#fff9}
+#slayhome.sh-l-cozy .shz-entry.on{background:#fff;box-shadow:0 6px 16px #c98b7a26}
+#slayhome.sh-l-cozy .shz-entry img{width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:top;border:3px solid #fff;box-shadow:0 2px 6px #c98b7a33}
+#slayhome.sh-l-cozy .shz-entry b{display:block;font:800 15px 'Nunito',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#slayhome.sh-l-cozy .shz-entry span{display:inline-block;margin-top:3px;font:700 11px 'Nunito',sans-serif;color:#fff;background:var(--sage);border-radius:99px;padding:2px 8px}
+#slayhome.sh-l-cozy .shz-entry.on span{background:var(--rose)}
+
+
+/* украшения v2: ветка, лепестки, кот, кружка */
+#slayhome.sh-l-cozy .shz-branch{position:absolute;left:-10px;top:30px;width:min(380px,30vw);aspect-ratio:444/202;pointer-events:none;z-index:1}
+#slayhome.sh-l-cozy .shz-bark{display:block;width:100%;height:100%;filter:drop-shadow(0 6px 10px #c98b7a33)}
+/* цветы — отдельные элементы поверх ветки: качание композитное, ветка с тенью не перерисовывается */
+#slayhome.sh-l-cozy .shz-branch .shz-fl{position:absolute;width:9.01%;aspect-ratio:1;margin:-4.505% 0 0 -4.505%;animation:shz-sway 5s ease-in-out infinite alternate}
+@keyframes shz-sway{to{transform:rotate(8deg)}}
+#slayhome.sh-l-cozy .shz-petals{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
+/* лепесток — один слой: падение через translate, кувырок через rotate (разные свойства, обе анимации композитные); ось вращения смещена, поэтому лепесток ещё и виляет */
+#slayhome.sh-l-cozy .shz-petals span{position:absolute;top:-30px;opacity:.9;transform-origin:60% 120%;animation:shz-fall linear infinite,shz-spin2 3s ease-in-out infinite alternate}
+#slayhome.sh-l-cozy .shz-petals span svg{display:block}
+@keyframes shz-fall{to{translate:var(--dx) 110vh}}
+@keyframes shz-spin2{from{rotate:-45deg}to{rotate:55deg}}
+/* котик: подушка и тело — два svg в стопке, дышит сам элемент тела (композитно), «z» — буквы поверх */
+#slayhome.sh-l-cozy .shz-cat{position:absolute;right:calc(5vw + 24px);top:20px;width:230px;aspect-ratio:240/150;z-index:3;pointer-events:none}
+#slayhome.sh-l-cozy .shz-cat svg{position:absolute;inset:0;width:100%;height:100%}
+#slayhome.sh-l-cozy .shz-cat .shz-body{transform-origin:50% 86%;animation:shz-breathe2 3.6s ease-in-out infinite}
+@keyframes shz-breathe2{50%{transform:scale(1.035,1.06)}}
+#slayhome.sh-l-cozy .shz-cat .shz-z{position:absolute;left:43%;top:19%;font:900 18px 'Nunito',sans-serif;font-style:normal;color:#8a6a60;opacity:0;animation:shz-zz 3.6s ease-out infinite}
+#slayhome.sh-l-cozy .shz-cat .shz-z:nth-of-type(2){left:48%;top:13%;animation-delay:1.2s;font-size:13px}
+#slayhome.sh-l-cozy .shz-cat .shz-z:nth-of-type(3){left:52%;top:8%;animation-delay:2.4s;font-size:11px}
+@keyframes shz-zz{0%{opacity:0;transform:translate(0,0)}25%{opacity:.9}100%{opacity:0;transform:translate(14px,-26px)}}
+#slayhome.sh-l-cozy .shz-diary{top:166px}
+#slayhome.sh-l-cozy .shz-mug{width:58px;flex:none;align-self:flex-end;margin-left:6px}
+#slayhome.sh-l-cozy .shz-mug .shz-st{fill:none;stroke:#c7a89c;stroke-width:3;stroke-linecap:round;opacity:.0;animation:shz-steam 3s ease-in-out infinite}
+#slayhome.sh-l-cozy .shz-mug .shz-st:nth-of-type(2){animation-delay:1s}
+#slayhome.sh-l-cozy .shz-mug .shz-st:nth-of-type(3){animation-delay:2s}
+@keyframes shz-steam{0%{opacity:0;transform:translateY(6px)}40%{opacity:.8}100%{opacity:0;transform:translateY(-10px)}}
+
+#slayhome.sh-l-cozy .shz-wrap{position:absolute;left:0;right:0;bottom:0;top:var(--topBarBlockSize)}
+#slayhome.sh-l-cozy .shz-acts button[data-act]{cursor:pointer}
+
+@media (max-width: 1000px) {
+  #slayhome.sh-l-cozy .shz-hello{left:16px;right:110px;top:52px;font-size:13px}
+  #slayhome.sh-l-cozy .shz-scene{left:16px;right:16px;top:98px;bottom:auto;width:auto;grid-template-columns:1fr;gap:16px}
+  #slayhome.sh-l-cozy .shz-arch{height:30vh;justify-self:center}
+  #slayhome.sh-l-cozy h1{font-size:32px;margin:10px 0 12px}
+  #slayhome.sh-l-cozy .shz-bubble{font-size:15px}
+  #slayhome.sh-l-cozy .shz-bubble::before{display:none}
+  #slayhome.sh-l-cozy .shz-bubble p{-webkit-line-clamp:3}
+  #slayhome.sh-l-cozy .shz-acts{margin-top:14px}
+  #slayhome.sh-l-cozy .shz-acts button{padding:11px 16px;font-size:14px}
+  #slayhome.sh-l-cozy .shz-diary{left:16px;right:16px;top:auto;bottom:14px;width:auto;height:80px;padding:8px 10px;border-radius:22px}
+  #slayhome.sh-l-cozy .shz-diary h2,#slayhome.sh-l-cozy .shz-diary small,#slayhome.sh-l-cozy .shz-entry div{display:none}
+  #slayhome.sh-l-cozy .shz-entries{flex-direction:row;overflow-x:auto;gap:6px}
+  #slayhome.sh-l-cozy .shz-entry{flex:none;grid-template-columns:48px;padding:6px}
+  #slayhome.sh-l-cozy .shz-branch{width:170px;top:70px;left:-20px;opacity:.9}
+  #slayhome.sh-l-cozy .shz-cat{right:6px;top:40px;bottom:auto;width:100px}
+  #slayhome.sh-l-cozy .shz-cat .shz-z{font-size:9px}#slayhome.sh-l-cozy .shz-cat .shz-z:nth-of-type(2){font-size:7px}#slayhome.sh-l-cozy .shz-cat .shz-z:nth-of-type(3){font-size:6px}
+  #slayhome.sh-l-cozy .shz-diary{top:auto}
+  #slayhome.sh-l-cozy .shz-mug{display:none}
+}
+/* ═══ 6. ФЕРМА (в духе Stardew Valley) ═══ */
+#slayhome.sh-l-farm{overflow:hidden;--wood:#b8692b;--wood2:#7a3d16;--wood3:#e39a4b;--paper:#ffdf9e;--paper2:#f6c97a;--ink:#5b2b0d;background:#6ab0e8;font-family:'Tiny5',monospace;color:var(--ink)}
+#slayhome.sh-l-farm canvas.sfm-scene{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+/* деревянная рамка + пергамент */
+#slayhome.sh-l-farm .sfm-wood{position:absolute;background:var(--paper);border:6px solid var(--wood);border-radius:0;
+  box-shadow:0 0 0 3px var(--wood2),inset 0 0 0 3px var(--paper2),inset 0 -6px 0 3px #e9b463,5px 6px 0 3px #0005}
+#slayhome.sh-l-farm .sfm-sign{left:50%;top:58px;transform:translateX(-50%);padding:16px 30px 18px;text-align:center;background:#c87533;border-color:var(--wood2);border-radius:0;box-shadow:0 0 0 3px #4a2009,inset 0 4px 0 #e8a058,inset 0 -4px 0 #9a5222,inset 4px 0 0 #d98a44,inset -4px 0 0 #a85c27,6px 6px 0 3px #0005}
+#slayhome.sh-l-farm .sfm-sign h1{font:400 clamp(22px,2.4vw,38px)/1.2 'Press Start 2P',monospace;color:#fff3c4;letter-spacing:0;
+  text-shadow:3px 3px 0 #5b2b0d,3px 0 #5b2b0d,0 3px #5b2b0d}
+#slayhome.sh-l-farm .sfm-sign small{display:block;margin-top:10px;font:400 18px 'Tiny5',monospace;color:#ffe7b0;text-shadow:2px 2px 0 #5b2b0d}
+#slayhome.sh-l-farm .sfm-clock{right:24px;top:56px;padding:10px 16px;min-width:170px;text-align:right}
+#slayhome.sh-l-farm .sfm-clock .sfm-d{font:400 24px 'Tiny5',monospace}
+#slayhome.sh-l-farm .sfm-clock .sfm-t{font:400 20px 'Tiny5',monospace;margin-top:2px}
+#slayhome.sh-l-farm .sfm-clock .sfm-g{margin-top:8px;padding-top:6px;border-top:3px solid var(--paper2);font:400 24px 'Tiny5',monospace;display:flex;justify-content:flex-end;align-items:center;gap:8px}
+#slayhome.sh-l-farm .sfm-clock .sfm-g i{width:14px;height:14px;background:#ffd23f;box-shadow:0 0 0 2px #a86b00,inset -3px -3px 0 #e6a800;border-radius:50%}
+#slayhome.sh-l-farm .sfm-btns{position:absolute;left:50%;top:calc(58px + 156px);transform:translateX(-50%);display:flex;gap:16px}
+#slayhome.sh-l-farm .sfm-btns button{position:relative;white-space:nowrap;padding:12px 22px 14px;min-width:150px;font:400 24px 'Tiny5',monospace;color:#fff8dc;text-shadow:2px 2px 0 #5b2b0d;
+  background:#c87533;border:4px solid var(--wood2);border-radius:0;box-shadow:0 0 0 2px #4a2009,inset 0 4px 0 #e8a058,inset 0 -4px 0 #9a5222,0 6px 0 2px #4a2009;transition:transform .08s,background .08s}
+#slayhome.sh-l-farm .sfm-btns button.on{background:#dc8a42;transform:translateY(-3px)}
+#slayhome.sh-l-farm .sfm-btns button.on::before{content:'';position:absolute;left:50%;top:-22px;margin-left:-8px;border:8px solid transparent;border-top:12px solid #fff3c4;filter:drop-shadow(2px 2px 0 #5b2b0d);animation:sfm-fbob .5s steps(2) infinite}
+@keyframes sfm-fbob{50%{transform:translateY(4px)}}
+#slayhome.sh-l-farm .sfm-btns button:active{transform:translateY(3px)}
+/* диалог как в игре: текст слева, портрет справа */
+#slayhome.sh-l-farm .sfm-dlg{left:50%;bottom:24px;width:min(1080px,calc(100% - 48px));transform:translateX(-50%);height:220px;display:grid;grid-template-columns:1fr 210px;padding:0}
+#slayhome.sh-l-farm .sfm-dlg .sfm-tx{padding:18px 26px;font:400 25px/1.4 'Tiny5',monospace;color:#3e1c06;overflow:hidden}
+#slayhome.sh-l-farm .sfm-dlg .sfm-tx .sfm-t{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+#slayhome.sh-l-farm .sfm-dlg .sfm-side{border-left:6px solid var(--wood);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px;background:var(--paper2)}
+#slayhome.sh-l-farm .sfm-dlg canvas{width:120px;height:120px;image-rendering:pixelated;border:4px solid var(--wood2);background:#8fc1e3}
+#slayhome.sh-l-farm .sfm-dlg .sfm-nm{font:400 17px 'Tiny5',monospace;text-align:center;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--paper);padding:2px 10px;border:3px solid var(--wood)}
+#slayhome.sh-l-farm .sfm-hearts{display:flex;gap:2px}
+#slayhome.sh-l-farm .sfm-hearts i{width:12px;height:11px;background:#d8a37a;clip-path:polygon(0 25%,15% 0,40% 0,50% 18%,60% 0,85% 0,100% 25%,100% 50%,50% 100%,0 50%)}
+#slayhome.sh-l-farm .sfm-hearts i.sfm-f{background:#e8344e}
+#slayhome.sh-l-farm .sfm-dlg .sfm-more{position:absolute;left:calc(100% - 210px - 34px);bottom:12px;width:0;height:0;border:9px solid transparent;border-top:12px solid var(--wood2);animation:sfm-fbob .5s steps(2) infinite}
+/* доска жителей */
+#slayhome.sh-l-farm .sfm-board{left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,calc(100% - 40px));padding:20px 22px 22px;display:none;z-index:6}
+#slayhome.sh-l-farm .sfm-board.open{display:block}
+#slayhome.sh-l-farm .sfm-board h2{font:400 30px 'Tiny5',monospace;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+#slayhome.sh-l-farm .sfm-board h2 button{font:400 22px 'Tiny5',monospace;color:var(--ink);padding:2px 10px;border:3px solid var(--wood);background:var(--paper2)}
+#slayhome.sh-l-farm .sfm-board .sfm-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+#slayhome.sh-l-farm .sfm-board .sfm-vl{min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border:3px solid transparent;background:#fff2;border-radius:3px}
+#slayhome.sh-l-farm .sfm-board .sfm-vl canvas{width:72px;height:72px;image-rendering:pixelated;border:3px solid var(--wood2);background:#8fc1e3}
+#slayhome.sh-l-farm .sfm-board .sfm-vl b{font:400 16px 'Tiny5',monospace;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#slayhome.sh-l-farm .sfm-board .sfm-vl.on{border-color:#e8344e;background:#fff6}
+#slayhome.sh-l-farm .sfm-board .sfm-vl .sfm-hearts i{width:8px;height:7px}
+#slayhome.sh-l-farm .sfm-dim{position:absolute;inset:0;background:#0006;display:none;z-index:5}
+#slayhome.sh-l-farm .sfm-dim.open{display:block}
+
+
+#slayhome.sh-l-farm .sfm-ui{position:absolute;left:0;right:0;bottom:0;top:var(--topBarBlockSize)}
+#slayhome.sh-l-farm .sfm-board .sfm-vl{cursor:pointer}
+
+@media (max-width: 1000px) {
+  #slayhome.sh-l-farm .sfm-sign{top:calc(var(--sh-top,0px) + 52px);padding:6px 14px 8px;width:auto;white-space:nowrap}
+  #slayhome.sh-l-farm .sfm-sign h1{font-size:18px}
+  #slayhome.sh-l-farm .sfm-sign small{display:none}
+  #slayhome.sh-l-farm .sfm-clock{right:auto;left:50%;transform:translateX(-50%);top:calc(var(--sh-top,0px) + 106px);white-space:nowrap;min-width:0;padding:6px 10px;display:flex;gap:12px;align-items:center}
+  #slayhome.sh-l-farm .sfm-clock .sfm-g{margin:0;padding:0;border:0}
+  #slayhome.sh-l-farm .sfm-clock .sfm-d,#slayhome.sh-l-farm .sfm-clock .sfm-g{font-size:15px}
+  #slayhome.sh-l-farm .sfm-clock .sfm-t{display:none}
+  #slayhome.sh-l-farm .sfm-btns{left:12px;right:12px;top:auto;bottom:178px;transform:none;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #slayhome.sh-l-farm .sfm-btns button{min-width:0;font-size:17px;padding:4px 6px 6px}
+  #slayhome.sh-l-farm .sfm-btns button.on::before{display:none}
+  #slayhome.sh-l-farm .sfm-dlg{left:12px;right:12px;width:auto;transform:none;bottom:12px;height:158px;grid-template-columns:96px 1fr;grid-template-rows:1fr}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-side{order:-1;border-left:0;border-right:6px solid var(--wood);gap:4px;padding:6px 4px;min-width:0}
+  #slayhome.sh-l-farm .sfm-dlg canvas{width:76px;height:76px}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-nm{max-width:100%;font-size:14px;padding:0 4px}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-hearts i{width:6px;height:6px}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-tx{padding:8px 12px;font-size:18px;line-height:1.25}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-tx .sfm-t{-webkit-line-clamp:6}
+  #slayhome.sh-l-farm .sfm-dlg .sfm-more{left:auto;right:16px}
+  #slayhome.sh-l-farm .sfm-board{padding:14px}
+  #slayhome.sh-l-farm .sfm-board .sfm-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  #slayhome.sh-l-farm .sfm-board .sfm-vl canvas{width:56px;height:56px}
+}
+
+/* экраны-игры: целая страница в рамке на всю площадь стартового экрана */
+/* рамка начинается под верхней панелью таверны, а не под ней (иначе верх экрана срезан) */
+#slayhome .sh-game { position: absolute; left: 0; top: var(--sh-top, var(--topBarBlockSize)); width: 100%; height: calc(100% - var(--sh-top, var(--topBarBlockSize))); border: 0; display: block; background: #000; }
+
+/* айфон отдаёт клик только «кликабельным» элементам — карты помечаем явно */
+#slayhome [data-i] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* кнопка смены темы в углу стартового экрана */
+#slayhome .sh-pill { position: absolute; right: 12px; top: calc(var(--sh-top, var(--topBarBlockSize)) + 10px); z-index: 900; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 99px; background: #000c; border: 1px solid #ffffff30; opacity: .55; transition: opacity .2s; font: 600 12px 'Onest', system-ui, sans-serif; color: #fff; }
+/* без меню кнопка поднимается к самому верху: отступаем от угла, там часто висят кнопки других расширений */
+body.slayhome-nobar #slayhome .sh-pill { right: 72px; }
+#slayhome .sh-pill:hover, #slayhome .sh-pill:focus-within { opacity: 1; }
+#slayhome .sh-pill button { color: #fff; background: none; border: 0; padding: 5px 9px; border-radius: 99px; cursor: pointer; font: inherit; white-space: nowrap; }
+#slayhome .sh-pill button:hover { background: #ffffff1f; }
+#slayhome .sh-pill .sh-pill-t { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; }
+@media (hover: none) { #slayhome .sh-pill { opacity: .8; } }
+/* на узком экране — только ‹ ◐ ›, чтобы не закрывать заголовки тем */
+@media (max-width: 760px) { #slayhome .sh-pill-t span { display: none; } #slayhome .sh-pill button { padding: 5px 8px; } }
+
+/* студия настроек — во весь экран поверх таверны */
+#slayhome-studio { position: fixed; left: 0; top: 0; width: 100vw; height: 100dvh; z-index: 10050; background: #000; }
+#slayhome-studio iframe { display: block; width: 100%; height: 100%; border: 0; }
+body.slayhome-studio-on #slayhome { visibility: hidden; }
+body.slayhome-studio-on #slayhome *, body.slayhome-studio-on #slayhome *::before, body.slayhome-studio-on #slayhome *::after { animation-play-state: paused !important; }

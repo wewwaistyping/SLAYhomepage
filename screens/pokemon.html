@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&family=Nunito:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--top:44px;--red:#dc0a2d;--red2:#a8061f;--ink:#26272b;--mut:#8a8d96;--pap:#f6f7f9;--blue:#30a7d7}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--red);color:var(--ink);font-family:'Nunito',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* корпус: красный пластик с бликом и тонкой «литьевой» кромкой */
+.body{position:fixed;inset:0;background:linear-gradient(160deg,#ff3b55 0,var(--red) 22%,var(--red) 70%,var(--red2) 100%)}
+.body::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,#ffffff14 1px,transparent 1.5px) 0 0/6px 6px}
+
+.dex{position:fixed;top:var(--top);left:0;right:0;bottom:0;padding:0 2.2vw 2.2vh;display:grid;grid-template-columns:minmax(230px,280px) 1fr minmax(330px,400px);grid-template-rows:92px minmax(0,1fr);grid-template-areas:"head head head" "list scr info";gap:0 22px}
+
+/* шапка: большая синяя линза и три лампочки */
+.head{grid-area:head;position:relative;display:flex;align-items:center;gap:18px;border-bottom:4px solid var(--red2);margin:0 -2.2vw;padding:0 2.2vw;box-shadow:0 3px 0 #ff5a70 inset}
+.lens{width:66px;height:66px;border-radius:50%;background:#fff;padding:5px;box-shadow:0 3px 0 var(--red2),0 0 0 3px #00000022}
+.lens i{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 34% 30%,#d6f4ff 0 9%,#5fd0ff 12%,#1c86d6 55%,#0b4f93 100%);box-shadow:inset 0 -4px 8px #0006;position:relative}
+.lens i::after{content:'';position:absolute;inset:0;border-radius:50%;background:#fff;opacity:0;animation:lens 3.4s ease-in-out infinite}
+@keyframes lens{50%{opacity:.2}}
+.leds{display:flex;gap:9px;align-self:flex-start;margin-top:14px}
+.leds i{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px #0005,0 0 0 2px #0002}
+.leds i:nth-child(1){background:radial-gradient(circle at 35% 35%,#ffb3b3,#e52a2a)}
+.leds i:nth-child(2){background:radial-gradient(circle at 35% 35%,#fff7b3,#f2c81c)}
+.leds i:nth-child(3){background:radial-gradient(circle at 35% 35%,#c6ffc0,#3cb43a)}
+.title{margin-left:auto;text-align:right;color:#fff}
+.title b{display:block;font:800 26px/1 'Rubik';letter-spacing:1px;text-shadow:0 3px 0 var(--red2)}
+.title span{font:700 13px 'Nunito';opacity:.9;letter-spacing:.5px}
+.title span em{font-style:normal;background:#fff;color:var(--red);border-radius:99px;padding:1px 8px;margin-left:4px}
+
+/* список видов: белая панель, выбранный — красная «таблетка» с покеболом */
+.list{grid-area:list;margin-top:18px;background:#fff;border-radius:18px;padding:10px 8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ddd transparent;box-shadow:0 6px 0 var(--red2);display:flex;flex-direction:column;gap:3px;min-height:0}
+.ch{flex:none;display:flex;align-items:center;gap:9px;padding:5px 10px 5px 6px;border-radius:99px;transition:background .12s}
+.ch img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top;background:#eee}
+.ch .no{font:400 9px 'Press Start 2P';color:var(--mut);width:38px;flex:none}
+.ch b{font:700 14px 'Rubik';flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch:hover{background:#f1f2f4}
+.ch.on{background:linear-gradient(90deg,#ff6a3d,var(--red));color:#fff}
+.ch.on .no{color:#ffe0d6}
+.ball{flex:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(var(--red) 0 44%,#26272b 44% 56%,#fff 56%);box-shadow:0 0 0 1.5px #26272b;position:relative}
+.ball::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px #26272b}
+.ball.no-c{background:#e3e4e8;box-shadow:0 0 0 1.5px #c3c5cc}.ball.no-c::after{display:none}
+
+/* экран: светлая рамка со срезанным углом, внутри — «среда обитания» */
+.scr{grid-area:scr;margin-top:18px;min-height:0;display:flex;flex-direction:column;background:#e9e9ec;border-radius:16px 16px 16px 16px;padding:22px 22px 0;clip-path:polygon(0 0,100% 0,100% 100%,64px 100%,0 calc(100% - 64px));box-shadow:inset 0 -5px 0 #c9c9cf}
+.scr .dots{position:absolute}
+.disp{position:relative;flex:1;min-height:0;border-radius:8px;overflow:hidden;background:radial-gradient(ellipse 60% 18% at 50% 92%,#b6e3c5 0,#d6efe0 60%,transparent 62%),linear-gradient(#bfe9ff 0,#e6f7ff 58%,#f4fbf2 100%);box-shadow:inset 0 0 0 3px #26272b}
+.disp::before{content:'';position:absolute;inset:0;background:linear-gradient(#26272b0d 1px,transparent 1px) 0 0/100% 24px,linear-gradient(90deg,#26272b0d 1px,transparent 1px) 0 0/24px 100%;pointer-events:none}
+.disp .num{position:absolute;left:14px;top:12px;z-index:2;font:400 13px 'Press Start 2P';color:#26272b;background:#fff;padding:7px 10px;border-radius:6px;box-shadow:0 3px 0 #26272b33}
+.disp .scan{position:absolute;right:14px;top:12px;z-index:2;display:flex;align-items:center;gap:6px;font:800 11px 'Nunito';letter-spacing:1px;color:#1c6fa8}
+.disp .scan i{width:9px;height:9px;border-radius:50%;background:#2fbf4a;animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.hero{position:absolute;left:0;right:0;top:44px;bottom:0;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+/* портрет на экране, по центру */
+.hero .frm{align-self:center;height:min(86%,520px);aspect-ratio:2/3;padding:8px;background:#fff;border-radius:10px;box-shadow:0 0 0 3px #26272b,0 10px 0 #26272b22;transform:rotate(-2deg);position:relative}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:5px}
+.hero.in{animation:pop .4s cubic-bezier(.3,1.5,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.94)}}
+.under{display:flex;align-items:center;gap:16px;height:58px;padding-left:56px}
+.under .rb{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a8a,var(--red));box-shadow:0 0 0 2px #26272b}
+.under .spk{margin-left:auto;display:flex;flex-direction:column;gap:5px}
+.under .spk i{display:block;width:62px;height:4px;border-radius:2px;background:#26272b}
+.under .spk.slim{display:none}
+
+/* карточка вида */
+.info{grid-area:info;margin-top:18px;min-height:0;display:flex;flex-direction:column;gap:12px;background:var(--pap);border-radius:18px;padding:18px 20px 16px;box-shadow:0 6px 0 var(--red2);overflow:hidden}
+.nm{display:flex;align-items:baseline;gap:10px}
+.nm h1{font:800 clamp(22px,2vw,30px)/1.1 'Rubik';flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kind{font:700 14px 'Nunito';color:var(--mut);margin-top:-6px}
+.types{display:flex;gap:8px}
+.type{display:flex;align-items:center;gap:6px;padding:4px 14px 4px 5px;border-radius:99px;font:700 12px 'Rubik';letter-spacing:.8px;text-transform:uppercase;color:#fff;background:var(--c);box-shadow:0 3px 0 #0002}
+.type::before{content:'';width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 4px var(--c),inset 0 0 0 5px #fff}
+.type.dk{color:#26272b}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st{background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 0 0 1px #e3e4e8}
+.st s{display:block;text-decoration:none;font:700 11px 'Nunito';color:var(--mut);letter-spacing:.5px}
+.st b{font:700 18px 'Rubik'}
+.st small{font:600 11px 'Nunito';color:var(--mut);margin-left:4px}
+.desc{background:#fff;border-radius:12px;padding:12px 14px;font:600 14px/1.5 'Nunito';box-shadow:0 0 0 1px #e3e4e8;position:relative;min-height:0}
+.desc p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+.desc p.none{color:var(--mut);font-style:italic}
+
+.base{display:flex;flex-direction:column;gap:6px;padding:2px 2px 0}
+.base h3{font:800 12px 'Nunito';letter-spacing:1px;color:var(--mut);text-transform:uppercase}
+.bar{display:grid;grid-template-columns:96px 34px 1fr;align-items:center;gap:8px;font:700 12px 'Nunito'}
+.bar b{font:700 13px 'Rubik';text-align:right}
+.bar span{height:8px;border-radius:99px;background:#e3e4e8;overflow:hidden}
+.bar span i{display:block;height:100%;border-radius:99px;background:var(--c);transition:width .5s cubic-bezier(.2,.9,.2,1)}
+.menu{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.menu button{position:relative;padding:10px 12px 10px 26px;border-radius:12px;background:#fff;font:700 14px 'Rubik';box-shadow:0 3px 0 #d5d7dc,0 0 0 1px #e3e4e8;transition:transform .1s,background .1s}
+.menu button::before{content:'';position:absolute;left:11px;top:50%;margin-top:-5px;border:5px solid transparent;border-left:7px solid currentColor;opacity:0}
+.menu button.on{background:var(--blue);color:#fff;box-shadow:0 3px 0 #1c6fa8;transform:translateY(-1px)}
+.menu button.on::before{opacity:1}
+.menu button[data-a=continue]{grid-column:1/-1;font-size:16px}
+@media (max-height:780px) and (min-width:761px){.base .bar:nth-of-type(n+5){display:none}}
+
+@media (max-width:760px){
+  .dex{padding:0 3vw 10px;grid-template-columns:1fr;grid-template-rows:58px 34vh minmax(0,1fr) 62px;grid-template-areas:"head" "scr" "info" "list";gap:10px}
+  .head{gap:10px}
+  .lens{width:42px;height:42px;padding:3px}
+  .leds{margin-top:6px;gap:6px}.leds i{width:10px;height:10px}
+  .title b{font-size:18px}.title span{font-size:11px}
+  .scr,.info,.list{margin-top:0}
+  .scr{padding:10px 10px 0;clip-path:polygon(0 0,100% 0,100% 100%,30px 100%,0 calc(100% - 30px))}
+  .under{height:26px;padding-left:30px}.under .rb{width:14px;height:14px}.under .spk i{width:40px;height:3px}.under .spk{gap:3px}
+  .disp .num{font-size:10px;padding:5px 7px}
+  .hero{top:34px}
+  .hero .frm{height:90%;padding:5px}
+  .info{padding:12px 12px 10px;gap:8px;box-shadow:0 4px 0 var(--red2)}
+  .nm h1{font-size:20px}.kind{font-size:12px;margin-top:-4px}
+  .stats{grid-template-columns:repeat(4,1fr);gap:5px}.st{padding:5px 7px}.st b{font-size:13px}.st small{display:none}.st s{font-size:9px}
+  .base{gap:3px}.base h3{display:none}.bar{grid-template-columns:86px 28px 1fr;font-size:11px}.bar b{font-size:11px}.base .bar:nth-of-type(n+4){display:none}
+  .desc{padding:8px 10px;font-size:12px}.desc p{-webkit-line-clamp:2}
+  .menu{gap:6px}.menu button{padding:7px 8px 7px 22px;font-size:12px}.menu button[data-a=continue]{font-size:14px}
+  .info{overflow-y:auto;scrollbar-width:none}
+  .list{flex-direction:row;padding:6px;overflow-x:auto;overflow-y:hidden;border-radius:14px;box-shadow:0 4px 0 var(--red2)}
+  .ch{padding:4px 12px 4px 4px;max-width:180px}
+  .ch .no,.ch .ball{display:none}
+}
+@media (max-width:760px) and (max-height:860px){.base{display:none}}
+@media (max-width:760px) and (max-height:640px){.desc{display:none}}
+</style>
+</head>
+<body>
+<div class="body"></div>
+<div class="dex">
+  <div class="head">
+    <div class="lens"><i></i></div>
+    <div class="leds"><i></i><i></i><i></i></div>
+    <div class="title"><b>ПОКЕДЕКС</b><span>Владелец: <span class="owner"></span> · Встречено <em class="seen"></em> · Поймано <em class="caught"></em></span></div>
+  </div>
+  <div class="list"></div>
+  <div class="scr">
+    <div class="disp"><span class="num"></span><span class="scan"><i></i>СКАН</span><div class="hero"></div></div>
+    <div class="under"><span class="rb"></span><span class="spk"><i></i><i></i><i></i></span></div>
+  </div>
+  <div class="info">
+    <div class="nm"><h1></h1><span class="ball"></span></div>
+    <div class="kind"></div>
+    <div class="types"></div>
+    <div class="stats"></div>
+    <div class="desc"><p></p></div>
+    <div class="base"></div>
+    <div class="menu">
+      <button data-a="continue" class="on">Продолжить</button>
+      <button data-a="new">Новый чат</button>
+      <button data-a="all">Все чаты</button>
+    </div>
+  </div>
+</div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+// типы: один или два, стабильно по имени
+const TYPES = [[tt('Нормальный'),'#a8a77a'],[tt('Огненный'),'#ee8130'],[tt('Водный'),'#6390f0'],[tt('Электрический'),'#f2c81c',1],[tt('Травяной'),'#5fb53a'],[tt('Ледяной'),'#7fd0cc',1],[tt('Боевой'),'#c22e28'],[tt('Ядовитый'),'#a33ea1'],[tt('Земляной'),'#d9b25a',1],[tt('Летающий'),'#a98ff3'],[tt('Психический'),'#f95587'],[tt('Жук'),'#a6b91a'],[tt('Каменный'),'#b6a136'],[tt('Призрачный'),'#735797'],[tt('Драконий'),'#6f35fc'],[tt('Тёмный'),'#705746'],[tt('Стальной'),'#a9a9c4',1],[tt('Волшебный'),'#d685ad']];
+const KIND = [tt('Собеседник'),tt('Рассказчик'),tt('Загадка'),tt('Тень'),tt('Сказочник'),tt('Спутник'),tt('Мечтатель'),tt('Шёпот'),tt('Полуночник'),tt('Хранитель')];
+const pl = PL;
+const typesOf = (c) => { const a = Math.floor(seeded(c.name, 31) * TYPES.length); let b = Math.floor(seeded(c.name, 32) * TYPES.length); return seeded(c.name, 33) > .45 && b !== a ? [a, b] : [a]; };
+const no = (i) => String(i + 1).padStart(3, '0');
+const caught = (c) => c.chats > 1; // «пойман» — если разговор возвращался больше одного раза
+// рост: 10 сообщений = 1 метр; вес: чат = 12,5 кг
+const num = (x) => x.toFixed(1).replace('.', ',');
+
+$('.seen').textContent = ITEMS.length; $('.caught').textContent = ITEMS.filter(caught).length;
+$('.list').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><span class="no">${no(i)}</span><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b><span class="ball ${caught(c) ? '' : 'no-c'}"></span></button>`).join('');
+
+let cur = 0, sel = 0;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur];
+  $('.owner').textContent = meOf(cur).name;
+  const hero = $('.hero'); hero.innerHTML = figHTML({ ...c, render: '' }, 'frm'); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.num').textContent = '№ ' + no(cur);
+  $('.nm h1').textContent = c.name;
+  $('.nm .ball').className = 'ball' + (caught(c) ? '' : ' no-c');
+  $('.kind').textContent = tt('Покемон-') + KIND[Math.floor(seeded(c.name, 34) * KIND.length)].toLowerCase();
+  $('.types').innerHTML = typesOf(c).map((t) => `<span class="type ${TYPES[t][2] ? 'dk' : ''}" style="--c:${TYPES[t][1]}">${TYPES[t][0]}</span>`).join('');
+  $('.stats').innerHTML = [
+    [tt('Рост'), num(c.msgs / 10) + tt(' м'), `${c.msgs} ${pl(c.msgs, 'реплика', 'реплики', 'реплик')}`],
+    [tt('Вес'), num(c.chats * 12.5) + tt(' кг'), `${c.chats} ${pl(c.chats, 'чат', 'чата', 'чатов')}`],
+    [tt('Встречен'), ago(c.ts), ''],
+    [tt('Статус'), caught(c) ? tt('Пойман') : tt('Замечен'), ''],
+  ].map(([s, b, m]) => `<div class="st"><s>${s}</s><b>${b}</b>${m ? `<small>${m}</small>` : ''}</div>`).join('');
+  // базовые характеристики: болтливость — сообщения, верность — чаты, свежесть — давность, остальное своё
+  const mx = (k) => Math.max(...ITEMS.map((x) => x[k])), fresh = Math.max(5, Math.round(255 - (NOW - c.ts) / 36e5 * 4));
+  const B = [[tt('Болтливость'), Math.max(5, Math.round(Math.sqrt(c.msgs / mx('msgs')) * 255)), '#ff5959'], [tt('Верность'), Math.max(5, Math.round(c.chats / mx('chats') * 255)), '#f5ac78'], [tt('Свежесть'), Math.min(255, fresh), '#fae078'], [tt('Обаяние'), 40 + Math.round(seeded(c.name, 35) * 200), '#9db7f5'], [tt('Загадочность'), 40 + Math.round(seeded(c.name, 36) * 200), '#a7db8d']];
+  $('.base').innerHTML = tt('<h3>Базовые характеристики</h3>') + B.map(([n, v, col]) => `<div class="bar" style="--c:${col}">${n}<b>${v}</b><span><i style="width:${v / 255 * 100}%"></i></span></div>`).join('');
+  const p = $('.desc p'); p.textContent = c.snip || tt('Данных об этом виде пока нет. Поговорите с ним, чтобы заполнить запись.'); p.classList.toggle('none', !c.snip);
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 3); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+show(+new URLSearchParams(location.search).get('i') || START);
+</script>
+</body>
+</html>

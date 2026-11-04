@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&family=Nunito:wght@600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--p:#ff8fc8;--pp:#ffbde1;--pl:#ffe6f4;--d:#b04a86;--ink:#4a2a3c;--top:44px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#fff4fa;color:var(--ink);font-family:'Nunito',sans-serif}
+img{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+
+/* фон: розовый горошек, медленно ползёт по диагонали, как в главном меню */
+.bg{position:fixed;inset:0;background:#fff4fa;overflow:hidden}
+/* горошек едет сдвигом слоя на одну клетку — без перерисовки фона на каждом кадре */
+.bg::before{content:'';position:absolute;left:-44px;top:-44px;right:0;bottom:0;background:radial-gradient(circle,#ffc9e4 7px,transparent 7.5px) 0 0/44px 44px,radial-gradient(circle,#ffc9e4 7px,transparent 7.5px) 22px 22px/44px 44px;animation:dots 14s linear infinite;will-change:transform}
+@keyframes dots{to{transform:translate(44px,44px)}}
+.wash{position:fixed;inset:0;background:linear-gradient(90deg,#fff4fadd 0 23%,#fff4fa00 38% 70%,#fff4fadd 86%);pointer-events:none}
+
+/* надпись «Доки Доки» слева сверху — пухлые буквы с обводкой */
+.logo{position:fixed;left:3vw;top:calc(var(--top) + 14px);z-index:3;line-height:.95;transform:rotate(-4deg)}
+.logo b{display:block;font:900 44px 'M PLUS Rounded 1c';color:#fff;-webkit-text-stroke:9px var(--p);paint-order:stroke fill;letter-spacing:-1px}
+.logo b span{display:inline-block;animation:hop 2.4s ease-in-out infinite}
+.logo b span:nth-child(2){animation-delay:.15s}
+@keyframes hop{0%,70%,100%{transform:none}80%{transform:translateY(-6px)}}
+.logo i{display:block;font:800 19px 'M PLUS Rounded 1c';font-style:normal;color:#fff;-webkit-text-stroke:6px var(--d);paint-order:stroke fill;margin:4px 0 0 34px}
+
+/* персонаж */
+.hero{position:fixed;left:50%;bottom:0;height:calc(100% - var(--top) - 2vh);width:52vw;transform:translateX(-50%);display:flex;align-items:flex-end;justify-content:center;pointer-events:none;z-index:1}
+.hero img.full{max-height:100%;max-width:52vw;object-fit:contain;-webkit-mask:linear-gradient(#000 82%,#0000);mask:linear-gradient(#000 82%,#0000)}
+.hero img.sl{position:absolute;left:50%;bottom:0;max-height:100%;max-width:52vw;object-fit:contain;transform:translateX(calc(-50% + var(--dx,0px)));visibility:hidden;filter:drop-shadow(3px 0 0 #00e5ff88) drop-shadow(-3px 0 0 #ff3a8a88)}
+/* портрет без PNG — фото на пробковой доске клуба: белая рамка, скотч, сердечко */
+.hero .frm{position:relative;align-self:center;width:min(22vw,320px);aspect-ratio:2/3;padding:12px 12px 40px;background:#fff;border-radius:6px;transform:rotate(-3deg);box-shadow:0 14px 34px #b04a8640,0 0 0 4px var(--pp)}
+.hero .frm img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:3px}
+.hero .frm img.sl{position:absolute;left:12px;top:12px;width:calc(100% - 24px);height:calc(100% - 52px);transform:translateX(var(--dx,0px))}
+.hero .frm::before{content:'';position:absolute;left:50%;top:-14px;width:90px;height:28px;transform:translateX(-50%) rotate(4deg);background:#ffd6ebcc;box-shadow:0 1px 3px #0001}
+.hero .frm::after{content:'';position:absolute;right:16px;bottom:9px;width:22px;height:20px;background:var(--p);clip-path:path('M11 20C5 15 0 11 0 6A5.5 5.5 0 0 1 11 4A5.5 5.5 0 0 1 22 6C22 11 17 15 11 20Z')}
+.hero.in{animation:pop .4s cubic-bezier(.3,1.5,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(18px) scale(.97)}}
+
+/* левая колонка: листок со стихом = меню */
+.left{position:fixed;left:3vw;top:calc(var(--top) + 130px);width:min(300px,23vw);display:flex;flex-direction:column;gap:22px;z-index:3}
+.paper{position:relative;padding:26px 20px 18px 46px;background:repeating-linear-gradient(#fff 0 33px,#bcd3f2 33px 34px) 0 14px,#fff;border-radius:3px;transform:rotate(-2deg);box-shadow:0 10px 26px #b04a8633,0 1px 0 #e9d6e0}
+.paper::before{content:'';position:absolute;left:34px;top:0;bottom:0;width:2px;background:#f4a3b8}
+.paper::after{content:'';position:absolute;left:50%;top:-12px;width:96px;height:26px;transform:translateX(-50%) rotate(-3deg);background:#ffd6ebcc}
+.paper h3{font:700 22px/34px 'Caveat';color:var(--d);margin-bottom:0}
+.menu{display:flex;flex-direction:column}
+.menu button{position:relative;font:500 30px/34px 'Caveat';color:#5b4a68;transition:color .12s,transform .12s}
+.menu button::before{content:'';position:absolute;left:-30px;top:8px;width:20px;height:18px;background:var(--p);clip-path:path('M10 18C4.5 13.5 0 10 0 5.5A5 5 0 0 1 10 3.6A5 5 0 0 1 20 5.5C20 10 15.5 13.5 10 18Z');opacity:0;transform:scale(.4);transition:.15s}
+.menu button.on{color:var(--d);transform:translateX(4px)}
+.menu button.on::before{opacity:1;transform:none;animation:beat 1s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.22)}30%{transform:scale(.95)}45%{transform:scale(1.1)}}
+.sig{font:500 20px/34px 'Caveat';color:#9a8aa6;text-align:right}
+
+/* «доки-метр» и слово дня */
+.stats{padding:14px 16px;background:#fff;border:3px solid var(--pp);border-radius:16px;box-shadow:0 6px 0 var(--pp)}
+.stats h4{font:800 13px 'M PLUS Rounded 1c';letter-spacing:1px;color:var(--d);text-transform:uppercase}
+.hearts{display:flex;gap:5px;margin:7px 0 9px}
+.hearts i{width:24px;height:22px;background:#f3dbe7;clip-path:path('M12 22C5 16.5 0 12.5 0 6.5A6 6 0 0 1 12 4.4A6 6 0 0 1 24 6.5C24 12.5 19 16.5 12 22Z')}
+.hearts i.on{background:linear-gradient(#ffa6d3,#ff5fa8)}
+.hearts i.half{background:linear-gradient(90deg,#ff7fbb 50%,#f3dbe7 50%)}
+.stats dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font:700 14px 'Nunito'}
+.stats dt{color:#a78aa0}.stats dd{text-align:right}
+.word{margin-top:10px;display:flex;align-items:center;gap:8px;font:700 13px 'Nunito';color:#a78aa0}
+.word b{padding:2px 12px;border-radius:99px;background:var(--pl);color:var(--d);font:700 21px 'Caveat'}
+
+/* текстовое окно: полупрозрачное, с именем на вкладке */
+.tb{position:fixed;left:calc(3vw + min(300px,23vw) + 36px);right:calc(min(250px,19vw) + 4vw);bottom:22px;min-height:150px;padding:30px 26px 34px;background:linear-gradient(#fff8fcee,#ffe6f4ee);border:4px solid #fff;border-radius:20px;box-shadow:0 0 0 3px var(--pp),0 14px 30px #b04a8630;z-index:4}
+.tag{position:absolute;left:26px;top:-24px;padding:4px 22px 6px;background:var(--pp);border:4px solid #fff;border-radius:14px;box-shadow:0 0 0 3px var(--p);font:900 22px 'M PLUS Rounded 1c';color:#fff;-webkit-text-stroke:6px var(--d);paint-order:stroke fill;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{position:absolute;right:20px;top:-15px;padding:3px 12px;background:#fff;border:3px solid var(--pp);border-radius:99px;font:800 12px 'Nunito';color:var(--d);white-space:nowrap}
+.tb p{font:600 18px/1.55 'Nunito';color:#3d2a36;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.tb p.none{color:#b49aac;font-style:italic}
+.ctc{position:absolute;right:24px;bottom:30px;width:0;height:0;border:8px solid transparent;border-top:11px solid var(--p);border-bottom:0;animation:bob .9s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+.qm{position:absolute;left:0;right:0;bottom:7px;display:flex;justify-content:center;gap:16px;font:800 11px 'Nunito';color:#c99ab5;letter-spacing:.5px;text-transform:uppercase}
+
+/* справа: члены клуба, выбранная фигурка прыгает как в мини-игре со стихами */
+.roster{position:fixed;right:3vw;top:calc(var(--top) + 18px);bottom:22px;width:min(250px,19vw);display:flex;flex-direction:column;gap:8px;overflow-y:auto;scrollbar-width:none;z-index:3;padding:30px 4px 10px}
+.roster::before{content:'Члены клуба';position:fixed;margin-top:-30px;font:900 17px 'M PLUS Rounded 1c';color:#fff;-webkit-text-stroke:5px var(--p);paint-order:stroke fill}
+.ch{flex:none;display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;background:#fff;border:3px solid var(--pp);border-radius:99px;transition:transform .15s,background .15s}
+.ch img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--pl)}
+.ch span{flex:1;min-width:0}
+.ch b{display:block;font:800 14px 'M PLUS Rounded 1c';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch small{display:block;font:700 11px 'Nunito';color:#b08aa3}
+.ch:hover{transform:translateX(-4px)}
+.ch.on{background:var(--pp);border-color:#fff;box-shadow:0 0 0 3px var(--p)}
+.ch.on b{color:#fff;-webkit-text-stroke:4px var(--d);paint-order:stroke fill}
+.ch.on small{color:var(--d)}
+.ch.on img{animation:jump .7s ease-in-out infinite;border-color:#fff}
+@keyframes jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}60%{transform:translateY(-7px) rotate(4deg)}}
+
+/* редкий глитч: один символ на миг подменяется (сама подмена — в JS) */
+.gx{color:#3d2a36;background:#ff3a8a33;font-family:monospace}
+
+@media (max-width:760px){
+  .logo,.stats,.wash,.roster::before{display:none}
+  .roster{left:0;right:0;top:calc(var(--top) + 6px);bottom:auto;width:auto;height:86px;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px 12px;gap:8px}
+  .ch{flex-direction:column;gap:2px;width:66px;padding:4px;border-radius:16px}
+  .ch img{width:44px;height:44px}
+  .ch b{font-size:10px;max-width:56px;text-align:center}.ch small{display:none}
+  .hero{top:calc(var(--top) + 96px);bottom:276px;height:auto;width:92vw}
+  .hero img.full,.hero img.sl{max-width:92vw}
+  .hero .frm{width:40vw;padding:8px 8px 26px}
+  .hero .frm img.sl{left:8px;top:8px;width:calc(100% - 16px);height:calc(100% - 34px)}
+  .tb{left:12px;right:12px;bottom:160px;min-height:0;height:112px;padding:22px 16px 12px}
+  .tb p{font-size:14px;-webkit-line-clamp:3}
+  .tag{font-size:16px;left:14px;top:-20px;padding:2px 14px 4px}
+  .meta{right:10px;font-size:10px;top:-13px}
+  .qm,.ctc{display:none}
+  .left{left:12px;right:12px;top:auto;bottom:12px;width:auto}
+  .paper{padding:16px 8px 8px 36px;transform:rotate(-1deg);height:132px}
+  .paper h3{font-size:18px;line-height:30px}
+  .menu{display:grid;grid-template-columns:1fr 1fr}
+  .menu button{font-size:clamp(16px,4.6vw,22px);line-height:34px;white-space:nowrap}
+  .menu button::before{left:-28px;top:8px;transform:scale(.4)}
+  .menu button.on{transform:none}
+  .sig{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wash"></div>
+<div class="logo"><b><span>Доки</span> <span>Доки</span></b><i>Литературный клуб!</i></div>
+<div class="hero"></div>
+<div class="left">
+  <div class="paper">
+    <h3>Сегодня после уроков я…</h3>
+    <div class="menu">
+      <button data-a="continue" class="on">продолжу разговор</button>
+      <button data-a="new">начну с чистого листа</button>
+      <button data-a="all">перечитаю все чаты</button>
+      <button data-a="png">вклею свою картинку</button>
+    </div>
+    <div class="sig"></div>
+  </div>
+  <div class="stats">
+    <h4>Доки-метр</h4>
+    <div class="hearts"></div>
+    <dl><dt>Встреч в клубе</dt><dd class="s-ch"></dd><dt>Строк написано</dt><dd class="s-ms"></dd><dt>Последний раз</dt><dd class="s-ag"></dd></dl>
+    <div class="word">Слово для стиха <b></b></div>
+  </div>
+</div>
+<div class="tb">
+  <div class="tag"></div>
+  <div class="meta"></div>
+  <p></p>
+  <i class="ctc"></i>
+  <div class="qm"><span>История</span><span>Пропуск</span><span>Авто</span><span>Сохранить</span><span>Загрузить</span><span>Настройки</span></div>
+</div>
+<div class="roster"></div>
+
+<script src="bridge.js"></script>
+<script src="common.js"></script>
+<script>
+const pl = PL;
+// близость 0..100 из сообщений и чатов; слово для стиха — стабильно по имени
+const affOf = (c) => Math.min(100, Math.round(c.msgs / 2 + c.chats * 4));
+const WORDS = [tt('сердце'), tt('вечность'), tt('капкейк'), tt('шёпот'), tt('звёзды'), tt('объятие'), tt('ливень'), tt('чернила'), tt('мечта'), tt('тайна'), tt('ромашка'), tt('рассвет'), tt('пульс'), tt('конфета')];
+
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><span><b>${esc(c.name)}</b><small>♥ ${affOf(c)}</small></span></button>`).join('');
+
+let cur = 0, sel = 0;
+const fig = (c) => c.render
+  ? `<img decoding="async" class="full" src="${c.render}" alt=""><img decoding="async" class="sl" src="${c.render}" alt="">`
+  : `<div class="frm"><img decoding="async" src="${c.img}" alt=""><img decoding="async" class="sl" src="${c.img}" alt=""></div>`;
+function show(i) {
+  cur = mod(i, ITEMS.length); const c = ITEMS[cur], a = affOf(c);
+  $('.sig').textContent = '— ' + meOf(cur).name;
+  const hero = $('.hero'); hero.innerHTML = fig(c); hero.classList.remove('in'); void hero.offsetWidth; hero.classList.add('in');
+  $('.tag').textContent = c.name;
+  const p = $('.tb p'); p.textContent = c.snip || tt('…Тишина. Здесь ждут твоих слов.'); p.classList.toggle('none', !c.snip);
+  $('.hearts').innerHTML = Array.from({ length: 5 }, (_, k) => `<i class="${a >= (k + 1) * 20 ? 'on' : a >= k * 20 + 10 ? 'half' : ''}"></i>`).join('');
+  $('.s-ch').textContent = `${c.chats} ${pl(c.chats, 'встреча', 'встречи', 'встреч')}`;
+  $('.s-ms').textContent = `${c.msgs} ${pl(c.msgs, 'строка', 'строки', 'строк')}`;
+  $('.s-ag').textContent = ago(c.ts);
+  $('.word b').textContent = WORDS[Math.floor(seeded(c.name, 3) * WORDS.length)];
+  $('.meta').textContent = `♥ ${a} · ${ago(c.ts)}`;
+  $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+function pick(k) { sel = mod(k, 4); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }
+$$('.menu button').forEach((b, j) => { b.onmouseenter = () => pick(j); b.onclick = () => ACT(b.dataset.a, ITEMS[cur]); });
+$$('.ch').forEach((x) => x.onclick = () => +x.dataset.i === cur ? ACT('continue', ITEMS[cur]) : show(+x.dataset.i));
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1);
+  if (e.key === 'ArrowDown') pick(sel + 1); if (e.key === 'ArrowUp') pick(sel - 1);
+  if (e.key === 'Enter') ACT($$('.menu button')[sel].dataset.a, ITEMS[cur]);
+});
+
+// глитч: редко и коротко, только картинка — ничего не нажимает и ничего не открывает
+const GL = tt('ЖЪЯ█▓#?ʞ');
+function swapChar() {
+  const el = [$('.tb p'), $('.tag'), $('.sig')][Math.floor(Math.random() * 3)], t = el.textContent;
+  const idx = [...t].map((ch, k) => /\S/.test(ch) ? k : -1).filter((k) => k >= 0);
+  if (!idx.length) return;
+  const k = idx[Math.floor(Math.random() * idx.length)];
+  el.innerHTML = esc(t.slice(0, k)) + `<span class="gx">${GL[Math.floor(Math.random() * GL.length)]}</span>` + esc(t.slice(k + 1));
+  setTimeout(() => { if (el.querySelector('.gx')) el.textContent = t; }, 140);
+}
+function slice() {
+  const s = $('.hero .sl'); if (!s) return;
+  const step = (n) => {
+    if (!n) { s.style.visibility = 'hidden'; return; }
+    const t = Math.random() * 80, h = 4 + Math.random() * 10;
+    s.style.clipPath = `inset(${t}% 0 ${100 - t - h}% 0)`; s.style.setProperty('--dx', (Math.random() < .5 ? -1 : 1) * (6 + Math.random() * 12) + 'px'); s.style.visibility = 'visible';
+    setTimeout(() => step(n - 1), 70);
+  };
+  step(2 + Math.floor(Math.random() * 2));
+}
+(function glitch() {
+  setTimeout(() => { if (!document.hidden) (Math.random() < .55 ? swapChar : slice)(); glitch(); }, 9000 + Math.random() * 11000);
+})();
+
+// #N в адресе — открыть сразу N-го (для проверки)
+show(location.hash ? +location.hash.slice(1) : START);
+</script>
+</body>
+</html>
