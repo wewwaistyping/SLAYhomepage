@@ -95,6 +95,7 @@ Custom pictures aren't supported for group chats yet.
 ## Good to know
 
 - **Fonts load from Google Fonts.** These are the extension's only external requests. Without internet, the screens fall back to other fonts.
+- **Picture quality.** By default Tavern makes 96×144 thumbnails, too small for a big screen. In that case SLAYhomepage shows the original cards of the bots on screen, so you don't need another extension. If your cards are heavy, you can raise `thumbnails.dimensions.avatar` in `config.yaml` instead, and the screen will use the thumbnails.
 - **Battery.** After 20 seconds without input, animations go to sleep and wake on any movement. When a chat is open, the screen is fully unloaded and runs nothing.
 - **Tavern themes.** The extension draws its screen on top of the Tavern and doesn't change your UI theme.
 - **Translations.** Strings live in `lang/en.json`, with the Russian text as keys. To add a language, copy that file to `lang/<code>.json` and translate the values.

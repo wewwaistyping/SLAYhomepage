@@ -85,7 +85,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
   .edge{display:none}
   .hero{left:68%;width:78vw;height:62%;bottom:108px}
   .hero img.full,.hero img.sh{max-width:78vw}
-  .hero .frm{width:44vw}
+  .hero .frm{width:min(40vw,max(30vw,calc((100vh - 438px)/1.5)));align-self:flex-end;margin-bottom:10px}
+  .hero:has(.frm){z-index:4;left:74%}
   .left{left:4vw;right:4vw;width:auto;top:calc(var(--top) + 64px);bottom:118px;gap:10px}
   .name{font-size:26px}
   .arc .num{font-size:22px;min-width:32px}.arc .an big{font-size:16px}

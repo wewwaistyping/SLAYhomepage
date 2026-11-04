@@ -389,7 +389,7 @@ function detail() {
   box.classList.toggle('has', !!r);
   box.querySelector('img.full')?.remove();
   if (r) box.insertAdjacentHTML('beforeend', `<img class="full" src="${esc(r)}" alt="">`);
-  $('.drop .card').src = b.img;
+  $('.drop .card').src = b.full || b.img;
   $('.dname').textContent = b.name; $('.dname-sub').textContent = r ? tt('своя картинка есть') : tt('пока только карточка');
   $('.dclear').style.display = r ? '' : 'none';
   $('.acts .go').textContent = r ? tt('Заменить картинку') : tt('Загрузить картинку');

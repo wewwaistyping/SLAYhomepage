@@ -71,7 +71,7 @@ function prose(mes) {
     for (const par of pars) {
         const t = par.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
         if (t.length < 60 || t.includes('|') || '#-=[>\\'.includes(t[0])) continue;
-        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t)) continue;
+        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t) || /^[\p{L}\d_-]{2,24}:\S*=/u.test(t)) continue;
         if (/META|OOC|CORE|INFOBLOCK|Co-author|PROMPT|P0|HTML|image/i.test(t)) continue;
         return t.length > 220 ? t.slice(0, 220).replace(/\s\S*$/, '') + '…' : t;
     }
@@ -88,8 +88,21 @@ function parseTs(v) {
 // Кто ты в этом чате: тот же порядок, что у таверны при открытии чата — привязка к чату, к персонажу, персона по умолчанию, текущая
 function personaOf(chat, key) {
     const avatar = [chat.chat_metadata?.persona, ...getConnectedPersonas(key), power_user.default_persona, user_avatar].find((a) => a && a in power_user.personas);
-    return { name: power_user.personas[avatar] || name1 || tt('Ты'), img: avatar ? getThumbnailUrl('persona', avatar) : '' };
+    return { name: power_user.personas[avatar] || name1 || tt('Ты'), img: avatar ? personaUrl(avatar) : '' };
 }
+
+// Таверна по умолчанию режет миниатюры до 96×144, на большом экране они мылятся. Размер задаётся только в config.yaml
+// на сервере, поэтому при маленьких миниатюрах берём оригиналы. Только для ботов на экране, остальную таверну не трогаем.
+let smallThumbs = null;
+const checkThumbs = () => new Promise((done) => {
+    if (smallThumbs !== null || !characters[0]) return done();
+    const probe = new Image();
+    probe.onload = () => { smallThumbs = probe.naturalHeight < 400; done(); };
+    probe.onerror = () => { smallThumbs = false; done(); };
+    probe.src = getThumbnailUrl('avatar', characters[0].avatar);
+});
+const avatarUrl = (file) => (smallThumbs ? `/characters/${encodeURIComponent(file)}` : getThumbnailUrl('avatar', file));
+const personaUrl = (file) => (smallThumbs ? `/User%20Avatars/${encodeURIComponent(file)}` : getThumbnailUrl('persona', file));
 
 async function fetchItems() {
     const res = await fetch('/api/chats/recent', {
@@ -100,6 +113,7 @@ async function fetchItems() {
     });
     if (!res.ok) return [];
     const data = await res.json();
+    await checkThumbs();
     const seen = new Set();
     const out = [];
     // сколько чатов у персонажа среди последних (для «Ретро» и «Киберпанка»), без отдельных запросов
@@ -119,7 +133,7 @@ async function fetchItems() {
             // openCharacterChat/openGroupChat ждут имя без расширения, иначе создадут новый «*.jsonl.jsonl»
             file: String(chat.file_name).replace(/\.jsonl$/, ''),
             name: ch ? ch.name : gr.name,
-            img: avatar ? getThumbnailUrl('avatar', avatar) : '',
+            img: avatar ? avatarUrl(avatar) : '',
             ts: parseTs(chat.last_mes),
             msgs: chat.chat_items ?? 0,
             snip: prose(chat.mes),
@@ -215,7 +229,7 @@ const api = {
     get current() { return current; },
     get items() { return items; },
     // ты — второй игрок: персона выбранного чата
-    get me() { return items[current]?.me ?? { name: name1 || tt('Ты'), img: user_avatar ? getThumbnailUrl('persona', user_avatar) : '' }; },
+    get me() { return items[current]?.me ?? { name: name1 || tt('Ты'), img: user_avatar ? personaUrl(user_avatar) : '' }; },
 };
 
 // То же для экранов в рамке: они читают ботов и персону и зовут действия отсюда
@@ -482,7 +496,7 @@ window.SLAYHOME_STUDIO = {
     // все боты: сначала из недавних чатов, потом остальные по алфавиту
     bots() {
         const recent = items.filter((x) => x.avatar).map((x) => x.avatar);
-        const list = characters.map((c) => ({ avatar: c.avatar, name: c.name, img: getThumbnailUrl('avatar', c.avatar), render: s.renders[c.avatar] || '', recent: recent.indexOf(c.avatar) }));
+        const list = characters.map((c) => ({ avatar: c.avatar, name: c.name, img: getThumbnailUrl('avatar', c.avatar), full: avatarUrl(c.avatar), render: s.renders[c.avatar] || '', recent: recent.indexOf(c.avatar) }));
         return list.sort((a, b) => ((a.recent < 0) - (b.recent < 0)) || (a.recent - b.recent) || a.name.localeCompare(b.name));
     },
     groupsList: () => groups.map((g) => ({ key: 'g:' + g.id, name: g.name })),

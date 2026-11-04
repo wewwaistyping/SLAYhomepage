@@ -184,7 +184,7 @@ const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
     <circle cx="100" cy="100" r="30" stroke-width="1.6" opacity=".5"/>${dots}</g>`;
   // свечи по краю эллипса
   const alt = $('.altar');
-  [200, 240, 290, 340, 20, 160].forEach((deg) => {
+  [200, 240, 300, 340, 20, 160].forEach((deg) => {
     const a = deg * Math.PI / 180, el = document.createElement('i');
     el.className = 'candle'; el.style.left = (50 + 47 * Math.cos(a)) + '%'; el.style.top = (50 + 47 * Math.sin(a)) + '%';
     alt.append(el);
