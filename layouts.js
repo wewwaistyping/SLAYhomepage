@@ -28,7 +28,47 @@ function deckFan(root) {
     const cards = root.querySelectorAll('.shd-card'), n = cards.length, r = $(root, '.shd-fan').getBoundingClientRect();
     const reach = innerWidth - (r.left + r.width / 2) - 12 - cards[0].offsetWidth * .85;
     const wide = 2 * Math.asin(Math.min(1, reach / (2.1 * cards[0].offsetHeight))) * 180 / Math.PI;
-    return { step: Math.min(9, Math.min(64, Math.max(44, wide)) / Math.max(n - 1, 1)), mid: (n - 1) / 2 };
+    return { step: Math.min(9, Math.min(64, Math.max(innerWidth <= 1000 ? 14 : 44, wide)) / Math.max(n - 1, 1)), mid: (n - 1) / 2 };
+}
+
+// Длинное имя в классических темах: уменьшаем шрифт, пока имя не влезет в две строки
+// Какая карта веера лежит в этой точке. Считаем по геометрии, а не по элементу под пальцем. При тапе первой
+// проверяем выбранную: она приподнята и лежит сверху. Для мыши она не в счёт, иначе выбор скакал бы туда-обратно.
+function deckHit(root, e, tap) {
+    const cards = root.querySelectorAll('.shd-card'), r = $(root, '.shd-fan').getBoundingClientRect();
+    const W = cards[0].offsetWidth, H = cards[0].offsetHeight, { step, mid } = deckFan(root);
+    const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.bottom + 1.6 * H); // от оси веера (transform-origin)
+    const inside = (i, lift) => {
+        const o = i - mid, a = -o * step * Math.PI / 180;
+        const x = dx * Math.cos(a) - dy * Math.sin(a), y = dx * Math.sin(a) + dy * Math.cos(a) - Math.abs(o) * 3 + lift;
+        return Math.abs(x) <= W / 2 && y >= -2.6 * H && y <= -1.6 * H;
+    };
+    if (tap) {
+        const on = [...cards].findIndex((c) => c.classList.contains('on'));
+        if (on >= 0 && inside(on, 70)) return on;
+    }
+    for (let i = cards.length - 1; i >= 0; i--) if (inside(i, 0)) return i;
+    return null;
+}
+
+// Шире ли сам текст своего блока. scrollWidth тут врёт: он считает ещё и копии имени для глитча
+function textWide(el) {
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    return r.getBoundingClientRect().width > el.clientWidth * 1.08;
+}
+
+export function fitLong(root) {
+    const el = root.querySelector('.shd-name, .shf-name, .shv-name, .shn-name, .shc-name, .shr-name, .shz-talk h1');
+    if (!el || !el.clientWidth) return;
+    el.style.fontSize = '';
+    const cs = getComputedStyle(el);
+    let size = parseFloat(cs.fontSize);
+    const lh = parseFloat(cs.lineHeight) / size || 1.15;
+    for (let n = 0; n < 60 && size > 13 && (el.offsetHeight > size * lh * 2 + 6 || textWide(el)); n++) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+    }
 }
 
 export const LAYOUTS = {
@@ -92,24 +132,12 @@ export const LAYOUTS = {
         hover: true,
         // на телефоне — та же полоса по горизонтали, но по координатам, а не по карте под пальцем
         tap(root, e, items) {
-            const r = $(root, '.shd-fan').getBoundingClientRect();
-            if (e.clientY < r.top - 60 || e.clientY > r.bottom) return null;
-            return Math.max(0, Math.min(items.length - 1, Math.floor((e.clientX - r.left) / r.width * items.length)));
+            return deckHit(root, e, true);
         },
         // Выбирается карта, которая лежит под курсором в раскрытом веере. Считаем по их местам в покое, а не по
         // элементу под мышью: выбранная карта выезжает и перекрывает соседей, и выбор скакал бы туда-обратно.
         // Мимо карт (пустое место, поднятый край выбранной) — null, выбор не меняется.
-        pointer(root, e) {
-            const cards = root.querySelectorAll('.shd-card'), r = $(root, '.shd-fan').getBoundingClientRect();
-            const W = cards[0].offsetWidth, H = cards[0].offsetHeight, { step, mid } = deckFan(root);
-            const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.bottom + 1.6 * H); // от оси веера (transform-origin)
-            for (let i = cards.length - 1; i >= 0; i--) {
-                const o = i - mid, a = -o * step * Math.PI / 180;
-                const x = dx * Math.cos(a) - dy * Math.sin(a), y = dx * Math.sin(a) + dy * Math.cos(a) - Math.abs(o) * 3;
-                if (Math.abs(x) <= W / 2 && y >= -2.6 * H && y <= -1.6 * H) return i;
-            }
-            return null;
-        },
+        pointer: (root, e) => deckHit(root, e, false),
         html: (items) => `
             <div class="shd-txt"><div class="shd-when"></div><h1 class="shd-name"></h1><p class="shd-q"></p><div class="shd-btns">${BTNS}</div></div>
             <div class="shd-fan">${items.map((c, i) => `<div class="shd-card" data-i="${i}">${img(c)}</div>`).join('')}</div>`,
@@ -118,6 +146,7 @@ export const LAYOUTS = {
             $(root, '.shd-when').textContent = (a ? tt('недавний') : tt('последний')) + tt(' разговор · ') + ago(c.ts);
             $(root, '.shd-name').textContent = c.name;
             $(root, '.shd-q').textContent = c.snip;
+            $(root, '.shd-txt').animate?.([{ opacity: .4 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
             const cards = root.querySelectorAll('.shd-card'), { step, mid } = deckFan(root);
             cards.forEach((k, i) => {
                 const o = i - mid, on = i === a;

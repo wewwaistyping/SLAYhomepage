@@ -36,3 +36,33 @@ const ACT = (what, c) => SH.act(what, ITEMS.indexOf(c));
 
 // фигура: своя PNG — целиком; без неё — портрет в аккуратной рамке (класс рамки задаёт каждый экран)
 const figHTML = (c, frameCls) => c.render ? `<img class="full" src="${c.render}" alt="">` : `<div class="${frameCls}"><img src="${c.img}" alt=""></div>`;
+
+// Длинное имя не должно ломать экран: уменьшаем шрифт, пока имя не влезет в две строки
+const NAME_FIT = { sf6: ['.nm'], gta: ['.nm'], cult: ['.nm'], otome: ['.nm', '.ph-name'], danganronpa: ['.nm'], genshin: ['.name'], ow: ['.big'], persona: ['.name'], hollow: ['.entry h2'], disco: ['.sheet h1'], pokemon: ['.nm h1'], valorant: ['.nm'], lis: ['.cap'] };
+addEventListener('DOMContentLoaded', () => {
+    const sels = NAME_FIT[location.pathname.split('/').pop().replace('.html', '')];
+    if (!sels) return;
+    const done = new Map();
+    const wide = (el) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width > el.clientWidth * 1.08; };
+    const fit = () => {
+        for (const s of sels) {
+            const el = $(s);
+            if (!el || !el.clientWidth) continue;
+            const key = el.textContent + '|' + innerWidth + '|' + innerHeight;
+            if (done.get(s) === key) continue;
+            done.set(s, key);
+            el.style.fontSize = '';
+            const cs = getComputedStyle(el);
+            let size = parseFloat(cs.fontSize);
+            const lh = parseFloat(cs.lineHeight) / size || 1.15;
+            for (let n = 0; n < 60 && size > 13 && (el.offsetHeight > size * lh * 2 + 6 || wide(el)); n++) {
+                size -= 1;
+                el.style.fontSize = size + 'px';
+            }
+        }
+    };
+    new MutationObserver(fit).observe(document.body, { childList: true, subtree: true, characterData: true });
+    addEventListener('resize', fit);
+    document.fonts?.ready.then(() => { done.clear(); fit(); });
+    fit();
+});

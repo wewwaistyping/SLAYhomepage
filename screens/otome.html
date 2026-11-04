@@ -130,6 +130,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
   .menu button{height:40px;padding:0 12px;font-size:12px;gap:8px}
   .msg{order:3;font-size:12px}.stories{display:none}
 }
+/* низкое окно: меню остаётся на экране */
+.stories{flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none}.side .menu{flex:none}
+@media (min-width:761px) and (max-height:680px){.side{gap:10px;padding:16px 20px 14px}.msg span{-webkit-line-clamp:2}.side .menu{display:grid;grid-template-columns:1fr 1fr;gap:6px}.side .menu button{padding:8px 10px;font-size:12px}}
 </style>
 </head>
 <body>

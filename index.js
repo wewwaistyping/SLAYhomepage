@@ -19,7 +19,7 @@ import { power_user } from '../../../power-user.js';
 import { extension_settings } from '../../../extensions.js';
 import { groups, openGroupById, openGroupChat } from '../../../group-chats.js';
 import { VER, LANG, tt, pl, localize } from './lang.js';
-import { LAYOUTS } from './layouts.js';
+import { LAYOUTS, fitLong } from './layouts.js';
 import { SCREENS } from './screens/screens.js';
 
 const KEY = 'slayHome';
@@ -59,7 +59,7 @@ s.offThemes = s.offThemes.filter((k) => LAYOUTS[k]);
 const shown = (k) => LAYOUTS[k] && !s.offThemes.includes(k);
 
 let root = null;
-let hoverTimer = 0, lastMove = { x: 0, t: 0 };
+let hoverTimer = 0, lastPick = 0;
 let items = [];
 let current = 0;
 let appReady = false;
@@ -71,7 +71,7 @@ function prose(mes) {
     for (const par of pars) {
         const t = par.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
         if (t.length < 60 || t.includes('|') || '#-=[>\\'.includes(t[0])) continue;
-        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t) || /^[\p{L}\d_-]{2,24}:\S*=/u.test(t)) continue;
+        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t) || /^[\p{L}\d_-]{2,24}:\S*=|^"[\p{L}\d_-]{2,24}"\s*:|^[a-z_-]{3,24}:\S/u.test(t)) continue;
         if (/META|OOC|CORE|INFOBLOCK|Co-author|PROMPT|P0|HTML|image/i.test(t)) continue;
         return t.length > 220 ? t.slice(0, 220).replace(/\s\S*$/, '') + '…' : t;
     }
@@ -172,13 +172,12 @@ function build() {
     root.addEventListener('mousemove', e => {
         if (touch() || !layout().pointer) return;
         const i = layout().pointer(root, e, items);
-        // рука замедлилась — выбираем сразу; мышь проносится мимо — ждём, пока остановится, чтобы карты не мельтешили
-        const fast = Math.abs(e.clientX - lastMove.x) / Math.max(e.timeStamp - lastMove.t, 1) > 1;
-        lastMove = { x: e.clientX, t: e.timeStamp };
         clearTimeout(hoverTimer);
         if (i === null || i === current) return;
-        if (fast) hoverTimer = setTimeout(() => show(i), 70);
-        else show(i);
+        // не чаще раза в 90 мс: карты сменяются ровно, а выбор догоняет курсор, не перепрыгивая через весь веер
+        const wait = lastPick + 90 - e.timeStamp;
+        if (wait > 0) hoverTimer = setTimeout(() => { lastPick = performance.now(); show(i); }, wait);
+        else { lastPick = e.timeStamp; show(i); }
     });
     root.addEventListener('mouseover', e => {
         // тап на телефоне тоже шлёт mouseover — там выбор делает click
@@ -376,6 +375,7 @@ function show(i) {
     if (!items[i] || !root) return;
     current = i;
     layout().show(root, i, items);
+    fitLong(root);
     fitName();
 }
 

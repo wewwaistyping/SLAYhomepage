@@ -109,6 +109,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
   .menu button.on{width:100%;transform:none}
   .menu button em{display:none}
 }
+/* низкое окно: меню остаётся на экране */
+@media (min-width:761px) and (max-height:640px){.left{top:calc(var(--top) + 30px);gap:8px}.prof div:nth-child(n+3){display:none}.hd{margin-top:6px}.menu{gap:3px}.menu button{height:32px}}
 </style>
 </head>
 <body>
