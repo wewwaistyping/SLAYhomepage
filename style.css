@@ -466,6 +466,10 @@ body.slayhome-on #slayhome.sh-l-msgr { display: grid; grid-template-columns: 320
     #slayhome.sh-l-retro .shr-name { font-size: 20px; margin-bottom: 6px; }
     #slayhome.sh-l-retro .shr-row { grid-template-columns: 36px 1fr auto; font-size: 15px; margin: 5px 0; }
     #slayhome.sh-l-retro .shr-menu { left: 16px; right: auto; top: auto; bottom: 178px; width: calc(50% - 22px); padding: 8px 4px; }
+    /* меню и отряд одной высоты: высота отряда с двумя рядами клеток растёт вместе с шириной экрана */
+    #slayhome.sh-l-retro .shr-menu, #slayhome.sh-l-retro .shr-party { height: max(115px, calc(25vw + 22px)); }
+    #slayhome.sh-l-retro .shr-menu { display: flex; flex-direction: column; justify-content: center; }
+    #slayhome.sh-l-retro .shr-party { align-content: center; }
     #slayhome.sh-l-retro .shr-menu button { font-size: 17px; padding: 6px 8px 6px 26px; }
     #slayhome.sh-l-retro .shr-menu button.on::before { left: 6px; }
     #slayhome.sh-l-retro .shr-party { right: 16px; top: auto; bottom: 178px; width: calc(50% - 22px); grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px; }
@@ -672,9 +676,14 @@ body.slayhome-nobar #slayhome .sh-pill { right: 72px; }
 #slayhome .sh-pill button { color: #fff; background: none; border: 0; padding: 5px 9px; border-radius: 99px; cursor: pointer; font: inherit; white-space: nowrap; }
 #slayhome .sh-pill button:hover { background: #ffffff1f; }
 #slayhome .sh-pill .sh-pill-t { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; }
+#slayhome .sh-pill .sh-pill-sep { width: 1px; height: 14px; margin: 0 2px; background: #ffffff40; }
+/* возврат со штатного списка чатов таверны */
+#slayhome-back { display: none; position: fixed; left: 50%; top: calc(100dvh - 104px); transform: translateX(-50%); z-index: 2000; white-space: nowrap; box-shadow: 0 4px 14px #0008; padding: 7px 14px; border-radius: 99px; background: #000c; border: 1px solid #ffffff30; color: #fff; font: 600 12px 'Onest', system-ui, sans-serif; cursor: pointer; }
+body.slayhome-peek #slayhome-back { display: block; }
+#slayhome-back:hover { background: #000; }
 @media (hover: none) { #slayhome .sh-pill { opacity: .8; } }
 /* на узком экране — только ‹ ◐ ›, чтобы не закрывать заголовки тем */
-@media (max-width: 760px) { #slayhome .sh-pill-t span { display: none; } #slayhome .sh-pill button { padding: 5px 8px; } }
+@media (max-width: 760px) { #slayhome .sh-pill-t span, #slayhome .sh-pill-c span { display: none; } #slayhome .sh-pill button { padding: 5px 8px; } }
 
 /* студия настроек — во весь экран поверх таверны */
 #slayhome-studio { position: fixed; left: 0; top: 0; width: 100vw; height: 100dvh; z-index: 10050; background: #000; }

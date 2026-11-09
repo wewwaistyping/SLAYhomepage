@@ -83,6 +83,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 .st b{font:700 18px 'Rubik'}
 .st small{font:600 11px 'Nunito';color:var(--mut);margin-left:4px}
 .desc{background:#fff;border-radius:12px;padding:12px 14px;font:600 14px/1.5 'Nunito';box-shadow:0 0 0 1px #e3e4e8;position:relative;min-height:0}
+.desc{flex-shrink:0}
 .desc p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .desc p.none{color:var(--mut);font-style:italic}
 
@@ -174,6 +175,20 @@ $('.seen').textContent = ITEMS.length; $('.caught').textContent = ITEMS.filter(c
 $('.list').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><span class="no">${no(i)}</span><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b><span class="ball ${caught(c) ? '' : 'no-c'}"></span></button>`).join('');
 
 let cur = 0, sel = 0;
+// Тесно по высоте: сначала прячем полоски характеристик с конца, потом укорачиваем цитату. Рамки и меню остаются целыми.
+function fitInfo() {
+  const info = $('.info'), desc = $('.desc'), p = $('.desc p'), base = $('.base');
+  const bars = [...base.querySelectorAll('.bar')];
+  bars.forEach((b) => { b.style.display = ''; }); base.style.display = ''; desc.style.display = ''; p.style.webkitLineClamp = '';
+  const over = () => info.scrollHeight > info.clientHeight + 1;
+  for (let i = bars.length - 1; i >= 0 && over(); i--) bars[i].style.display = 'none';
+  if (over()) base.style.display = 'none';
+  for (let n = (parseInt(getComputedStyle(p).webkitLineClamp) || 4) - 1; n >= 1 && over(); n--) p.style.webkitLineClamp = n;
+  if (over()) desc.style.display = 'none';
+}
+addEventListener('resize', () => fitInfo());
+document.fonts?.ready.then(() => fitInfo());
+
 function show(i) {
   cur = mod(i, ITEMS.length); const c = ITEMS[cur];
   $('.owner').textContent = meOf(cur).name;
@@ -194,6 +209,7 @@ function show(i) {
   const B = [[tt('Болтливость'), Math.max(5, Math.round(Math.sqrt(c.msgs / mx('msgs')) * 255)), '#ff5959'], [tt('Верность'), Math.max(5, Math.round(c.chats / mx('chats') * 255)), '#f5ac78'], [tt('Свежесть'), Math.min(255, fresh), '#fae078'], [tt('Обаяние'), 40 + Math.round(seeded(c.name, 35) * 200), '#9db7f5'], [tt('Загадочность'), 40 + Math.round(seeded(c.name, 36) * 200), '#a7db8d']];
   $('.base').innerHTML = tt('<h3>Базовые характеристики</h3>') + B.map(([n, v, col]) => `<div class="bar" style="--c:${col}">${n}<b>${v}</b><span><i style="width:${v / 255 * 100}%"></i></span></div>`).join('');
   const p = $('.desc p'); p.textContent = c.snip || tt('Данных об этом виде пока нет. Поговорите с ним, чтобы заполнить запись.'); p.classList.toggle('none', !c.snip);
+  fitInfo();
   $$('.ch').forEach((x, k) => x.classList.toggle('on', k === cur)); $$('.ch')[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 function pick(k) { sel = mod(k, 3); $$('.menu button').forEach((b, j) => b.classList.toggle('on', j === sel)); }

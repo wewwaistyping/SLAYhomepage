@@ -34,6 +34,7 @@ s.favs ??= [];         // избранное человек собирает с�
 s.hidden ??= [];        // 'c:<аватар>' / 'g:<группа>' — не показывать на стартовом экране
 s.offThemes ??= [];     // темы, убранные из меню: их нет в настройках, в кнопке в углу и в «Сюрпризе»
 s.groups ??= true;      // групповые чаты в ленте
+s.chatsBtn ??= true;    // кнопка «Чаты»: штатный список таверны, где чат можно закрепить, переименовать и удалить
 s.btn ??= true;         // кнопка смены темы в углу стартового экрана
 s.lang ??= 'auto';      // 'auto' — как в таверне, иначе код языка
 s.hideBar ??= false;    // верхнее меню таверны прячется на стартовом экране, выезжает у верхнего края
@@ -71,7 +72,7 @@ function prose(mes) {
     for (const par of pars) {
         const t = par.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
         if (t.length < 60 || t.includes('|') || '#-=[>\\'.includes(t[0])) continue;
-        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t) || /^[\p{L}\d_-]{2,24}:\S*=|^"[\p{L}\d_-]{2,24}"\s*:|^[a-z_-]{3,24}:\S/u.test(t)) continue;
+        if (/^(\d+\.|[A-ZА-Я0-9 _]{2,}:)/.test(t) || /^[\p{L}\d_-]{2,24}:\S*=|^["“”«»'][\p{L}\d_-]{2,24}["“”«»']\s*:|^[a-z_-]{3,24}:\S/u.test(t)) continue;
         if (/META|OOC|CORE|INFOBLOCK|Co-author|PROMPT|P0|HTML|image/i.test(t)) continue;
         return t.length > 220 ? t.slice(0, 220).replace(/\s\S*$/, '') + '…' : t;
     }
@@ -118,8 +119,13 @@ const chatKey = (chat) => `${chat.avatar || ''}|${chat.group || ''}|${chat.file_
 
 // Метаданные чатов бывают по мегабайту на чат, а нужна из них только персона. Поэтому список берём без них,
 // а потом просим метаданные только у чатов на экране: таверна отдаёт закреплённые сверх лимита, а лимит ставим 0.
+// Чаты, закреплённые в штатном списке таверны, идут первыми, как и там. Старая таверна без закрепов это поле не читает.
+function pinnedChats() {
+    try { return Object.values(JSON.parse(globalThis.SillyTavern?.getContext?.().accountStorage?.getItem('pinnedChats') || '{}')); } catch { return []; }
+}
+
 async function fetchItems() {
-    const data = await recentChats({ max: 60 });
+    const data = await recentChats({ max: 60, pinned: pinnedChats() });
     await checkThumbs();
     const picked = buildItems(data);
     const pinned = picked.map(({ chat }) => ({ avatar: chat.avatar || '', group: chat.group || '', file_name: chat.file_name }));
@@ -353,7 +359,7 @@ function render() {
     root.classList.toggle('sh-empty', !items.length);
     root.innerHTML = items.length ? layout().html(items) : '';
     if (items.length) { mounted = layout(); mounted.mount?.(root, api); }
-    if (s.btn && items.length) themePill();
+    if ((s.btn || s.chatsBtn) && items.length) themePill();
     root._napped = false;
     wake();
     show(Math.min(current, Math.max(items.length - 1, 0)));
@@ -387,9 +393,12 @@ function themePill() {
     const k = layoutKey();
     const pill = document.createElement('div');
     pill.className = 'sh-pill';
-    pill.innerHTML = `<button data-d="-1" title="${tt("Предыдущая тема")}">‹</button><button class="sh-pill-t" title="${tt("Настройки стартового экрана")}">◐<span> ${LAYOUTS[k].title}</span></button><button data-d="1" title="${tt("Следующая тема")}">›</button>`;
+    const chats = s.chatsBtn ? `<button class="sh-pill-c" data-chats title="${tt("Недавние чаты таверны: закрепить, переименовать, удалить")}">☰<span> ${tt("Чаты")}</span></button>` : '';
+    const theme = s.btn ? `<button data-d="-1" title="${tt("Предыдущая тема")}">‹</button><button class="sh-pill-t" title="${tt("Настройки стартового экрана")}">◐<span> ${LAYOUTS[k].title}</span></button><button data-d="1" title="${tt("Следующая тема")}">›</button>` : '';
+    pill.innerHTML = chats + (chats && theme ? '<i class="sh-pill-sep"></i>' : '') + theme;
     pill.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (e.target.closest('[data-chats]')) return showTavernList();
         const d = e.target.closest('[data-d]');
         if (!d) return openStudio();
         const next = order[(order.indexOf(k) + +d.dataset.d + order.length) % order.length];
@@ -444,6 +453,37 @@ async function act(what, c) {
     }
 }
 
+// «Чаты»: убираем свой экран и показываем штатный список недавних чатов таверны. Там её собственные кнопки:
+// закрепить, переименовать, удалить. Кнопка «Стартовый экран» возвращает обратно.
+let peek = false;
+function showTavernList() {
+    peek = true;
+    setVisible(false);
+    document.body.classList.add('slayhome-peek');
+    placeBack();
+    if (document.getElementById('slayhome-back')) return;
+    const back = document.createElement('button');
+    back.id = 'slayhome-back';
+    back.type = 'button';
+    back.textContent = tt('‹ Стартовый экран');
+    back.addEventListener('click', () => { endPeek(); refresh(); });
+    document.body.append(back);
+    placeBack();
+}
+// Кнопка висит по центру колонки чата над полем ввода: шапку списка и боковые панели таверны она не закрывает
+function placeBack() {
+    const back = document.getElementById('slayhome-back'), box = document.getElementById('sheld')?.getBoundingClientRect();
+    if (!back || !box?.width) return;
+    back.style.left = Math.round(box.left + box.width / 2) + 'px';
+    const form = document.getElementById('form_sheld')?.getBoundingClientRect();
+    // в мобильной раскладке таверны у fixed-слоёв контейнер нулевой высоты, bottom там не работает: считаем top
+    if (form?.height) back.style.top = Math.round(form.top - (back.offsetHeight || 32) - 10) + 'px';
+}
+function endPeek() {
+    peek = false;
+    document.body.classList.remove('slayhome-peek');
+}
+
 function setVisible(on) {
     document.body.classList.toggle('slayhome-on', on);
     // таймеры и анимации раскладки не крутятся под открытым чатом, картинки не держатся в памяти
@@ -475,7 +515,7 @@ try { items = JSON.parse(localStorage.getItem(CACHE) || '[]'); } catch { items =
 if (s.enabled && items.length) { setVisible(true); render(); }
 
 document.fonts?.ready.then(fitName);
-window.addEventListener('resize', () => { if (!document.body.classList.contains('slayhome-on')) return; measureTop(); if (items[current]) show(current); });
+window.addEventListener('resize', () => { if (peek) placeBack(); if (!document.body.classList.contains('slayhome-on')) return; measureTop(); if (items[current]) show(current); });
 window.addEventListener('keydown', e => {
     if (!document.body.classList.contains('slayhome-on') || e.target.closest?.('input, textarea, [contenteditable]')) return;
     if (!items[current]) return;
@@ -487,8 +527,8 @@ window.addEventListener('keydown', e => {
 eventSource.once(event_types.APP_READY, () => { appReady = true; refresh(); });
 eventSource.on(event_types.CHAT_CHANGED, () => {
     if (!appReady) return;
-    if (getCurrentChatId() === undefined) refresh();
-    else setVisible(false);
+    if (getCurrentChatId() !== undefined) { endPeek(); return setVisible(false); }
+    if (!peek) refresh(); // пока открыт список таверны, свой экран не возвращаем: его вернёт кнопка
 });
 
 // Студия настроек: своя страница в рамке поверх таверны (стили таверны её не трогают)
@@ -515,7 +555,7 @@ window.SLAYHOME_STUDIO = {
     tt, pl, localize, lang: LANG,
     base: BASE,
     get themes() { return Object.entries(LAYOUTS).map(([key, l]) => ({ key, title: l.title, game: !!l.game })); },
-    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, btn: s.btn, hideBar: s.hideBar, lang: s.lang }; },
+    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, btn: s.btn, chatsBtn: s.chatsBtn, hideBar: s.hideBar, lang: s.lang }; },
     set(patch) {
         Object.assign(s, patch);
         if ('mode' in patch || 'favs' in patch || (session && !shown(session))) session = null;

@@ -258,7 +258,14 @@ function typeInto(root, el, text, step = 2, ms = 26) {
 const pixImgs = {};
 function pix(canvas, src, w, h, cropTop = 0, cropH = 1) {
     canvas.width = w; canvas.height = h;
-    const draw = (im) => canvas.getContext('2d').drawImage(im, 0, im.naturalHeight * cropTop, im.naturalWidth, im.naturalHeight * cropH, 0, 0, w, h);
+    const draw = (im) => {
+        // Сначала приводим портрет к 2:3, как миниатюры таверны, потом берём из полосы кусок с пропорциями холста:
+        // лишнее срезается по бокам, лицо не сплющивается
+        const vw = Math.min(im.naturalWidth, im.naturalHeight * 2 / 3), vh = Math.min(im.naturalHeight, im.naturalWidth * 1.5);
+        let sw = vh * cropH * w / h, sh = vh * cropH;
+        if (sw > vw) { sw = vw; sh = vw * h / w; }
+        canvas.getContext('2d').drawImage(im, (im.naturalWidth - sw) / 2, vh * cropTop, sw, sh, 0, 0, w, h);
+    };
     const im = pixImgs[src] ??= Object.assign(new Image(), { src });
     if (im.complete && im.naturalWidth) draw(im); else im.addEventListener('load', () => draw(im), { once: true });
 }
