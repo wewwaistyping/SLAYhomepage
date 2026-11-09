@@ -676,14 +676,16 @@ body.slayhome-nobar #slayhome .sh-pill { right: 72px; }
 #slayhome .sh-pill button { color: #fff; background: none; border: 0; padding: 5px 9px; border-radius: 99px; cursor: pointer; font: inherit; white-space: nowrap; }
 #slayhome .sh-pill button:hover { background: #ffffff1f; }
 #slayhome .sh-pill .sh-pill-t { max-width: 46vw; overflow: hidden; text-overflow: ellipsis; }
-#slayhome .sh-pill .sh-pill-sep { width: 1px; height: 14px; margin: 0 2px; background: #ffffff40; }
 /* возврат со штатного списка чатов таверны */
 #slayhome-back { display: none; position: fixed; left: 50%; top: calc(100dvh - 104px); transform: translateX(-50%); z-index: 2000; white-space: nowrap; box-shadow: 0 4px 14px #0008; padding: 7px 14px; border-radius: 99px; background: #000c; border: 1px solid #ffffff30; color: #fff; font: 600 12px 'Onest', system-ui, sans-serif; cursor: pointer; }
 body.slayhome-peek #slayhome-back { display: block; }
 #slayhome-back:hover { background: #000; }
+/* чаты бота, с которого нажали «Все чаты», коротко подсвечиваются в списке таверны */
+body.slayhome-peek #chat .recentChat.slayhome-mine { animation: slayhome-mine 1.8s ease-out 1; }
+@keyframes slayhome-mine { 0%, 45% { box-shadow: 0 0 0 2px var(--SmartThemeQuoteColor, #e6a23c); } 100% { box-shadow: 0 0 0 2px transparent; } }
 @media (hover: none) { #slayhome .sh-pill { opacity: .8; } }
 /* на узком экране — только ‹ ◐ ›, чтобы не закрывать заголовки тем */
-@media (max-width: 760px) { #slayhome .sh-pill-t span, #slayhome .sh-pill-c span { display: none; } #slayhome .sh-pill button { padding: 5px 8px; } }
+@media (max-width: 760px) { #slayhome .sh-pill-t span { display: none; } #slayhome .sh-pill button { padding: 5px 8px; } }
 
 /* студия настроек — во весь экран поверх таверны */
 #slayhome-studio { position: fixed; left: 0; top: 0; width: 100vw; height: 100dvh; z-index: 10050; background: #000; }

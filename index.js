@@ -34,7 +34,6 @@ s.favs ??= [];         // избранное человек собирает с�
 s.hidden ??= [];        // 'c:<аватар>' / 'g:<группа>' — не показывать на стартовом экране
 s.offThemes ??= [];     // темы, убранные из меню: их нет в настройках, в кнопке в углу и в «Сюрпризе»
 s.groups ??= true;      // групповые чаты в ленте
-s.chatsBtn ??= true;    // кнопка «Чаты»: штатный список таверны, где чат можно закрепить, переименовать и удалить
 s.btn ??= true;         // кнопка смены темы в углу стартового экрана
 s.lang ??= 'auto';      // 'auto' — как в таверне, иначе код языка
 s.hideBar ??= false;    // верхнее меню таверны прячется на стартовом экране, выезжает у верхнего края
@@ -359,7 +358,7 @@ function render() {
     root.classList.toggle('sh-empty', !items.length);
     root.innerHTML = items.length ? layout().html(items) : '';
     if (items.length) { mounted = layout(); mounted.mount?.(root, api); }
-    if ((s.btn || s.chatsBtn) && items.length) themePill();
+    if (s.btn && items.length) themePill();
     root._napped = false;
     wake();
     show(Math.min(current, Math.max(items.length - 1, 0)));
@@ -393,12 +392,9 @@ function themePill() {
     const k = layoutKey();
     const pill = document.createElement('div');
     pill.className = 'sh-pill';
-    const chats = s.chatsBtn ? `<button class="sh-pill-c" data-chats title="${tt("Недавние чаты таверны: закрепить, переименовать, удалить")}">☰<span> ${tt("Чаты")}</span></button>` : '';
-    const theme = s.btn ? `<button data-d="-1" title="${tt("Предыдущая тема")}">‹</button><button class="sh-pill-t" title="${tt("Настройки стартового экрана")}">◐<span> ${LAYOUTS[k].title}</span></button><button data-d="1" title="${tt("Следующая тема")}">›</button>` : '';
-    pill.innerHTML = chats + (chats && theme ? '<i class="sh-pill-sep"></i>' : '') + theme;
+    pill.innerHTML = `<button data-d="-1" title="${tt("Предыдущая тема")}">‹</button><button class="sh-pill-t" title="${tt("Настройки стартового экрана")}">◐<span> ${LAYOUTS[k].title}</span></button><button data-d="1" title="${tt("Следующая тема")}">›</button>`;
     pill.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (e.target.closest('[data-chats]')) return showTavernList();
         const d = e.target.closest('[data-d]');
         if (!d) return openStudio();
         const next = order[(order.indexOf(k) + +d.dataset.d + order.length) % order.length];
@@ -432,6 +428,8 @@ function fitName() {
 
 async function act(what, c) {
     if (!c || !appReady) return;
+    // «Все чаты» чат не открывает: показываем список таверны прямо на главной. Нет списка (старая таверна или он свёрнут) — как раньше
+    if (what === 'all' && showTavernList(c)) return;
     try {
         if (c.group) {
             await openGroupById(c.group);
@@ -446,29 +444,39 @@ async function act(what, c) {
         }
         saveSettingsDebounced();
         if (what === 'new') await doNewChat();
-        if (what === 'all') document.getElementById('option_select_chat')?.click();
+        if (what === 'all') document.getElementById('option_select_chat')?.click(); // запасной путь без списка таверны
     } catch (err) {
         console.error('[SLAYhomepage]', err);
         toastr.error(tt('Не удалось открыть чат, подробности в консоли'));
     }
 }
 
-// «Чаты»: убираем свой экран и показываем штатный список недавних чатов таверны. Там её собственные кнопки:
+// «Все чаты»: убираем свой экран и показываем штатный список недавних чатов таверны. Там её собственные кнопки:
 // закрепить, переименовать, удалить. Кнопка «Стартовый экран» возвращает обратно.
 let peek = false;
-function showTavernList() {
+function showTavernList(c) {
+    const panel = document.querySelector('#chat .welcomePanel');
+    const rows = [...(panel?.querySelectorAll('.recentChat') ?? [])];
+    if (!rows.some((el) => el.offsetParent || el.classList.contains('hidden'))) return false;
     peek = true;
     setVisible(false);
     document.body.classList.add('slayhome-peek');
+    // таверна показывает три чата: раскрываем список целиком и подсвечиваем чаты выбранного бота
+    const more = panel.querySelector('.showMoreChats');
+    if (more && !more.classList.contains('rotated') && panel.querySelector('.recentChat.hidden')) more.click();
+    const mine = rows.filter((el) => (c.group ? el.dataset.group === c.group : el.dataset.avatar === c.avatar));
+    rows.forEach((el) => el.classList.toggle('slayhome-mine', mine.includes(el)));
+    mine[0]?.scrollIntoView({ block: 'center' });
+    if (!document.getElementById('slayhome-back')) {
+        const back = document.createElement('button');
+        back.id = 'slayhome-back';
+        back.type = 'button';
+        back.textContent = tt('‹ Стартовый экран');
+        back.addEventListener('click', () => { endPeek(); refresh(); });
+        document.body.append(back);
+    }
     placeBack();
-    if (document.getElementById('slayhome-back')) return;
-    const back = document.createElement('button');
-    back.id = 'slayhome-back';
-    back.type = 'button';
-    back.textContent = tt('‹ Стартовый экран');
-    back.addEventListener('click', () => { endPeek(); refresh(); });
-    document.body.append(back);
-    placeBack();
+    return true;
 }
 // Кнопка висит по центру колонки чата над полем ввода: шапку списка и боковые панели таверны она не закрывает
 function placeBack() {
@@ -555,7 +563,7 @@ window.SLAYHOME_STUDIO = {
     tt, pl, localize, lang: LANG,
     base: BASE,
     get themes() { return Object.entries(LAYOUTS).map(([key, l]) => ({ key, title: l.title, game: !!l.game })); },
-    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, btn: s.btn, chatsBtn: s.chatsBtn, hideBar: s.hideBar, lang: s.lang }; },
+    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, btn: s.btn, hideBar: s.hideBar, lang: s.lang }; },
     set(patch) {
         Object.assign(s, patch);
         if ('mode' in patch || 'favs' in patch || (session && !shown(session))) session = null;
