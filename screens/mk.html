@@ -41,7 +41,8 @@ html,body{height:100%;overflow:hidden;background:#000}
 #app .mk-grid { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; z-index: 3; }
 #app .mk-tile { position: relative; aspect-ratio: 1; padding: 0; background: #1a0c06; border: 3px solid #6b4a24; box-shadow: inset 0 0 0 2px #000, 0 4px 10px #000a; overflow: hidden; }
 #app .mk-tile img { width: 100%; height: 100%; object-fit: cover; object-position: center 14%; filter: grayscale(.5) brightness(.75); transition: filter .1s; }
-#app .mk-tile.on { border-color: #ff3a1a; animation: mk-sel .5s steps(2) infinite; z-index: 1; }
+#app .mk-tile.on { border-color: #ff3a1a; overflow: visible; z-index: 1; }
+#app .mk-tile.on::before { content: ''; position: absolute; inset: -3px; border: 3px solid #ffd23a; opacity: 0; pointer-events: none; animation: mk-sel .5s steps(2) infinite; }
 #app .mk-tile.on img { filter: none; }
 #app .mk-tile.on::after { content: 'P1'; position: absolute; left: 2px; top: 2px; font: 400 11px 'Russo One', sans-serif; color: #fff; background: #ff3a1a; padding: 0 4px; }
 #app .mk-info { font: 400 13px 'IBM Plex Mono', monospace; color: #c9a27a; white-space: nowrap; text-shadow: 0 1px 2px #000; }
@@ -78,7 +79,7 @@ html,body{height:100%;overflow:hidden;background:#000}
 @keyframes mk-flick { 50% { opacity: .7; } 100% { opacity: 1; transform: scaleY(1.06); } }
 @keyframes mk-smoke { to { transform: translateX(4vw); } }
 @keyframes mk-in { from { transform: translateX(-60px); opacity: 0; } }
-@keyframes mk-sel { 50% { border-color: #ffd23a; } }
+@keyframes mk-sel { 50% { opacity: 1; } }
 @keyframes mk-flash { 0% { opacity: 0; transform: scale(2.4); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1.06); } }
 @media (max-width: 1000px) {
 #app .mk-title { font-size: 26px; }

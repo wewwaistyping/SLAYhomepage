@@ -6,6 +6,13 @@ import { LOCALE, tt } from './lang.js';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const $ = (root, sel) => root.querySelector(sel);
+// Экран живёт на странице таверны, а у неё много правил :has(). Замена дочернего узла заставляет браузер заново
+// считать тысячи элементов, поэтому меняем текст внутри уже существующего текстового узла.
+const setText = (el, value) => {
+    const text = String(value ?? ''), node = el.firstChild;
+    if (node?.nodeType === 3 && !node.nextSibling) node.data = text;
+    else el.textContent = text;
+};
 const mark = (root, sel, i) => root.querySelectorAll(sel).forEach(x => x.classList.toggle('on', +x.dataset.i === i));
 
 export function ago(ts) {
@@ -94,10 +101,10 @@ export const LAYOUTS = {
             const c = items[i];
             $(root, '.sh-amb').style.backgroundImage = c.img ? `url("${c.img}")` : '';
             $(root, '.sh-por img').src = c.img;
-            $(root, '.sh-k').textContent = (i ? tt('недавний разговор · ') : tt('последний разговор · ')) + ago(c.ts);
-            $(root, '.sh-name').textContent = c.name;
+            setText($(root, '.sh-k'), (i ? tt('недавний разговор · ') : tt('последний разговор · ')) + ago(c.ts));
+            setText($(root, '.sh-name'), c.name);
             const q = $(root, '.sh-q');
-            q.textContent = c.snip;
+            setText(q, c.snip);
             q.hidden = !c.snip;
             $(root, '.sh-stats').innerHTML = `<span><b>${c.msgs}</b> ${tt("сообщений в чате")}</span>${c.group ? tt('<span>группа</span>') : ''}`;
             mark(root, '.sh-c', i);
@@ -119,9 +126,9 @@ export const LAYOUTS = {
             const c = items[i];
             $(root, '.shs-bg').src = c.img;
             $(root, '.shs-fill').style.backgroundImage = c.img ? `url("${c.img}")` : '';
-            $(root, '.shs-tm').textContent = tt`${c.msgs} сообщ. · ${ago(c.ts)}`;
-            $(root, '.shs-who').textContent = c.name;
-            $(root, '.shs-line').textContent = c.snip ? '— ' + c.snip : '';
+            setText($(root, '.shs-tm'), tt`${c.msgs} сообщ. · ${ago(c.ts)}`);
+            setText($(root, '.shs-who'), c.name);
+            setText($(root, '.shs-line'), c.snip ? '— ' + c.snip : '');
             mark(root, '.shs-rec img', i);
         },
     },
@@ -143,9 +150,9 @@ export const LAYOUTS = {
             <div class="shd-fan">${items.map((c, i) => `<div class="shd-card" data-i="${i}">${img(c)}</div>`).join('')}</div>`,
         show(root, a, items) {
             const c = items[a];
-            $(root, '.shd-when').textContent = (a ? tt('недавний') : tt('последний')) + tt(' разговор · ') + ago(c.ts);
-            $(root, '.shd-name').textContent = c.name;
-            $(root, '.shd-q').textContent = c.snip;
+            setText($(root, '.shd-when'), (a ? tt('недавний') : tt('последний')) + tt(' разговор · ') + ago(c.ts));
+            setText($(root, '.shd-name'), c.name);
+            setText($(root, '.shd-q'), c.snip);
             $(root, '.shd-txt').animate?.([{ opacity: .4 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
             const cards = root.querySelectorAll('.shd-card'), { step, mid } = deckFan(root);
             cards.forEach((k, i) => {
@@ -177,11 +184,11 @@ export const LAYOUTS = {
             const c = items[i];
             $(root, '.shm-av').src = c.img;
             $(root, '.shm-pic').src = c.img;
-            $(root, '.shm-name').textContent = c.name;
-            $(root, '.shm-sub').textContent = tt`${c.msgs} сообщений в чате`;
-            $(root, '.shm-bub span').textContent = c.snip || '…';
-            $(root, '.shm-bub time').textContent = ago(c.ts);
-            $(root, '.shm-field').textContent = tt`Ответить ${c.name.split(' ')[0]}…`;
+            setText($(root, '.shm-name'), c.name);
+            setText($(root, '.shm-sub'), tt`${c.msgs} сообщений в чате`);
+            setText($(root, '.shm-bub span'), c.snip || '…');
+            setText($(root, '.shm-bub time'), ago(c.ts));
+            setText($(root, '.shm-field'), tt`Ответить ${c.name.split(' ')[0]}…`);
             mark(root, '.shm-ct', i);
         },
     },
@@ -205,9 +212,9 @@ export const LAYOUTS = {
             <div class="shf-meta"><div class="shf-when"></div><h1 class="shf-name"></h1><p class="shf-q"></p><div class="shf-btns">${BTNS}</div></div>`,
         show(root, cur, items) {
             const c = items[cur];
-            $(root, '.shf-when').textContent = ago(c.ts);
-            $(root, '.shf-name').textContent = c.name;
-            $(root, '.shf-q').textContent = c.snip;
+            setText($(root, '.shf-when'), ago(c.ts));
+            setText($(root, '.shf-name'), c.name);
+            setText($(root, '.shf-q'), c.snip);
             root.querySelectorAll('.shf-card').forEach((k, i) => {
                 const o = i - cur, ao = Math.abs(o), w = k.offsetWidth;
                 k.style.transform = `translateX(${-w / 2 + o * w * 0.62 + Math.sign(o) * w * 0.25}px) translateZ(${-ao * 140}px) rotateY(${-Math.sign(o) * 38}deg)`;
@@ -243,8 +250,8 @@ function menu(root, sel) {
 // Печать реплики по буквам
 function typeInto(root, el, text, step = 2, ms = 26) {
     clearInterval(root._tm);
-    let n = 0; el.textContent = '';
-    root._tm = setInterval(() => { n += step; el.textContent = text.slice(0, n); if (n >= text.length) clearInterval(root._tm); }, ms);
+    let n = 0; setText(el, '');
+    root._tm = setInterval(() => { n += step; setText(el, text.slice(0, n)); if (n >= text.length) clearInterval(root._tm); }, ms);
 }
 
 // Пикселизация: картинку в маленький canvas, CSS растягивает без сглаживания
@@ -281,8 +288,8 @@ Object.assign(LAYOUTS, {
             const c = items[i];
             root.querySelector('.shv-fill').style.backgroundImage = c.img ? `url("${c.img}")` : '';
             root.querySelector('.shv-art').src = c.img;
-            root.querySelector('.shv-name').textContent = c.name;
-            root.querySelector('.shv-sub').textContent = tt`история · ${c.msgs} сообщений · ${ago(c.ts)}`;
+            setText(root.querySelector('.shv-name'), c.name);
+            setText(root.querySelector('.shv-sub'), tt`история · ${c.msgs} сообщений · ${ago(c.ts)}`);
         },
         key(k, root, api) {
             if (root.querySelector('.shv-gal.open')) {
@@ -312,12 +319,12 @@ Object.assign(LAYOUTS, {
             const c = items[i];
             root.querySelector('.shn-art').src = c.img;
             const nm = root.querySelector('.shn-name');
-            nm.textContent = c.name;
+            setText(nm, c.name);
             // имя с широкой разрядкой — уменьшаем, пока не влезет в одну строку
             nm.style.fontSize = '';
             let fs = parseFloat(getComputedStyle(nm).fontSize);
             while (fs > 16 && nm.scrollWidth > nm.clientWidth + 1) { fs -= 2; nm.style.fontSize = fs + 'px'; }
-            root.querySelector('.shn-line').textContent = c.snip ? `«${c.snip}»` : '';
+            setText(root.querySelector('.shn-line'), c.snip ? `«${c.snip}»` : '');
         },
         key(k, root, api) {
             if (k === 'ArrowDown' || k === 'ArrowUp') { root._menu.move(k === 'ArrowDown' ? 1 : -1); return true; }
@@ -350,16 +357,16 @@ Object.assign(LAYOUTS, {
         show(root, i, items) {
             const c = items[i], maxChats = Math.max(1, ...items.map((x) => x.chats || 0));
             pix(root.querySelector('.shr-hero canvas'), c.img, 64, 96);
-            root.querySelector('.shr-name').textContent = c.name;
-            root.querySelector('.shr-lv').textContent = c.msgs;
+            setText(root.querySelector('.shr-name'), c.name);
+            setText(root.querySelector('.shr-lv'), c.msgs);
             root.querySelector('.shr-hp').style.width = Math.max(8, (c.chats || 0) / maxChats * 100) + '%';
-            root.querySelector('.shr-hpn').textContent = `${c.chats || 0}/${maxChats}`;
+            setText(root.querySelector('.shr-hpn'), `${c.chats || 0}/${maxChats}`);
             const fresh = Math.max(0.06, 1 - (Date.now() - c.ts) / (30 * 864e5));
             root.querySelector('.shr-mp').style.width = fresh * 100 + '%';
-            root.querySelector('.shr-mpn').textContent = Math.round(fresh * 99);
-            root.querySelector('.shr-when').textContent = ago(c.ts);
+            setText(root.querySelector('.shr-mpn'), Math.round(fresh * 99));
+            setText(root.querySelector('.shr-when'), ago(c.ts));
             mark(root, '.shr-party button', i);
-            root.querySelector('.shr-dlg b').textContent = c.name.split(' ')[0].toUpperCase();
+            setText(root.querySelector('.shr-dlg b'), c.name.split(' ')[0].toUpperCase());
             typeInto(root, root.querySelector('.shr-t'), c.snip ? `«${c.snip}»` : '…', 2, 28);
         },
         key(k, root, api) {
@@ -399,11 +406,11 @@ Object.assign(LAYOUTS, {
             q('.shc-haze').style.backgroundImage = c.img ? `url("${c.img}")` : '';
             root.querySelectorAll('.shc-por img').forEach((im) => { im.src = c.img; });
             q('.shc-call img').src = c.img;
-            const nm = q('.shc-name'); nm.textContent = c.name; nm.dataset.t = c.name;
+            const nm = q('.shc-name'); setText(nm, c.name); nm.dataset.t = c.name;
             q('.shc-meta').innerHTML = `<span>${tt("СООБЩ:")} <i>${c.msgs}</i></span>${c.chats ? `<span>${tt("ЧАТОВ:")} <i>${c.chats}</i></span>` : ''}<span>${tt("СВЯЗЬ:")} <i>${ago(c.ts)}</i></span>`;
-            q('.shc-tagr').textContent = `ID ${String(i + 1).padStart(4, '0')}-${String(c.msgs).padStart(4, '0')}`;
-            q('.shc-tagid').textContent = tt`◆ ${c.name.toUpperCase()} // ЛИЧНОЕ ДЕЛО`;
-            q('.shc-who b').textContent = c.name.toUpperCase();
+            setText(q('.shc-tagr'), `ID ${String(i + 1).padStart(4, '0')}-${String(c.msgs).padStart(4, '0')}`);
+            setText(q('.shc-tagid'), tt`◆ ${c.name.toUpperCase()} // ЛИЧНОЕ ДЕЛО`);
+            setText(q('.shc-who b'), c.name.toUpperCase());
             mark(root, '.shc-ct', i);
             root.querySelectorAll('.shc-ct')[i]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
             if (root._shown) root._glitch?.(); root._shown = true;
@@ -498,9 +505,9 @@ LAYOUTS.cozy = {
     show(root, i, items) {
         const c = items[i], q = (s) => root.querySelector(s);
         q('.shz-arch img').src = c.img;
-        q('.shz-tag').textContent = tt`${c.msgs} сообщений · ${ago(c.ts)}`;
-        q('.shz-talk h1').textContent = c.name;
-        q('.shz-bubble p').textContent = c.snip || '…';
+        setText(q('.shz-tag'), tt`${c.msgs} сообщений · ${ago(c.ts)}`);
+        setText(q('.shz-talk h1'), c.name);
+        setText(q('.shz-bubble p'), c.snip || '…');
         mark(root, '.shz-entry', i);
         root.querySelectorAll('.shz-entry')[i]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     },
@@ -657,9 +664,9 @@ LAYOUTS.farm = {
     show(root, i, items) {
         const c = items[i], q = (s) => root.querySelector(s);
         pix(q('.sfm-dlg canvas'), c.img, 56, 56, 0.03, 0.45);
-        q('.sfm-nm').textContent = c.name;
+        setText(q('.sfm-nm'), c.name);
         q('.sfm-dlg .sfm-hearts').innerHTML = sfmHearts(Math.min(10, c.chats || 0));
-        q('.sfm-gold').textContent = c.msgs;
+        setText(q('.sfm-gold'), c.msgs);
         typeInto(root, q('.sfm-tx .sfm-t'), c.snip || '…', 2, 26);
     },
     key(k, root, api) {

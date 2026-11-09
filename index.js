@@ -104,16 +104,30 @@ const checkThumbs = () => new Promise((done) => {
 const avatarUrl = (file) => (smallThumbs ? `/characters/${encodeURIComponent(file)}` : getThumbnailUrl('avatar', file));
 const personaUrl = (file) => (smallThumbs ? `/User%20Avatars/${encodeURIComponent(file)}` : getThumbnailUrl('persona', file));
 
-async function fetchItems() {
+async function recentChats(body) {
     const res = await fetch('/api/chats/recent', {
         method: 'POST',
         headers: getRequestHeaders(),
-        body: JSON.stringify({ max: 60, metadata: true }),
+        body: JSON.stringify(body),
         cache: 'no-cache',
     });
-    if (!res.ok) return [];
-    const data = await res.json();
+    return res.ok ? res.json() : [];
+}
+
+const chatKey = (chat) => `${chat.avatar || ''}|${chat.group || ''}|${chat.file_name}`;
+
+// Метаданные чатов бывают по мегабайту на чат, а нужна из них только персона. Поэтому список берём без них,
+// а потом просим метаданные только у чатов на экране: таверна отдаёт закреплённые сверх лимита, а лимит ставим 0.
+async function fetchItems() {
+    const data = await recentChats({ max: 60 });
     await checkThumbs();
+    const picked = buildItems(data);
+    const pinned = picked.map(({ chat }) => ({ avatar: chat.avatar || '', group: chat.group || '', file_name: chat.file_name }));
+    const meta = new Map((pinned.length ? await recentChats({ max: 0, pinned, metadata: true }) : []).map((chat) => [chatKey(chat), chat.chat_metadata]));
+    return picked.map(({ item, chat, owner }) => ({ ...item, me: personaOf({ chat_metadata: meta.get(chatKey(chat)) }, owner) }));
+}
+
+function buildItems(data) {
     const seen = new Set();
     const out = [];
     // сколько чатов у персонажа среди последних (для «Ретро» и «Киберпанка»), без отдельных запросов
@@ -127,7 +141,7 @@ async function fetchItems() {
         if (!ch && !gr) continue;
         seen.add(key);
         const avatar = ch ? ch.avatar : (gr.members?.[0] ?? '');
-        out.push({
+        const item = {
             avatar: ch ? ch.avatar : '',
             group: gr ? gr.id : '',
             // openCharacterChat/openGroupChat ждут имя без расширения, иначе создадут новый «*.jsonl.jsonl»
@@ -139,8 +153,9 @@ async function fetchItems() {
             snip: prose(chat.mes),
             chats: counts[key],
             render: ch ? (s.renders[ch.avatar] || '') : '',
-            me: personaOf(chat, ch ? ch.avatar : gr.id),
-        });
+            me: null,
+        };
+        out.push({ item, chat, owner: ch ? ch.avatar : gr.id });
         if (out.length >= s.count) break;
     }
     return out;
@@ -315,7 +330,21 @@ function measureTop() {
     root?.style.setProperty('--sh-top', Math.round(Math.max(...bottoms)) + 'px');
 }
 
+// Шрифты подключаем отдельно и только когда экран показан: таверна не ждёт Google и не тянет их, если экран выключен
+const FONTS = 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&family=Unbounded:wght@800&family=JetBrains+Mono:wght@400;600&family=Literata:ital,opsz,wght@1,7..72,400&family=Onest:wght@400;500;700&family=Spectral:ital,wght@0,300;1,300&family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@800;900&family=Tektur:wght@500;700;800&family=Exo+2:wght@500&family=Tiny5&family=Press+Start+2P&family=Nunito:wght@600;700;800;900&display=swap';
+let fontsAdded = false;
+function loadFonts() {
+    if (fontsAdded) return;
+    fontsAdded = true;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = FONTS;
+    link.onload = () => document.fonts?.ready.then(() => { if (root?.childElementCount && document.body.classList.contains('slayhome-on')) { fitLong(root); fitName(); } });
+    document.head.append(link);
+}
+
 function render() {
+    loadFonts();
     if (!root) build();
     applyBar();
     measureTop();
@@ -425,7 +454,7 @@ function setVisible(on) {
 async function refresh(redraw = false) {
     if (!s.enabled || getCurrentChatId() !== undefined) return setVisible(false);
     setVisible(true);
-    if (!root?.childElementCount) render(); // уже нарисован из кэша при загрузке — не перерисовываем
+    if (!root) build();
     try {
         const fresh = await fetchItems();
         if (getCurrentChatId() !== undefined) return setVisible(false);
@@ -437,6 +466,7 @@ async function refresh(redraw = false) {
         localStorage.setItem(CACHE, JSON.stringify(items));
     } catch (err) {
         console.error('[SLAYhomepage]', err);
+        if (!root?.childElementCount) render(); // сервер не ответил — показываем то, что помним
     }
 }
 

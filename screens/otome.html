@@ -56,8 +56,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 @keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.7);opacity:0}}
 .ph-name{font:italic 800 24px/1.1 'Playfair Display';overflow-wrap:anywhere}
 .ph-sub{margin-top:6px;font:500 12px 'Montserrat';color:var(--mu)}
-.ph-sub::after{content:'';animation:dots 1.5s steps(4) infinite}
-@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+.ph-dots b{display:inline-block;font-weight:inherit;opacity:0;animation:dot1 1.5s steps(1) infinite}.ph-dots b:nth-child(2){animation-name:dot2}.ph-dots b:nth-child(3){animation-name:dot3}
+@keyframes dot1{0%{opacity:0}25%,100%{opacity:1}}@keyframes dot2{0%{opacity:0}50%,100%{opacity:1}}@keyframes dot3{0%{opacity:0}75%,100%{opacity:1}}
 .ph-btns{display:flex;justify-content:space-around;margin-top:26px}
 .ph-btns button{display:flex;flex-direction:column;align-items:center;gap:8px;font:600 11px 'Montserrat';color:var(--mu)}
 .ph-btns span{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;transition:transform .15s}
@@ -145,7 +145,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 <div class="phone glass">
   <div class="ph-top">Входящий видеовызов</div>
   <div class="ava"><i></i><i></i><i></i><img decoding="async" src="" alt=""></div>
-  <div class="ph-txt"><div class="ph-name"></div><div class="ph-sub">звонит тебе</div></div>
+  <div class="ph-txt"><div class="ph-name"></div><div class="ph-sub">звонит тебе<span class="ph-dots"><b>.</b><b>.</b><b>.</b></span></div></div>
   <div class="ph-btns">
     <button class="no" title="Отклонить"><span><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>Отклонить</button>
     <button class="yes" title="Ответить"><span><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>Ответить</button>
