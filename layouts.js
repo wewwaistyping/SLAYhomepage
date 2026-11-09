@@ -630,13 +630,13 @@ function farmScene(canvas) {
     smoke.forEach(p => { p.y -= .35; p.x += .15; p.a -= .012; if (p.a>0) px(night?`rgba(160,160,190,${p.a*.6})`:`rgba(235,235,235,${p.a})`,p.x,p.y,2,2); });
     smoke = smoke.filter(p => p.a > 0);
   }
-  let raf, last = 0;
-  const loop = t => { if (t - last > 110) { frame(t); last = t; } raf = requestAnimationFrame(loop); };
+  // сцена рисует 9 кадров в секунду: таймер будит страницу 9 раз, а не 60, как опрос через requestAnimationFrame
+  let timer = 0;
 
 
   build();
   const onResize = () => build();
-  return { start: () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); addEventListener('resize', onResize); }, stop: () => { cancelAnimationFrame(raf); removeEventListener('resize', onResize); } };
+  return { start: () => { clearInterval(timer); timer = setInterval(() => frame(performance.now()), 110); addEventListener('resize', onResize); }, stop: () => { clearInterval(timer); removeEventListener('resize', onResize); } };
 }
 const sfmHearts = (n) => Array.from({ length: 10 }, (_, k) => `<i class="${k < n ? 'sfm-f' : ''}"></i>`).join('');
 LAYOUTS.farm = {

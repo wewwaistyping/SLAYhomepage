@@ -64,5 +64,6 @@ addEventListener('DOMContentLoaded', () => {
     new MutationObserver(fit).observe(document.body, { childList: true, subtree: true, characterData: true });
     addEventListener('resize', fit);
     document.fonts?.ready.then(() => { done.clear(); fit(); });
+    document.fonts?.addEventListener?.('loadingdone', () => { done.clear(); fit(); });
     fit();
 });

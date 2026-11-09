@@ -36,3 +36,6 @@ addEventListener('load', () => {
     for (const e of ['pointerdown', 'pointermove', 'touchstart', 'keydown', 'wheel']) addEventListener(e, wake, { passive: true });
     wake();
 });
+
+// Шрифты приходят в фоне: когда они загрузились, экран пересчитывает всё, что зависит от ширины текста
+document.fonts?.addEventListener?.('loadingdone', () => dispatchEvent(new Event('resize')));

@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SLAYhomepage</title>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<!-- Шрифты грузятся в фоне: если Google не отвечает, экран появится через 1,2 с системным шрифтом, а не останется пустым -->
+<script>document.documentElement.classList.add('fw');setTimeout(() => document.documentElement.classList.remove('fw'), 1200);</script>
+<style>.fw body{visibility:hidden}</style>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all';document.documentElement.classList.remove('fw')" onerror="document.documentElement.classList.remove('fw')">
 <style>
 :root{--bg:#141215;--card:#1d1a1f;--line:#ffffff14;--line2:#ffffff26;--txt:#f1ece6;--dim:#9b938c;--acc:#ff7a59;--acc2:#ffb199;--star:#ffcf5a}
 *{box-sizing:border-box;margin:0;padding:0}

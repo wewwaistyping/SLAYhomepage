@@ -324,9 +324,24 @@ function unmount() { mounted?.unmount?.(root, api); mounted = null; if (root) cl
 
 // Реальный низ верхней панели таверны: тема может сделать её выше стандартной переменной
 // у верхнего края — невидимая полоска: навёл мышь (или тапнул) — меню выехало
+// Меню видно, пока указатель у верхнего края или на самом меню, или открыта его панель: тогда у body класс slayhome-bar.
+// Раньше это решало правило body:has(…) в стилях, но из-за него браузер заново считал стили всей страницы таверны
+// при каждом изменении на экране (смена бота, печать текста).
+const BAR_ZONE = '#slayhome-barzone, #top-bar, #top-settings-holder';
+let barWatch = null;
 function applyBar() {
     document.body.classList.toggle('slayhome-nobar', !!s.hideBar);
-    if (s.hideBar && !document.getElementById('slayhome-barzone')) document.body.insertAdjacentHTML('beforeend', '<div id="slayhome-barzone"></div>');
+    if (!s.hideBar || barWatch) return;
+    document.body.insertAdjacentHTML('beforeend', '<div id="slayhome-barzone"></div>');
+    const holder = document.getElementById('top-settings-holder');
+    let over = false, drawer = false;
+    const update = () => document.body.classList.toggle('slayhome-bar', over || drawer);
+    document.addEventListener('pointerover', (e) => { const now = !!e.target.closest?.(BAR_ZONE); if (now !== over) { over = now; update(); } }, { passive: true });
+    // мышь ушла за окно; у пальца «наведение» держится до следующего тапа, как :hover на телефоне
+    document.documentElement.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && over) { over = false; update(); } });
+    barWatch = new MutationObserver(() => { const now = !!holder.querySelector('.openDrawer'); if (now !== drawer) { drawer = now; update(); } });
+    if (holder) { barWatch.observe(holder, { subtree: true, attributes: true, attributeFilter: ['class'] }); drawer = !!holder.querySelector('.openDrawer'); }
+    update();
 }
 
 function measureTop() {
@@ -344,7 +359,7 @@ function loadFonts() {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = FONTS;
-    link.onload = () => document.fonts?.ready.then(() => { if (root?.childElementCount && document.body.classList.contains('slayhome-on')) { fitLong(root); fitName(); } });
+    document.fonts?.addEventListener?.('loadingdone', () => { if (root?.childElementCount && document.body.classList.contains('slayhome-on')) { fitLong(root); fitName(); } });
     document.head.append(link);
 }
 

@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Oswald:wght@500;700&family=PT+Serif:ital,wght@1,700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<!-- Шрифты грузятся в фоне: если Google не отвечает, экран появится через 1,2 с системным шрифтом, а не останется пустым -->
+<script>document.documentElement.classList.add('fw');setTimeout(() => document.documentElement.classList.remove('fw'), 1200);</script>
+<style>.fw body{visibility:hidden}</style>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Oswald:wght@500;700&family=PT+Serif:ital,wght@1,700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet" media="print" onload="this.media='all';document.documentElement.classList.remove('fw')" onerror="document.documentElement.classList.remove('fw')">
 <style>
 :root{--r:#e3121b;--k:#0b0b0b;--w:#f4f1ea;--top:44px}
 *{box-sizing:border-box;margin:0;padding:0}

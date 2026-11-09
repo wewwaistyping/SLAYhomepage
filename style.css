@@ -29,7 +29,7 @@ body.slayhome-on .stlp--container { display: none !important; }
 body.slayhome-on.slayhome-nobar #slayhome-barzone { display: block; position: fixed; left: 0; right: 0; top: 0; height: 12px; z-index: 3004; }
 body.slayhome-on.slayhome-nobar #slayhome { --topBarBlockSize: 0px; }
 body.slayhome-on.slayhome-nobar :is(#top-bar, #top-settings-holder) { transition: opacity .2s, translate .2s; }
-body.slayhome-on.slayhome-nobar:not(:has(#slayhome-barzone:hover, #top-bar:hover, #top-settings-holder:hover, #top-settings-holder .openDrawer)) :is(#top-bar, #top-settings-holder) { opacity: 0; translate: 0 -100%; pointer-events: none; }
+body.slayhome-on.slayhome-nobar:not(.slayhome-bar) :is(#top-bar, #top-settings-holder) { opacity: 0; translate: 0 -100%; pointer-events: none; }
 @media (hover: none) { body.slayhome-on.slayhome-nobar #slayhome-barzone { height: 20px; } }
 
 /* общий сброс: тема ST не должна лезть внутрь экрана */
