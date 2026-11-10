@@ -1,5 +1,7 @@
 # SLAYhomepage
 
+Inspired by [ST Landing Page](https://github.com/LenAnderson/SillyTavern-LandingPage)
+
 [Русская версия](README.ru.md)
 
 A start screen for [SillyTavern](https://github.com/SillyTavern/SillyTavern). Instead of an empty window it shows your recent bots: one click takes you back into a conversation, starts a new one or opens all your chats. 30 themes, 19 of them styled after video games. The interface is available in English and Russian.

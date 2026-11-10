@@ -1,5 +1,7 @@
 # SLAYhomepage
 
+Inspired by [ST Landing Page](https://github.com/LenAnderson/SillyTavern-LandingPage)
+
 [English version](README.md)
 
 Стартовый экран для [SillyTavern](https://github.com/SillyTavern/SillyTavern). Вместо пустого окна показывает недавних ботов: одним кликом можно вернуться в разговор, начать новый или открыть все чаты. 30 тем, из них 19 в стиле игр. Интерфейс на русском и английском.
