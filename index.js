@@ -538,7 +538,13 @@ try { items = JSON.parse(localStorage.getItem(CACHE) || '[]'); } catch { items =
 if (s.enabled && items.length) { setVisible(true); render(); }
 
 document.fonts?.ready.then(fitName);
-window.addEventListener('resize', () => { if (peek) placeBack(); if (!document.body.classList.contains('slayhome-on')) return; measureTop(); if (items[current]) show(current); });
+// При повороте телефона и когда прячется адресная строка resize приходит пачкой: перерисовываем один раз, когда окно успокоилось
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+    if (peek) placeBack();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (!document.body.classList.contains('slayhome-on')) return; measureTop(); if (items[current]) show(current); }, 150);
+});
 window.addEventListener('keydown', e => {
     if (!document.body.classList.contains('slayhome-on') || e.target.closest?.('input, textarea, [contenteditable]')) return;
     if (!items[current]) return;

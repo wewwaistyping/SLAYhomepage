@@ -85,7 +85,7 @@ export const LAYOUTS = {
         html: (items) => `
             <div class="sh-amb"></div>
             <div class="sh-hero">
-                <div class="sh-por"><img alt=""></div>
+                <div class="sh-por"><img alt="" decoding="async"></div>
                 <div class="sh-meta">
                     <div class="sh-k"></div>
                     <h1 class="sh-name"></h1>
@@ -117,7 +117,7 @@ export const LAYOUTS = {
         hover: true,
         html: (items) => `
             <div class="shs-fill"></div>
-            <img class="shs-bg" alt="">
+            <img class="shs-bg" alt="" decoding="async">
             <div class="shs-shade"></div>
             <div class="shs-top"><span class="shs-tm"></span><div class="shs-rec">${items.map((c, i) => `<img data-i="${i}" src="${esc(c.img)}" alt="" title="${esc(c.name)}" decoding="async">`).join('')}</div></div>
             <div class="shs-sub"><div class="shs-who"></div><div class="shs-line"></div></div>
@@ -174,10 +174,10 @@ export const LAYOUTS = {
                 <div class="shm-ct" data-i="${i}">${img(c)}<div><b>${esc(c.name)}<i>${ago(c.ts).replace(tt(' назад'), '')}</i></b><span>${esc(c.snip)}</span></div></div>`).join('')}
             </aside>
             <main class="shm-main">
-                <header><img class="shm-av" alt=""><div><b class="shm-name"></b><small class="shm-sub"></small></div>
+                <header><img class="shm-av" alt="" decoding="async"><div><b class="shm-name"></b><small class="shm-sub"></small></div>
                     <div class="shm-sm"><button data-act="new">${tt("Новый чат")}</button><button data-act="all">${tt("Все чаты")}</button></div></header>
                 <div class="shm-feed"><div class="shm-day">${tt("последнее сообщение")}</div>
-                    <div class="shm-msg"><img class="shm-pic" alt=""><div class="shm-bub"><span></span><time></time></div></div></div>
+                    <div class="shm-msg"><img class="shm-pic" alt="" decoding="async"><div class="shm-bub"><span></span><time></time></div></div></div>
                 <div class="shm-input"><div class="shm-field" data-act="continue"></div><button data-act="continue" title="${tt("Продолжить")}">➤</button></div>
             </main>`,
         show(root, i, items) {
@@ -276,7 +276,7 @@ Object.assign(LAYOUTS, {
         title: tt('Новелла'),
         hover: false,
         html: (items) => `
-            <div class="shv-fill"></div><img class="shv-art" alt="">
+            <div class="shv-fill"></div><img class="shv-art" alt="" decoding="async">
             <div class="shv-logo"><h1 class="shv-name"></h1><small class="shv-sub"></small></div>
             <div class="shv-bar"><div class="shv-keys"><span><kbd>←→</kbd>${tt("меню")}</span><span><kbd>↑↓</kbd>${tt("персонаж")}</span><span><kbd>Enter</kbd>${tt("ок")}</span></div>
                 <div class="shv-menu"><button data-act="continue">${tt("Продолжить")}</button><button data-act="new">${tt("Начать заново")}</button><button data-act="all">${tt("Загрузить")}</button><button data-ui="gal">${tt("Галерея")}</button></div></div>
@@ -317,7 +317,7 @@ Object.assign(LAYOUTS, {
         title: tt('Минимал'),
         hover: false,
         html: () => `
-            <img class="shn-art" alt=""><h1 class="shn-name"></h1>
+            <img class="shn-art" alt="" decoding="async"><h1 class="shn-name"></h1>
             <div class="shn-who"><button data-nav="-1">${tt("‹ пред.")}</button><button data-nav="1">${tt("след. ›")}</button></div>
             <div class="shn-menu"><button data-act="continue">${tt("Продолжить")}</button><button data-act="new">${tt("Новое начало")}</button><button data-act="all">${tt("Все сказания")}</button></div>
             <div class="shn-line"></div>`,
@@ -394,9 +394,9 @@ Object.assign(LAYOUTS, {
                 <button class="shc-mi" data-act="continue"><small>01</small>${tt("Продолжить")}</button>
                 <button class="shc-mi" data-act="new"><small>02</small>${tt("Новый чат")}</button>
                 <button class="shc-mi" data-act="all"><small>03</small>${tt("Все чаты")}</button></nav>
-            <div class="shc-por"><div class="shc-fr shc-cut"><img class="base" alt=""><img class="rc r1" alt=""><img class="rc r2" alt=""></div><span class="shc-br a"></span><span class="shc-br b"></span><span class="shc-tagr"></span><span class="shc-tagid"></span></div>
+            <div class="shc-por"><div class="shc-fr shc-cut"><img class="base" alt="" decoding="async"><img class="rc r1" alt="" decoding="async"><img class="rc r2" alt="" decoding="async"></div><span class="shc-br a"></span><span class="shc-br b"></span><span class="shc-tagr"></span><span class="shc-tagid"></span></div>
             <div class="shc-cts"><h6><span>${tt("КОНТАКТЫ")}</span><span>${items.length}</span></h6><div class="shc-list">${items.map((c, i) => `<button class="shc-ct" data-i="${i}"><img src="${esc(c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><small>${ago(c.ts)}</small></div><i class="${Date.now() - c.ts < 864e5 ? 'live' : ''}"></i></button>`).join('')}</div></div>
-            <div class="shc-call shc-cut"><img alt=""><div><div class="shc-who">${tt("ВХОДЯЩИЙ ВЫЗОВ ·")} <b></b></div><div class="shc-msg"><span class="shc-t"></span><span class="shc-cur"></span></div></div>
+            <div class="shc-call shc-cut"><img alt="" decoding="async"><div><div class="shc-who">${tt("ВХОДЯЩИЙ ВЫЗОВ ·")} <b></b></div><div class="shc-msg"><span class="shc-t"></span><span class="shc-cur"></span></div></div>
                 <div class="shc-ans"><button data-act="continue">${tt("Ответить")}</button><button data-act="all">${tt("История")}</button></div></div>
             <div class="shc-scan"></div>`,
         mount(root) {
@@ -504,7 +504,7 @@ LAYOUTS.cozy = {
         return `<div class="shz-wrap">${SHZ_BRANCH}<div class="shz-petals">${Array.from({ length: 22 }, () => `<span style="left:${(Math.random()*100).toFixed(1)}%;--dx:${(Math.random()*160-80).toFixed(0)}px;animation-duration:${(9+Math.random()*9).toFixed(1)}s,3s;animation-delay:-${(Math.random()*18).toFixed(1)}s,-${(Math.random()*3).toFixed(1)}s"><svg width="${(10+Math.random()*8).toFixed(0)}" viewBox="-10 -18.5 20 19.5"><path d="M0 0C-5 -2 -9.5 -8 -8.6 -13.4C-7.8 -16.8 -3.6 -17.6 -1.3 -14.8L0 -13.2 1.3 -14.8C3.6 -17.6 7.8 -16.8 8.6 -13.4C9.5 -8 5 -2 0 0Z" fill="${['#ffe4ec','#fbc6d5','#f7b3c7'][Math.floor(Math.random()*3)]}" /></svg></span>`).join('')}</div>${SHZ_CAT}
             <div class="shz-soft"><i style="left:8%;top:62%;width:260px;height:260px;background:#ffc9a8"></i><i style="left:44%;top:6%;width:220px;height:220px;background:#f59bb0;animation-delay:-5s"></i><i style="left:70%;top:70%;width:300px;height:300px;background:#9cc9a4;animation-delay:-9s"></i></div>
             <div class="shz-hello">${hello}${tt(". С кем посидим сегодня?")}</div>
-            <div class="shz-scene"><div class="shz-arch"><img alt=""></div>
+            <div class="shz-scene"><div class="shz-arch"><img alt="" decoding="async"></div>
                 <div class="shz-talk"><span class="shz-tag"></span><h1></h1><div class="shz-bubble"><p></p></div>
                     <div class="shz-acts"><button class="shz-go" data-act="continue"><i></i>${tt("Продолжить")}</button><button data-act="new"><i></i>${tt("Новый чат")}</button><button data-act="all"><i></i>${tt("Все чаты")}</button>${SHZ_MUG}</div></div></div>
             <div class="shz-diary"><h2>${tt("Дневник")}</h2><small>${tt("последние разговоры")}</small><div class="shz-entries">${items.map((c, i) => `<button class="shz-entry" data-i="${i}"><img src="${esc(c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><span>${ago(c.ts)}</span></div></button>`).join('')}</div></div></div>`;

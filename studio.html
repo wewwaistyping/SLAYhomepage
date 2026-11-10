@@ -317,18 +317,21 @@ function paintModes() {
   const n = { all: on.length, fav: favsOn().length, game: on.filter((t) => t.game).length, classic: on.filter((t) => !t.game).length, off: st.offThemes.length };
   $$('.chip[data-f]').forEach((c) => c.querySelector('i').textContent = n[c.dataset.f]);
 }
+// Превью тем грузятся, когда карточка подходит к экрану, а не все тридцать сразу
+const picIO = new IntersectionObserver((list) => { for (const e of list) if (e.isIntersecting) { e.target.style.backgroundImage = `url(${e.target.dataset.bg})`; picIO.unobserve(e.target); } }, { rootMargin: '300px' });
 function grid() {
   const q = $('.q').value.trim().toLowerCase();
   const inFilter = (t) => filter === 'off' ? isOff(t.key) : !isOff(t.key) && (filter === 'all' || (filter === 'fav' ? st.favs.includes(t.key) : filter === 'game' ? t.game : !t.game));
   const list = THEMES.filter((t) => inFilter(t) && t.title.toLowerCase().includes(q));
   $('.grid').innerHTML = list.map((t) => `
     <div class="th ${st.mode === 'one' && st.layout === t.key ? 'cur' : ''} ${st.mode === 'random' && !st.favs.includes(t.key) ? 'dim' : ''}" data-k="${t.key}" role="button" tabindex="0">
-      <div class="pic" style="background-image:url(${pic(t.key)})"></div>
+      <div class="pic" data-bg="${pic(t.key)}"></div>
       <span class="now">${tt("Сейчас")}</span>
       <button class="eye ${isOff(t.key) ? 'on' : ''}" title="${isOff(t.key) ? tt("Вернуть") : tt("Скрыть тему")}">${isOff(t.key) ? EYE : EYE_OFF}</button>
       <button class="star ${st.favs.includes(t.key) ? 'on' : ''}" title="${tt("В избранное")}">${STAR}</button>
       <div class="cap"><b>${esc(t.title)}</b><span class="mono">${t.key === 'pokemon' ? tt('игра') : t.game ? tt('игра · png') : tt('классика')}</span></div>
     </div>`).join('') || (filter === 'off' && !q ? tt('<p style="color:var(--dim);grid-column:1/-1">Скрытых тем нет. Значок с глазом на карточке убирает тему из меню.</p>') : tt('<p style="color:var(--dim)">Ничего не нашлось.</p>'));
+  picIO.disconnect(); $$('.grid .pic').forEach((p) => picIO.observe(p));
 }
 function fav(k) { set({ favs: st.favs.includes(k) ? st.favs.filter((x) => x !== k) : [...st.favs, k] }); paintModes(); grid(); }
 function toggleOff(k) {
