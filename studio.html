@@ -132,7 +132,7 @@ img{display:block}
 
 /* ── Общее ── */
 /* minmax(0,…): иначе колонка растягивается под самое длинное (список «Скрыть бота…» шириной в длиннейшее имя) и экран едет вбок */
-.gen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-content:start;overflow-y:auto;overflow-x:hidden}
+.gen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-content:start;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent}
 .opt{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line);min-width:0}
 .opt>div{flex:1;min-width:0}
 .opt b{display:block;font-weight:700;font-size:15px}
@@ -151,6 +151,9 @@ img{display:block}
 .hidden img{width:20px;height:20px;border-radius:50%;object-fit:cover;object-position:top}
 .hidden button{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:var(--dim)}
 .wide{grid-column:1/-1}
+/* широкая карточка с примером: текст слева, картинка справа */
+.side-demo>div{display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:auto 1fr;column-gap:20px;align-items:start}
+.side-demo .demo{grid-column:2;grid-row:1/3;margin-top:0}
 .hadd,.lang{margin-top:10px;padding:8px 10px;border-radius:10px;background:#ffffff0a;border:1px solid var(--line2);color:var(--txt);font:500 13px 'Onest';width:100%;max-width:340px}
 .hadd option,.lang option{background:#1d1a1f}
 
@@ -182,6 +185,8 @@ img{display:block}
   .back{display:inline-flex;align-self:flex-start;order:-1}
   .stagebox{flex:none;height:46vh;min-height:280px}
   .gen{grid-template-columns:minmax(0,1fr)}
+  .side-demo>div{display:block}
+  .side-demo .demo{margin-top:12px}
   .lb{padding:12px}
   .lb .ft{flex-wrap:wrap;gap:8px;padding:12px}
   .lb .ft h2{flex:0 0 100%;margin:0;font-size:18px}
@@ -262,13 +267,14 @@ img{display:block}
   <!-- ОБЩЕЕ -->
   <section class="pane" data-pane="gen">
     <div class="gen">
+      <!-- карточки идут парами похожей высоты: в сетке пара тянется по самой высокой, и у короткой снизу остаётся пустота -->
       <div class="opt"><div><b>Показывать стартовый экран</b><small>Вместо пустого окна, когда ни один чат не открыт.</small></div><button class="sw" data-k="enabled"></button></div>
-      <div class="opt"><div><b>Кнопка «сменить тему» на экране</b><small>Маленькая кнопка в углу: листаешь темы стрелками прямо на стартовом экране, без захода сюда.</small><div class="demo"><i>‹ ◐ Тема ›</i></div></div><button class="sw" data-k="btn"></button></div>
-      <div class="opt"><div><b>Прятать верхнее меню</b><small>На стартовом экране меню таверны скрыто и выезжает, когда ведёшь мышь к верхнему краю (на телефоне — тап по краю). Экран занимает всю высоту.</small></div><button class="sw" data-k="hideBar"></button></div>
-      <div class="opt"><div><b>Язык интерфейса</b><small>«Как в таверне» — русский для русской таверны, для остальных английский. Применится после перезагрузки страницы.</small><select class="lang"><option value="auto">Как в таверне</option><option value="ru">Русский</option><option value="en">English</option></select></div></div>
-      <div class="opt"><div><b>Сколько недавних ботов показывать</b><small>Боты из последних чатов, по свежести. Закреплённые в таверне чаты идут первыми.</small><div class="range"><input type="range" min="3" max="20" value="10" class="cnt"><output class="cntv">10</output></div></div></div>
-      <div class="opt"><div><b>Последние чаты вместо ботов</b><small>Каждый недавний чат своей карточкой, даже если это один и тот же бот. Выключено: бот показывается один раз, с самым свежим чатом.</small></div><button class="sw" data-k="byChat"></button></div>
       <div class="opt"><div><b>Показывать групповые чаты</b><small>Группы попадут в ленту вместе с ботами (для своей картинки нужен отдельный бот).</small></div><button class="sw" data-k="groups"></button></div>
+      <div class="opt"><div><b>Последние чаты вместо ботов</b><small>Каждый недавний чат своей карточкой, даже если это один и тот же бот. Выключено: бот показывается один раз, с самым свежим чатом.</small></div><button class="sw" data-k="byChat"></button></div>
+      <div class="opt"><div><b>Прятать верхнее меню</b><small>На стартовом экране меню таверны скрыто и выезжает, когда ведёшь мышь к верхнему краю (на телефоне — тап по краю). Экран занимает всю высоту.</small></div><button class="sw" data-k="hideBar"></button></div>
+      <div class="opt"><div><b>Сколько недавних ботов показывать</b><small>Боты из последних чатов, по свежести. Закреплённые в таверне чаты идут первыми.</small><div class="range"><input type="range" min="3" max="20" value="10" class="cnt"><output class="cntv">10</output></div></div></div>
+      <div class="opt"><div><b>Язык интерфейса</b><small>«Как в таверне» — русский для русской таверны, для остальных английский. Применится после перезагрузки страницы.</small><select class="lang"><option value="auto">Как в таверне</option><option value="ru">Русский</option><option value="en">English</option></select></div></div>
+      <div class="opt wide side-demo"><div><b>Кнопка «сменить тему» на экране</b><small>Маленькая кнопка в углу: листаешь темы стрелками прямо на стартовом экране, без захода сюда.</small><div class="demo"><i>‹ ◐ Тема ›</i></div></div><button class="sw" data-k="btn"></button></div>
       <div class="opt wide"><div><b>Скрытые боты</b><small>Не попадают на стартовый экран, даже если чат свежий. Например, служебные.</small>
         <div class="hidden"></div><select class="hadd"></select></div></div>
     </div>
