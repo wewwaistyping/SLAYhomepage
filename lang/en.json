@@ -601,5 +601,8 @@
  "Это текущая тема. Сначала поставь другую": "This is the current theme. Set another one first",
  "Хотя бы одна тема должна остаться": "At least one theme has to stay",
  "Тема скрыта. Вернуть можно в фильтре «Скрытые»": "Theme hidden. You can bring it back from the Hidden filter",
- "<p style=\"color:var(--dim);grid-column:1/-1\">Скрытых тем нет. Значок с глазом на карточке убирает тему из меню.</p>": "<p style=\"color:var(--dim);grid-column:1/-1\">No hidden themes. The eye icon on a card removes a theme from the menu.</p>"
+ "<p style=\"color:var(--dim);grid-column:1/-1\">Скрытых тем нет. Значок с глазом на карточке убирает тему из меню.</p>": "<p style=\"color:var(--dim);grid-column:1/-1\">No hidden themes. The eye icon on a card removes a theme from the menu.</p>",
+ "Последние чаты вместо ботов": "Recent chats instead of bots",
+ "Каждый недавний чат своей карточкой, даже если это один и тот же бот. Выключено: бот показывается один раз, с самым свежим чатом.": "Every recent chat gets its own card, even if it is the same bot. Off: each bot shows once, with its latest chat.",
+ "Боты из последних чатов, по свежести. Закреплённые в таверне чаты идут первыми.": "Bots from your latest chats, newest first. Chats pinned in Tavern come first."
 }

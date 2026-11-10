@@ -701,3 +701,17 @@ body.slayhome-studio-on #slayhome *, body.slayhome-studio-on #slayhome *::before
     #slayhome.sh-l-cozy .shz-acts { gap: 6px; margin-top: 10px; }
     #slayhome.sh-l-cozy .shz-acts button { padding: 8px 14px; font-size: 13px; }
 }
+
+/* Закреплённый в таверне чат: значок-кнопка у имени и на миниатюре в списке, как в штатном списке таверны */
+#slayhome.sh-pin :is(.sh-name, .shs-who, .shd-name, .shm-name, .shf-name, .shv-name, .shn-name, .shr-name, .shz-talk h1, .sfm-nm)::before {
+    content: '\f08d'; font: 900 .42em/1 'Font Awesome 6 Free';
+    display: inline-block; vertical-align: .55em; margin-right: .45em; rotate: 30deg; opacity: .85;
+    background: inherit; -webkit-background-clip: text; background-clip: text; /* имя с градиентом: значок того же цвета */
+}
+/* у имени в Киберпанке оба слоя заняты глитчем: значок встаёт в подпись над ним */
+#slayhome.sh-pin.sh-l-cyber .shc-lbl::after { content: '\f08d'; font: 900 12px/1 'Font Awesome 6 Free'; color: var(--y); rotate: 30deg; }
+#slayhome .sh-pinned:not(img)::after {
+    content: '\f08d'; font: 900 10px/1 'Font Awesome 6 Free';
+    position: absolute; top: 3px; left: 3px; z-index: 3; display: grid; place-items: center;
+    width: 18px; height: 18px; border-radius: 50%; background: #000a; color: #fff; rotate: 30deg; pointer-events: none;
+}

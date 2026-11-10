@@ -33,7 +33,8 @@ s.mode ??= 'one';       // 'one' — всегда s.layout; 'random' — при 
 s.favs ??= [];         // избранное человек собирает сам
 s.hidden ??= [];        // 'c:<аватар>' / 'g:<группа>' — не показывать на стартовом экране
 s.offThemes ??= [];     // темы, убранные из меню: их нет в настройках, в кнопке в углу и в «Сюрпризе»
-s.groups ??= true;      // групповые чаты в ленте
+s.groups ??= true;
+s.byChat ??= false;     // каждый чат своей карточкой; по умолчанию бот показывается один раз, с самым свежим чатом      // групповые чаты в ленте
 s.btn ??= true;         // кнопка смены темы в углу стартового экрана
 s.lang ??= 'auto';      // 'auto' — как в таверне, иначе код языка
 s.hideBar ??= false;    // верхнее меню таверны прячется на стартовом экране, выезжает у верхнего края
@@ -135,16 +136,19 @@ async function fetchItems() {
 function buildItems(data) {
     const seen = new Set();
     const out = [];
+    const pins = new Set(pinnedChats().map(chatKey));
     // сколько чатов у персонажа среди последних (для «Ретро» и «Киберпанка»), без отдельных запросов
     const counts = {};
     for (const chat of data) { const k = chat.group ? 'g:' + chat.group : 'c:' + chat.avatar; counts[k] = (counts[k] || 0) + 1; }
     for (const chat of data) {
         const key = chat.group ? 'g:' + chat.group : 'c:' + chat.avatar;
-        if (seen.has(key) || s.hidden.includes(key) || (chat.group && !s.groups)) continue;
+        // в режиме «чаты» повторяется бот, но не чат
+        const id = s.byChat ? chatKey(chat) : key;
+        if (seen.has(id) || s.hidden.includes(key) || (chat.group && !s.groups)) continue;
         const ch = chat.avatar ? characters.find(x => x.avatar === chat.avatar) : null;
         const gr = chat.group ? groups.find(x => x.id === chat.group) : null;
         if (!ch && !gr) continue;
-        seen.add(key);
+        seen.add(id);
         const avatar = ch ? ch.avatar : (gr.members?.[0] ?? '');
         const item = {
             avatar: ch ? ch.avatar : '',
@@ -157,6 +161,7 @@ function buildItems(data) {
             msgs: chat.chat_items ?? 0,
             snip: prose(chat.mes),
             chats: counts[key],
+            pin: pins.has(chatKey(chat)),
             render: ch ? (s.renders[ch.avatar] || '') : '',
             me: null,
         };
@@ -424,8 +429,21 @@ function show(i) {
     if (!items[i] || !root) return;
     current = i;
     layout().show(root, i, items);
+    markPins(i);
     fitLong(root);
     fitName();
+}
+
+// Закреплённый в таверне чат: значок у имени и на миниатюре в списке, тот же, что в штатном списке таверны
+function markPins(i) {
+    root.classList.toggle('sh-pin', !!items[i]?.pin);
+    // data-g — галерея Новеллы и доска жителей на Ферме
+    for (const el of root.querySelectorAll('[data-i], [data-g]')) {
+        const on = !!items[+(el.dataset.i ?? el.dataset.g)]?.pin;
+        el.classList.toggle('sh-pinned', on);
+        // уголку со значком нужна опора; карточки, которые уже стоят сами по себе, не трогаем
+        if (on && getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    }
 }
 
 // Имя — не больше двух строк и без переноса посреди слова: уменьшаем кегль, пока не влезет
@@ -479,7 +497,7 @@ function showTavernList(c) {
     // таверна показывает три чата: раскрываем список целиком и подсвечиваем чаты выбранного бота
     const more = panel.querySelector('.showMoreChats');
     if (more && !more.classList.contains('rotated') && panel.querySelector('.recentChat.hidden')) more.click();
-    const mine = rows.filter((el) => (c.group ? el.dataset.group === c.group : el.dataset.avatar === c.avatar));
+    const mine = rows.filter((el) => (c.group ? el.dataset.group === c.group : el.dataset.avatar === c.avatar) && (!s.byChat || el.dataset.file === c.file));
     rows.forEach((el) => el.classList.toggle('slayhome-mine', mine.includes(el)));
     mine[0]?.scrollIntoView({ block: 'center' });
     if (!document.getElementById('slayhome-back')) {
@@ -584,7 +602,7 @@ window.SLAYHOME_STUDIO = {
     tt, pl, localize, lang: LANG,
     base: BASE,
     get themes() { return Object.entries(LAYOUTS).map(([key, l]) => ({ key, title: l.title, game: !!l.game })); },
-    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, btn: s.btn, hideBar: s.hideBar, lang: s.lang }; },
+    get state() { return { enabled: s.enabled, mode: s.mode, layout: s.layout, favs: [...s.favs], hidden: [...s.hidden], offThemes: [...s.offThemes], count: s.count, groups: s.groups, byChat: s.byChat, btn: s.btn, hideBar: s.hideBar, lang: s.lang }; },
     set(patch) {
         Object.assign(s, patch);
         if ('mode' in patch || 'favs' in patch || (session && !shown(session))) session = null;
