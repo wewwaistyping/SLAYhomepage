@@ -32,7 +32,8 @@ The screen appears on its own when no chat is open. It never opens a chat by its
 
 - **Continue** opens the latest chat with the selected bot.
 - **New chat** starts a fresh conversation.
-- **All chats** shows the bot's chat list.
+- **All chats** opens SillyTavern's recent chats list right on the start screen, with this bot's chats highlighted. There you can pin, rename or delete a chat. **‹ Start screen** brings you back.
+- Chats pinned in SillyTavern come first and are marked with a pin.
 - Flip through bots with the ← → keys, Enter continues the chat. On a phone, swipe.
 
 Settings: **Extensions → SLAYhomepage → Themes, pictures and more…**
