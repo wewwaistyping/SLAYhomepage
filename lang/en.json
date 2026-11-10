@@ -605,5 +605,6 @@
  "Последние чаты вместо ботов": "Recent chats instead of bots",
  "Каждый недавний чат своей карточкой, даже если это один и тот же бот. Выключено: бот показывается один раз, с самым свежим чатом.": "Every recent chat gets its own card, even if it is the same bot. Off: each bot shows once, with its latest chat.",
  "Боты из последних чатов, по свежести. Закреплённые в таверне чаты идут первыми.": "Bots from your latest chats, newest first. Chats pinned in Tavern come first.",
- "Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.": "SillyTavern tried to save the chat empty over a file that has messages. The file was left untouched."
+ "Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.": "SillyTavern tried to save the chat empty over a file that has messages. The file was left untouched.",
+ "Чат загрузился пустым, хотя в файле есть сообщения. Сохранение остановлено, обнови страницу (F5).": "The chat loaded empty although the file has messages. Saving was stopped, please reload the page (F5)."
 }

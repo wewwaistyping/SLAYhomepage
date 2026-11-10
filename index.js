@@ -13,6 +13,7 @@ import {
     setActiveGroup,
     doNewChat,
     name1,
+    chat,
 } from '../../../../script.js';
 import { getConnectedPersonas, user_avatar } from '../../../personas.js';
 import { power_user } from '../../../power-user.js';
@@ -22,22 +23,44 @@ import { VER, LANG, tt, pl, localize } from './lang.js';
 import { LAYOUTS, fitLong } from './layouts.js';
 import { SCREENS } from './screens/screens.js';
 
-// Страховка от затирания чата. В таверне (1.19) при перезагрузке чата сообщения в памяти стираются, а файл читается
-// с диска позже. Если в эту паузу срабатывает любое сохранение (отложенное, своё или от расширения), в файл уходит
-// чат без единого сообщения, и проверка целостности его пропускает: метка у чата своя. Так ветка теряет все сообщения.
-// Поэтому запись чата без сообщений в файл, где сообщения точно есть, на сервер не отправляем. Что в файле есть
-// сообщения, знаем по прочитанным чатам и по списку недавних. Новый пустой чат и запись с подтверждением OVERWRITE
-// проходят как обычно.
-const hasMessages = new Map();
+// Страховка от затирания чата. В таверне (1.19) есть две дороги, которыми чат или ветка теряют все сообщения.
+// 1. Перезагрузка и смена чата сначала стирают сообщения в памяти, а файл читают с диска позже. Сохранение в эту
+//    паузу (отложенное, своё или от расширения) пишет в файл чат без сообщений, и проверка целостности его пропускает.
+// 2. Если чтение чата не удалось (сеть, ошибка сервера — сервер тогда отвечает пустым), таверна считает чат пустым,
+//    дописывает приветствие и сохраняет его поверх файла.
+// Поэтому помним, сколько сообщений в каждом файле: по списку недавних, по прочитанным чатам и по событиям таверны.
+// Не пускаем на сервер: запись без сообщений во время загрузки этого чата (или когда в памяти уже снова есть
+// сообщения); любую запись, где сообщений меньше, чем в файле, после неудачного чтения. Своё удаление сообщений,
+// новый пустой чат и запись с подтверждением OVERWRITE проходят как обычно.
+// Тело сохранения (мегабайты) разбираем только во время загрузки чата и после неудачного чтения, в остальное время
+// запрос уходит без задержки.
+const known = new Map();   // файл → сколько в нём сообщений
+const loads = new Map();   // файл → { busy: идёт чтение, until: недавно дочитан, failed: чтение не удалось, wait: разбор ответа }
+const RECENT = 5000;
 // у групп файл чата называется по id чата, поэтому для них ключ — этот id
 const fileKey = (avatar, file, group) => (avatar ? 'c|' + avatar + '|' : 'g|') + String(file ?? group ?? '').replace(/\.jsonl$/, '');
 function rememberChats(list) {
-    for (const c of list) if (c?.file_name) hasMessages.set(fileKey(c.avatar, c.file_name), (c.chat_items ?? 0) > 0);
+    for (const c of list) if (c?.file_name && Number.isFinite(c.chat_items)) known.set(fileKey(c.avatar, c.file_name), c.chat_items);
 }
 (() => {
     const native = window.fetch;
     const GET = /\/api\/chats\/(group\/)?get$/, SAVE = /\/api\/chats\/(group\/)?save$/;
     const json = (s) => { try { return JSON.parse(s); } catch { return null; } };
+    const load = (key) => loads.get(key) ?? loads.set(key, {}).get(key);
+
+    // открытый сейчас чат: сколько в нём сообщений, таверна знает сама — так своё удаление и новые сообщения
+    // учитываются без разбора файлов
+    const currentKey = () => {
+        const c = globalThis.SillyTavern?.getContext?.();
+        const id = c?.getCurrentChatId?.();
+        if (!id) return null;
+        if (c.groupId) return fileKey(null, null, id);
+        const ch = c.characters?.[c.characterId];
+        return ch ? fileKey(ch.avatar, id) : null;
+    };
+    const syncCurrent = () => { const k = currentKey(); if (k && !loads.get(k)?.failed) known.set(k, chat.length); };
+    for (const ev of ['MESSAGE_SENT', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'CHAT_CHANGED']) if (event_types[ev]) eventSource.on(event_types[ev], () => setTimeout(syncCurrent, 0));
+
     // тело сохранения таверна может сжать gzip: разжимаем копию, оригинал уходит как есть
     async function bodyText(init) {
         const b = init?.body;
@@ -47,33 +70,60 @@ function rememberChats(list) {
         if (new Headers(init.headers).get('Content-Encoding') === 'gzip') stream = stream.pipeThrough(new DecompressionStream('gzip'));
         return new Response(stream).text();
     }
+    // во время загрузки или после неудачного чтения тело сохранения нужно разобрать
+    const watching = () => [...loads.values()].some((l) => l.busy || l.failed || Date.now() < (l.until ?? 0));
+
+    function verdict(key, n, force) {
+        const had = known.get(key), l = loads.get(key) ?? {};
+        if (force || !had) return '';
+        if (l.failed && n < had) return tt('Чат загрузился пустым, хотя в файле есть сообщения. Сохранение остановлено, обнови страницу (F5).');
+        if (n === 0 && (l.busy || Date.now() < (l.until ?? 0) || chat.length > 0)) return tt('Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.');
+        return '';
+    }
+
     window.fetch = async function (input, init) {
         const url = String(input?.url ?? input).split('?')[0];
-        if (SAVE.test(url)) {
+        if (SAVE.test(url) && watching()) {
+            // ответ на чтение могли ещё не разобрать: ждём, но не дольше 3 секунд
+            const waits = [...loads.values()].map((l) => l.wait).filter(Boolean);
+            if (waits.length) await Promise.race([Promise.all(waits), new Promise((r) => setTimeout(r, 3000))]);
             let j = null;
             try { j = json(await bodyText(init)); } catch { j = null; }
-            if (j && Array.isArray(j.chat)) {
-                const key = fileKey(j.avatar_url, j.file_name, j.id);
-                if (j.chat.length <= 1 && !j.force && hasMessages.get(key)) {
-                    console.warn('[SLAYhomepage] Не дала сохранить чат без сообщений поверх непустого файла:', key);
-                    toastr.warning(tt('Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.'), 'SLAYhomepage');
+            if (Array.isArray(j?.chat)) {
+                const key = fileKey(j.avatar_url, j.file_name, j.id), n = Math.max(0, j.chat.length - 1);
+                const why = verdict(key, n, j.force);
+                if (why) {
+                    console.warn('[SLAYhomepage] Сохранение остановлено, чтобы не затереть чат:', key, 'было сообщений', known.get(key), 'уходило', n);
+                    toastr.warning(why, 'SLAYhomepage', { preventDuplicates: true });
                     return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } });
                 }
                 const res = await native.apply(this, arguments);
-                if (res.ok) hasMessages.set(key, j.chat.length > 1);
+                if (res.ok) known.set(key, n);
                 return res;
             }
         }
         if (!GET.test(url)) return native.apply(this, arguments);
-        const j = json(typeof init?.body === 'string' ? init.body : '');
-        const res = await native.apply(this, arguments);
-        if (j && res.ok) {
-            const key = fileKey(j.avatar_url, j.file_name, j.id);
-            // пустой или новый файл приходит как [] или {}
-            const len = res.headers.get('content-length');
-            if (len !== null) hasMessages.set(key, Number(len) > 300);
-            else res.clone().text().then((s) => hasMessages.set(key, (json(s)?.length ?? 0) > 1), () => {});
+        const q = json(typeof init?.body === 'string' ? init.body : '');
+        if (!q) return native.apply(this, arguments);
+        const key = fileKey(q.avatar_url, q.file_name, q.id), l = load(key);
+        l.busy = true;
+        let res;
+        try {
+            res = await native.apply(this, arguments);
+        } catch (err) {
+            Object.assign(l, { busy: false, failed: true, until: Date.now() + RECENT });
+            throw err;
         }
+        if (!res.ok) { Object.assign(l, { busy: false, failed: true, until: Date.now() + RECENT }); return res; }
+        // сколько сообщений пришло: первая запись — заголовок чата; пустой или новый файл приходит как [] или {}
+        l.wait = res.clone().text().then((s) => {
+            const d = json(s);
+            const n = Array.isArray(d) ? Math.max(0, d.length - 1) : 0;
+            const had = known.get(key);
+            // сервер при ошибке чтения отвечает пустым: пустой ответ при непустом файле — это неудачное чтение
+            l.failed = n === 0 && had > 0;
+            if (!l.failed) known.set(key, n);
+        }, () => { l.failed = true; }).finally(() => { l.busy = false; l.until = Date.now() + RECENT; l.wait = null; });
         return res;
     };
 })();
@@ -180,39 +230,46 @@ function pinnedChats() {
     try { return Object.values(JSON.parse(globalThis.SillyTavern?.getContext?.().accountStorage?.getItem('pinnedChats') || '{}')); } catch { return []; }
 }
 
+// Недавние чаты берём без закрепов: так таверна отдаёт их строго по времени записи файла, и первый чат бота —
+// действительно последний, даже если это свежая ветка, в которой ещё не писали. Закреплённые — отдельным запросом
+// (лимит 0, поэтому придут только они), для значка и порядка.
 async function fetchItems() {
-    const data = await recentChats({ max: 60, pinned: pinnedChats() });
+    const pinList = pinnedChats();
+    const [data, pinData] = await Promise.all([recentChats({ max: 60 }), pinList.length ? recentChats({ max: 0, pinned: pinList }) : []]);
     rememberChats(data);
+    rememberChats(pinData);
     await checkThumbs();
-    const picked = buildItems(data);
+    const picked = buildItems(data, pinData);
     const pinned = picked.map(({ chat }) => ({ avatar: chat.avatar || '', group: chat.group || '', file_name: chat.file_name }));
     const meta = new Map((pinned.length ? await recentChats({ max: 0, pinned, metadata: true }) : []).map((chat) => [chatKey(chat), chat.chat_metadata]));
     return picked.map(({ item, chat, owner }) => ({ ...item, me: personaOf({ chat_metadata: meta.get(chatKey(chat)) }, owner) }));
 }
 
-// Один чат на бота — тот, в котором писали последним: «Продолжить» должно вести туда, где человек остановился.
-// Таверна отдаёт закреплённые чаты первыми вне очереди, остальные — по времени записи файла. Поэтому закреплённый
-// берём, только если последнее сообщение в нём новее, чем в самом свежем обычном чате бота. Боты с закрепами
-// остаются первыми в ленте, как в списке таверны.
-function latestPerBot(data, pins) {
-    const bots = new Map();
-    for (const chat of data) {
-        const key = chat.group ? 'g:' + chat.group : 'c:' + chat.avatar;
-        const b = bots.get(key) ?? bots.set(key, {}).get(key);
-        if (pins.has(chatKey(chat))) { if (!b.pin || parseTs(chat.last_mes) > parseTs(b.pin.last_mes)) b.pin = chat; }
-        else b.plain ??= chat;
+const botKey = (chat) => (chat.group ? 'g:' + chat.group : 'c:' + chat.avatar);
+
+// Порядок карточек. Режим «чаты»: закреплённые первыми, дальше по времени файла.
+// Режим «боты»: у каждого бота его последний чат по времени файла — туда ведёт «Продолжить». Боты с закреплёнными
+// чатами стоят первыми, как в списке таверны; закреп старше 60 последних чатов становится карточкой своего бота.
+function orderChats(data, pinData) {
+    if (s.byChat) {
+        const pinned = new Set(pinData.map(chatKey));
+        return [...pinData, ...data.filter((c) => !pinned.has(chatKey(c)))];
     }
-    return [...bots.values()].map(({ pin, plain }) => (!plain || (pin && parseTs(pin.last_mes) > parseTs(plain.last_mes)) ? pin : plain));
+    const latest = new Map();
+    for (const c of [...data, ...pinData]) if (!latest.has(botKey(c))) latest.set(botKey(c), c);
+    const first = [...new Set(pinData.map(botKey))];
+    return [...first, ...[...latest.keys()].filter((k) => !first.includes(k))].map((k) => latest.get(k));
 }
 
-function buildItems(data) {
+function buildItems(data, pinData = []) {
     const seen = new Set();
     const out = [];
-    const pins = new Set(pinnedChats().map(chatKey));
+    const pins = new Set(pinData.map(chatKey));
     // сколько чатов у персонажа среди последних (для «Ретро» и «Киберпанка»), без отдельных запросов
     const counts = {};
-    for (const chat of data) { const k = chat.group ? 'g:' + chat.group : 'c:' + chat.avatar; counts[k] = (counts[k] || 0) + 1; }
-    for (const chat of s.byChat ? data : latestPerBot(data, pins)) {
+    const all = new Map([...data, ...pinData].map((c) => [chatKey(c), c]));
+    for (const chat of all.values()) { const k = botKey(chat); counts[k] = (counts[k] || 0) + 1; }
+    for (const chat of orderChats(data, pinData)) {
         const key = chat.group ? 'g:' + chat.group : 'c:' + chat.avatar;
         // в режиме «чаты» повторяется бот, но не чат
         const id = s.byChat ? chatKey(chat) : key;
