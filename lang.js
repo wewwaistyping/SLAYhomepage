@@ -2,7 +2,7 @@
 import { extension_settings } from '../../../extensions.js';
 import { getCurrentLocale } from '../../../i18n.js';
 
-export const VER = '1.0.11'; // меняется — экраны в рамке и словарь грузятся заново, а не из кэша браузера
+export const VER = '1.0.12'; // меняется — экраны в рамке и словарь грузятся заново, а не из кэша браузера
 
 // 'auto' — как в таверне: русский для русской таверны, для всех остальных английский
 const want = extension_settings.slayHome?.lang || 'auto';
