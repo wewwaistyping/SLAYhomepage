@@ -155,7 +155,7 @@ const ROLES = {
 const roleOf = (c) => c.msgs / c.chats >= 15 ? ROLES.duel : c.chats >= 10 ? ROLES.ctrl : c.msgs <= 5 ? ROLES.sent : ROLES.init;
 const MAPS = [tt('ХЕЙВЕН'), tt('БИНД'), tt('СПЛИТ'), tt('АСЦЕНТ'), tt('ЛОТУС'), tt('САНСЕТ'), tt('ПЕРЛ')];
 
-$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}" alt=""></button>`).join('');
 
 let cur = 0, sel = 0;
 // фиксация — только подсветка выбора, чат не открывает

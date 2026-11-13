@@ -2,7 +2,7 @@
 const SH = parent.SLAYHOME;
 const tt = SH.tt, PL = SH.pl, LANG = SH.lang;
 SH.localize(document);
-const CHARS = SH.items.map((c) => ({ name: c.name, img: c.img, chats: c.chats, last: c.ts, msgs: c.msgs, snip: c.snip, render: c.render, pin: !!c.pin }));
+const CHARS = SH.items.map((c) => ({ name: c.name, img: c.img, chats: c.chats, last: c.ts, msgs: c.msgs, snip: c.snip, render: c.render, pin: !!c.pin, thumb: c.thumb || c.img }));
 const ME = SH.me;
 // ты в чате с i-м ботом: у разных чатов может быть разная персона
 const meOf = (i) => SH.items[i]?.me ?? ME;
@@ -44,7 +44,8 @@ document.fonts?.addEventListener?.('loadingdone', () => dispatchEvent(new Event(
 // Шрифт значков берём у таверны и грузим, только если значок правда нужен.
 const PIN_NAME = { sf6: '.nm', gta: '.nm', cult: '.nm', otome: '.nm', danganronpa: '.nm', genshin: '.name', ow: '.big', persona: '.name', hollow: '.entry h2', disco: '.sheet h1', pokemon: '.nm h1', valorant: '.nm', lis: '.cap', acnh: '.tag', ddlc: '.tag', pipboy: '.cap', sims: '.fname', mk: '.mk-n1' };
 // в Pip-Boy список текстовый: значок встаёт после имени, а не уголком поверх букв (перед именем — курсор темы)
-const PIN_EXTRA = { pipboy: '.row.sh-pinned::after{position:static;display:inline-block;width:auto;height:auto;background:none;color:inherit;-webkit-text-fill-color:currentColor;font-size:.8em;margin-left:8px}' };
+// в Genshin левый верхний угол плитки занят значком стихии: закреп уходит в правый
+const PIN_EXTRA = { genshin: '.ch.sh-pinned::after{left:auto;right:3px}', pipboy: '.row.sh-pinned::after{position:static;display:inline-block;width:auto;height:auto;background:none;color:inherit;-webkit-text-fill-color:currentColor;font-size:.8em;margin-left:8px}' };
 addEventListener('DOMContentLoaded', () => {
     if (!CHARS.some((c) => c.pin)) return;
     const name = PIN_NAME[location.pathname.split('/').pop().replace('.html', '')];
@@ -55,12 +56,15 @@ html.sh-pin ${name || '#none'}::before{content:'\\f08d';font:900 .42em/1 shpin;d
     st.textContent += PIN_EXTRA[location.pathname.split('/').pop().replace('.html', '')] || '';
     document.head.append(st);
     const now = () => (typeof cur !== 'undefined' ? cur : typeof current !== 'undefined' ? current : -1);
+    // При смене бота меняется только класс у страницы. Плитки помечаются один раз: data-pm — «уже смотрели»,
+    // так что заново обходятся только те, что экран перерисовал (страницы колеса в GTA)
     const mark = () => {
         document.documentElement.classList.toggle('sh-pin', !!CHARS[now()]?.pin);
-        for (const el of document.querySelectorAll('[data-i]')) {
-            const on = !!CHARS[+el.dataset.i]?.pin;
-            el.classList.toggle('sh-pinned', on);
-            if (on && el.tagName !== 'IMG' && getComputedStyle(el).position === 'static') el.style.position = 'relative';
+        for (const el of document.querySelectorAll('[data-i]:not([data-pm])')) {
+            el.dataset.pm = '1';
+            if (!CHARS[+el.dataset.i]?.pin) continue;
+            el.classList.add('sh-pinned');
+            if (el.tagName !== 'IMG' && getComputedStyle(el).position === 'static') el.style.position = 'relative';
         }
     };
     // каждый экран выбирает бота своей функцией show(): после неё обновляем значок

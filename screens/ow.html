@@ -86,6 +86,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .lock span{display:block;margin-top:8px;font:600 clamp(16px,1.6vw,22px) 'Oswald';font-style:italic;text-transform:uppercase;letter-spacing:.06em}
 .timer.low{background:#ff4a3a;color:#fff;animation:tick .5s steps(1) infinite}
 @keyframes tick{50%{opacity:.6}}
+/* телефон: без размытия фона под панелями (оно тормозит слабые телефоны), панели плотнее */
+@media(max-width:760px){.ab,.lock{backdrop-filter:none}.lock{background:#1d2433a6}}
 </style>
 </head>
 <body>
@@ -113,7 +115,7 @@ $('.city g').innerHTML = Array.from({ length: 40 }, (_, k) => { const w = 30 + s
   return `<rect x="${x}" y="${460 - h}" width="${w}" height="${h}" rx="4"/>` + (seeded('t', k) > .7 ? `<rect x="${x + w / 2 - 4}" y="${460 - h - 40}" width="8" height="40"/>` : ''); }).join('');
 const ROLES = [tt('Танк'), tt('Урон'), tt('Поддержка')];
 const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs));
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="tile" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="tile" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}" alt=""></button>`).join('');
 let cur = 0, t = 30;
 let locked = false;
 setInterval(() => {

@@ -175,7 +175,7 @@ const caught = (c) => c.chats > 1; // «пойман» — если разгов
 const num = (x) => x.toFixed(1).replace('.', ',');
 
 $('.seen').textContent = ITEMS.length; $('.caught').textContent = ITEMS.filter(caught).length;
-$('.list').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><span class="no">${no(i)}</span><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b><span class="ball ${caught(c) ? '' : 'no-c'}"></span></button>`).join('');
+$('.list').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><span class="no">${no(i)}</span><img decoding="async" src="${c.thumb || c.img}" alt=""><b>${esc(c.name)}</b><span class="ball ${caught(c) ? '' : 'no-c'}"></span></button>`).join('');
 
 let cur = 0, sel = 0;
 // Тесно по высоте: сначала прячем полоски характеристик с конца, потом укорачиваем цитату. Рамки и меню остаются целыми.

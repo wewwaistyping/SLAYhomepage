@@ -154,7 +154,7 @@ const d = new Date(), DOW = [tt('ВС'),tt('ПН'),tt('ВТ'),tt('СР'),tt('Ч�
 $('.date').innerHTML = `${d.getMonth() + 1}/${d.getDate()}<small>${DOW[d.getDay()]}</small>`;
 $('.tod').textContent = h < 5 ? tt('НОЧЬ') : h < 11 ? tt('УТРО') : h < 17 ? tt('ДЕНЬ') : h < 22 ? tt('ВЕЧЕР') : tt('НОЧЬ');
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.thumb || c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
 
 let cur = 0, sel = 0;
 const fig = (c) => c.render ? `<div class="fig"><img decoding="async" class="sh" src="${c.render}" alt=""><img decoding="async" class="full" src="${c.render}" alt=""></div>` : `<div class="frm"><img decoding="async" src="${c.img}" alt=""></div>`;

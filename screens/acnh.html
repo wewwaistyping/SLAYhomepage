@@ -179,7 +179,7 @@ const MON = [tt('янв.'), tt('февр.'), tt('марта'), tt('апр.'), tt
 function tick() { const d = new Date(); $('.hm').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); $('.dm').textContent = `${d.getDate()} ${MON[d.getMonth()]} · ${DOW[d.getDay()]}`; }
 tick(); setInterval(tick, 10e3);
 
-$('.vil').innerHTML = ITEMS.map((c, i) => `<button class="v" data-i="${i}" style="--c:${colOf(c)}"><i><img decoding="async" src="${c.img}" alt=""></i><span>${esc(c.name)}</span></button>`).join('');
+$('.vil').innerHTML = ITEMS.map((c, i) => `<button class="v" data-i="${i}" style="--c:${colOf(c)}"><i><img decoding="async" src="${c.thumb || c.img}" alt=""></i><span>${esc(c.name)}</span></button>`).join('');
 
 // текст печатается по буквам, как реплики жителей
 let typing;

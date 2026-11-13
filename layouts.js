@@ -65,9 +65,15 @@ function textWide(el) {
     return r.getBoundingClientRect().width > el.clientWidth * 1.08;
 }
 
+// Подобранный размер имени помним по имени и размеру окна: при листании ботов вёрстку заново не меряем.
+// Сбрасывается, когда догружаются шрифты.
+export const fitSizes = new Map();
+
 export function fitLong(root) {
     const el = root.querySelector('.shd-name, .shf-name, .shv-name, .shn-name, .shc-name, .shr-name, .shz-talk h1');
     if (!el || !el.clientWidth) return;
+    const memo = el.className + '|' + el.textContent + '|' + innerWidth + '|' + innerHeight;
+    if (fitSizes.has(memo)) { el.style.fontSize = fitSizes.get(memo); return; }
     el.style.fontSize = '';
     const cs = getComputedStyle(el);
     let size = parseFloat(cs.fontSize);
@@ -76,7 +82,11 @@ export function fitLong(root) {
         size -= 1;
         el.style.fontSize = size + 'px';
     }
+    fitSizes.set(memo, el.style.fontSize);
 }
+
+// Маленькая плитка в списке: уменьшенная копия аватарки. Оригинал нужен только большому портрету
+const tile = (c) => `<img src="${esc(c.thumb || c.img)}" alt="" decoding="async">`;
 
 export const LAYOUTS = {
     kino: {
@@ -95,7 +105,7 @@ export const LAYOUTS = {
                 </div>
             </div>
             <div class="sh-row"><h3>${tt("Недавние")}</h3><div class="sh-strip">${items.map((c, i) => `
-                <div class="sh-c" data-i="${i}">${img(c)}<span>${esc(c.name)}</span><i>${ago(c.ts)}</i></div>`).join('')}
+                <div class="sh-c" data-i="${i}">${tile(c)}<span>${esc(c.name)}</span><i>${ago(c.ts)}</i></div>`).join('')}
             </div></div>`,
         show(root, i, items) {
             const c = items[i];
@@ -119,7 +129,7 @@ export const LAYOUTS = {
             <div class="shs-fill"></div>
             <img class="shs-bg" alt="" decoding="async">
             <div class="shs-shade"></div>
-            <div class="shs-top"><span class="shs-tm"></span><div class="shs-rec">${items.map((c, i) => `<img data-i="${i}" src="${esc(c.img)}" alt="" title="${esc(c.name)}" decoding="async">`).join('')}</div></div>
+            <div class="shs-top"><span class="shs-tm"></span><div class="shs-rec">${items.map((c, i) => `<img data-i="${i}" src="${esc(c.thumb || c.img)}" alt="" title="${esc(c.name)}" decoding="async">`).join('')}</div></div>
             <div class="shs-sub"><div class="shs-who"></div><div class="shs-line"></div></div>
             <div class="shs-acts">${BTNS}</div>`,
         show(root, i, items) {
@@ -171,7 +181,7 @@ export const LAYOUTS = {
         hover: false,
         html: (items) => `
             <aside class="shm-list"><h6>${tt("Недавние")}</h6>${items.map((c, i) => `
-                <div class="shm-ct" data-i="${i}">${img(c)}<div><b>${esc(c.name)}<i>${ago(c.ts).replace(tt(' назад'), '')}</i></b><span>${esc(c.snip)}</span></div></div>`).join('')}
+                <div class="shm-ct" data-i="${i}">${tile(c)}<div><b>${esc(c.name)}<i>${ago(c.ts).replace(tt(' назад'), '')}</i></b><span>${esc(c.snip)}</span></div></div>`).join('')}
             </aside>
             <main class="shm-main">
                 <header><img class="shm-av" alt="" decoding="async"><div><b class="shm-name"></b><small class="shm-sub"></small></div>
@@ -182,7 +192,7 @@ export const LAYOUTS = {
             </main>`,
         show(root, i, items) {
             const c = items[i];
-            $(root, '.shm-av').src = c.img;
+            $(root, '.shm-av').src = c.thumb || c.img;
             $(root, '.shm-pic').src = c.img;
             setText($(root, '.shm-name'), c.name);
             setText($(root, '.shm-sub'), tt`${c.msgs} сообщений в чате`);
@@ -280,7 +290,7 @@ Object.assign(LAYOUTS, {
             <div class="shv-logo"><h1 class="shv-name"></h1><small class="shv-sub"></small></div>
             <div class="shv-bar"><div class="shv-keys"><span><kbd>←→</kbd>${tt("меню")}</span><span><kbd>↑↓</kbd>${tt("персонаж")}</span><span><kbd>Enter</kbd>${tt("ок")}</span></div>
                 <div class="shv-menu"><button data-act="continue">${tt("Продолжить")}</button><button data-act="new">${tt("Начать заново")}</button><button data-act="all">${tt("Загрузить")}</button><button data-ui="gal">${tt("Галерея")}</button></div></div>
-            <div class="shv-gal"><h2>${tt("Галерея")}</h2><div class="shv-grid">${items.map((c, i) => `<button class="shv-it" data-g="${i}"><img src="${esc(c.img)}" alt="" decoding="async"><span>${esc(c.name)}</span></button>`).join('')}</div></div>`,
+            <div class="shv-gal"><h2>${tt("Галерея")}</h2><div class="shv-grid">${items.map((c, i) => `<button class="shv-it" data-g="${i}"><img src="${esc(c.thumb || c.img)}" alt="" decoding="async"><span>${esc(c.name)}</span></button>`).join('')}</div></div>`,
         mount(root, api) {
             root._menu = menu(root, '.shv-menu button');
             const gal = root.querySelector('.shv-gal'), its = [...root.querySelectorAll('.shv-it')];
@@ -358,12 +368,12 @@ Object.assign(LAYOUTS, {
             <div class="shr-win shr-dlg"><b></b><span class="shr-t"></span><span class="shr-more">▼</span></div><div class="shr-scan"></div>`,
         mount(root, api) {
             root._menu = menu(root, '.shr-menu button');
-            root.querySelectorAll('.shr-party button').forEach((b, i) => pix(b.querySelector('canvas'), api.items[i].img, 16, 16, 0.06, 0.42));
+            root.querySelectorAll('.shr-party button').forEach((b, i) => pix(b.querySelector('canvas'), (api.items[i].thumb || api.items[i].img), 16, 16, 0.06, 0.42));
         },
         unmount(root) { clearInterval(root._tm); },
         show(root, i, items) {
             const c = items[i], maxChats = Math.max(1, ...items.map((x) => x.chats || 0));
-            pix(root.querySelector('.shr-hero canvas'), c.img, 64, 96);
+            pix(root.querySelector('.shr-hero canvas'), c.thumb || c.img, 64, 96);
             setText(root.querySelector('.shr-name'), c.name);
             setText(root.querySelector('.shr-lv'), c.msgs);
             root.querySelector('.shr-hp').style.width = Math.max(8, (c.chats || 0) / maxChats * 100) + '%';
@@ -395,7 +405,7 @@ Object.assign(LAYOUTS, {
                 <button class="shc-mi" data-act="new"><small>02</small>${tt("Новый чат")}</button>
                 <button class="shc-mi" data-act="all"><small>03</small>${tt("Все чаты")}</button></nav>
             <div class="shc-por"><div class="shc-fr shc-cut"><img class="base" alt="" decoding="async"><img class="rc r1" alt="" decoding="async"><img class="rc r2" alt="" decoding="async"></div><span class="shc-br a"></span><span class="shc-br b"></span><span class="shc-tagr"></span><span class="shc-tagid"></span></div>
-            <div class="shc-cts"><h6><span>${tt("КОНТАКТЫ")}</span><span>${items.length}</span></h6><div class="shc-list">${items.map((c, i) => `<button class="shc-ct" data-i="${i}"><img src="${esc(c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><small>${ago(c.ts)}</small></div><i class="${Date.now() - c.ts < 864e5 ? 'live' : ''}"></i></button>`).join('')}</div></div>
+            <div class="shc-cts"><h6><span>${tt("КОНТАКТЫ")}</span><span>${items.length}</span></h6><div class="shc-list">${items.map((c, i) => `<button class="shc-ct" data-i="${i}"><img src="${esc(c.thumb || c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><small>${ago(c.ts)}</small></div><i class="${Date.now() - c.ts < 864e5 ? 'live' : ''}"></i></button>`).join('')}</div></div>
             <div class="shc-call shc-cut"><img alt="" decoding="async"><div><div class="shc-who">${tt("ВХОДЯЩИЙ ВЫЗОВ ·")} <b></b></div><div class="shc-msg"><span class="shc-t"></span><span class="shc-cur"></span></div></div>
                 <div class="shc-ans"><button data-act="continue">${tt("Ответить")}</button><button data-act="all">${tt("История")}</button></div></div>
             <div class="shc-scan"></div>`,
@@ -412,7 +422,7 @@ Object.assign(LAYOUTS, {
             const c = items[i], q = (s) => root.querySelector(s);
             q('.shc-haze').style.backgroundImage = c.img ? `url("${c.img}")` : '';
             root.querySelectorAll('.shc-por img').forEach((im) => { im.src = c.img; });
-            q('.shc-call img').src = c.img;
+            q('.shc-call img').src = c.thumb || c.img;
             const nm = q('.shc-name'); setText(nm, c.name); nm.dataset.t = c.name;
             q('.shc-meta').innerHTML = `<span>${tt("СООБЩ:")} <i>${c.msgs}</i></span>${c.chats ? `<span>${tt("ЧАТОВ:")} <i>${c.chats}</i></span>` : ''}<span>${tt("СВЯЗЬ:")} <i>${ago(c.ts)}</i></span>`;
             setText(q('.shc-tagr'), `ID ${String(i + 1).padStart(4, '0')}-${String(c.msgs).padStart(4, '0')}`);
@@ -507,7 +517,7 @@ LAYOUTS.cozy = {
             <div class="shz-scene"><div class="shz-arch"><img alt="" decoding="async"></div>
                 <div class="shz-talk"><span class="shz-tag"></span><h1></h1><div class="shz-bubble"><p></p></div>
                     <div class="shz-acts"><button class="shz-go" data-act="continue"><i></i>${tt("Продолжить")}</button><button data-act="new"><i></i>${tt("Новый чат")}</button><button data-act="all"><i></i>${tt("Все чаты")}</button>${SHZ_MUG}</div></div></div>
-            <div class="shz-diary"><h2>${tt("Дневник")}</h2><small>${tt("последние разговоры")}</small><div class="shz-entries">${items.map((c, i) => `<button class="shz-entry" data-i="${i}"><img src="${esc(c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><span>${ago(c.ts)}</span></div></button>`).join('')}</div></div></div>`;
+            <div class="shz-diary"><h2>${tt("Дневник")}</h2><small>${tt("последние разговоры")}</small><div class="shz-entries">${items.map((c, i) => `<button class="shz-entry" data-i="${i}"><img src="${esc(c.thumb || c.img)}" alt="" decoding="async"><div><b>${esc(c.name)}</b><span>${ago(c.ts)}</span></div></button>`).join('')}</div></div></div>`;
     },
     show(root, i, items) {
         const c = items[i], q = (s) => root.querySelector(s);
@@ -657,7 +667,7 @@ LAYOUTS.farm = {
         root._scene.start();
         root._menu = menu(root, '.sfm-btns button');
         const board = root.querySelector('.sfm-board'), dim = root.querySelector('.sfm-dim'), vls = [...root.querySelectorAll('.sfm-vl')];
-        vls.forEach((v, i) => pix(v.querySelector('canvas'), api.items[i].img, 24, 24, 0.04, 0.42));
+        vls.forEach((v, i) => pix(v.querySelector('canvas'), (api.items[i].thumb || api.items[i].img), 24, 24, 0.04, 0.42));
         root._g = 0;
         root._paintG = () => vls.forEach((v, i) => v.classList.toggle('on', i === root._g));
         root._board = (on) => { board.classList.toggle('open', on); dim.classList.toggle('open', on); if (on) { root._g = api.current; root._paintG(); } };
@@ -670,7 +680,7 @@ LAYOUTS.farm = {
     unmount(root) { root._scene?.stop(); clearInterval(root._tm); },
     show(root, i, items) {
         const c = items[i], q = (s) => root.querySelector(s);
-        pix(q('.sfm-dlg canvas'), c.img, 56, 56, 0.03, 0.45);
+        pix(q('.sfm-dlg canvas'), c.thumb || c.img, 56, 56, 0.03, 0.45);
         setText(q('.sfm-nm'), c.name);
         q('.sfm-dlg .sfm-hearts').innerHTML = sfmHearts(Math.min(10, c.chats || 0));
         setText(q('.sfm-gold'), c.msgs);

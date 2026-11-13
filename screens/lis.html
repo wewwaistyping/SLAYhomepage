@@ -98,7 +98,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 <script>
 const MON = [tt('января'), tt('февраля'), tt('марта'), tt('апреля'), tt('мая'), tt('июня'), tt('июля'), tt('августа'), tt('сентября'), tt('октября'), tt('ноября'), tt('декабря')];
 const pl = PL;
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ph" data-i="${i}" style="--rot:${((seeded(c.name, 41) - .5) * 14).toFixed(1)}deg"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ph" data-i="${i}" style="--rot:${((seeded(c.name, 41) - .5) * 14).toFixed(1)}deg"><img decoding="async" src="${c.thumb || c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
 
 let cur = 0, sel = 0;
 const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="pol"><img decoding="async" src="${c.img}" alt=""></div>`;

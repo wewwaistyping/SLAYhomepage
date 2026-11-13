@@ -118,7 +118,7 @@ const SKILLS = [[tt('Энциклопедия'), '--int'], [tt('Логика'), 
 const pl = PL;
 const DIFF = (c) => c.chats >= 5 ? [tt('Легко'), tt('Успех')] : c.chats >= 2 ? [tt('Средне'), tt('Успех')] : [tt('Сложно'), tt('Провал')];
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}" alt=""></button>`).join('');
 
 let cur = 0, sel = 0;
 function show(i) {

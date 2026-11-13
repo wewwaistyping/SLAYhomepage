@@ -3,7 +3,7 @@
 const NOW = Date.now();
 const ITEMS = CHARS.map((c) => {
     const name = c.name.replace(/\s+/g, ' ').trim();
-    return { name, img: c.img, ts: c.last, msgs: c.msgs || 0, chats: c.chats || 1, snip: c.snip || '', render: c.render || '' };
+    return { name, img: c.img, ts: c.last, msgs: c.msgs || 0, chats: c.chats || 1, snip: c.snip || '', render: c.render || '', thumb: c.thumb || c.img };
 });
 
 const $ = (s, r = document) => r.querySelector(s);

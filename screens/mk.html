@@ -108,7 +108,7 @@ html,body{height:100%;overflow:hidden;background:#000}
 <script>
 // как в расширении: те же раскладка и данные (своя PNG — c.render, иначе аватар)
 const NOW = Date.now();
-const items = CHARS.slice(0, 14).map(c => { const name = c.name.replace(/\s+/g,' ').trim(); return { name, img: c.img, ts: c.last, msgs: c.msgs || 0, chats: c.chats, snip: c.snip || '', render: c.render || '' }; });
+const items = CHARS.slice(0, 14).map(c => { const name = c.name.replace(/\s+/g,' ').trim(); return { name, img: c.img, thumb: c.thumb || c.img, ts: c.last, msgs: c.msgs || 0, chats: c.chats, snip: c.snip || '', render: c.render || '' }; });
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function ago(ts) { const m = (NOW - ts) / 60e3; if (m < 60) return Math.round(m) + tt(' мин назад'); if (m < 1440) return Math.round(m / 60) + tt(' ч назад'); const d = Math.round(m / 1440); return d === 1 ? tt('вчера') : d + tt(' дн назад'); }
 const mark = (root, sel, i) => root.querySelectorAll(sel).forEach(x => x.classList.toggle('on', +x.dataset.i === i));
@@ -130,7 +130,7 @@ const L = {
             <h1 class="mk-title">${tt("Выбери бойца")}</h1>
             <div class="mk-side mk-p1"><div class="mk-fig"><img decoding="async" alt=""></div><div class="mk-plate"><small>P1</small><b class="mk-n1"></b></div></div>
             <div class="mk-side mk-p2"><div class="mk-fig"><img decoding="async" alt=""></div><div class="mk-plate"><small>${tt("P2 · ты")}</small><b class="mk-n2"></b></div></div>
-            <div class="mk-center"><div class="mk-grid">${items.map((c, i) => `<button class="mk-tile" data-i="${i}" title="${esc(c.name)}"><img src="${esc(c.img)}" alt="" decoding="async"></button>`).join('')}</div>
+            <div class="mk-center"><div class="mk-grid">${items.map((c, i) => `<button class="mk-tile" data-i="${i}" title="${esc(c.name)}"><img src="${esc(c.thumb || c.img)}" alt="" decoding="async"></button>`).join('')}</div>
             <div class="mk-info"></div></div>
             <div class="mk-acts"><button class="mk-go" data-ui="fight">${tt("В бой")}</button><button data-act="new">${tt("Новый бой")}</button><button data-act="all">${tt("История")}</button>
                 <span class="mk-rnd"><button data-render="set" title="${tt("Своя PNG в полный рост")}">PNG</button><button data-render="clear" title="${tt("Убрать свою PNG")}">✕</button></span></div>

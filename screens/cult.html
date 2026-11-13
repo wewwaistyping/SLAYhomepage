@@ -219,7 +219,7 @@ const heart = (fill) => `<svg viewBox="0 0 24 22"><defs><clipPath id="h${fill}">
 const total = ITEMS.reduce((s, c) => s + c.msgs, 0);
 $('.hv').textContent = `${ITEMS.length} ${pl(ITEMS.length, 'последователь', 'последователя', 'последователей')} · ${total} ${pl(total, 'молитва', 'молитвы', 'молитв')}`;
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><svg class="cr"><use href="#crown"/></svg><span class="av"><img decoding="async" src="${c.img}" alt=""></span><b>${esc(c.name)}</b></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}" title="${esc(c.name)}"><svg class="cr"><use href="#crown"/></svg><span class="av"><img decoding="async" src="${c.thumb || c.img}" alt=""></span><b>${esc(c.name)}</b></button>`).join('');
 
 let cur = 0, sel = 0;
 const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frm"><i></i><i></i><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></div>`;

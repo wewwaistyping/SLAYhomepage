@@ -159,7 +159,7 @@ const HATE = [tt('Пустой экран'), tt('Долгие паузы'), tt('
 const pickS = (arr, c, k) => arr[Math.floor(seeded(c.name, k) * arr.length)];
 const hopeOf = (c) => Math.max(4, Math.min(100, Math.round(c.msgs / 2 + c.chats * 4)));
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.thumb || c.img}" alt=""><b>${esc(c.name)}</b></button>`).join('');
 
 let cur = 0, sel = 0;
 const fig = (c) => c.render ? `<img decoding="async" class="full" src="${c.render}" alt="">` : `<div class="frm"><img decoding="async" src="${c.img}" alt=""></div>`;

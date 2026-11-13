@@ -142,7 +142,7 @@ const PER = 8, pages = Math.ceil(ITEMS.length / PER);
 let cur = 0;
 function drawWheel() {
   const p = Math.floor(cur / PER), list = ITEMS.slice(p * PER, p * PER + PER), n = list.length, step = 360 / n;
-  $('.slots').innerHTML = list.map((c, k) => { const a = -Math.PI / 2 + k / n * Math.PI * 2; return `<button class="slot" data-i="${p * PER + k}" style="left:${50 + Math.cos(a) * 36}%;top:${50 + Math.sin(a) * 36}%"><img decoding="async" src="${c.img}" alt=""></button>`; }).join('');
+  $('.slots').innerHTML = list.map((c, k) => { const a = -Math.PI / 2 + k / n * Math.PI * 2; return `<button class="slot" data-i="${p * PER + k}" style="left:${50 + Math.cos(a) * 36}%;top:${50 + Math.sin(a) * 36}%"><img decoding="async" src="${c.thumb || c.img}" alt=""></button>`; }).join('');
   $('.secs').innerHTML = list.map((c, k) => { const a0 = k * step - step / 2; return `<i class="sec" data-k="${p * PER + k}" style="background:conic-gradient(from ${a0}deg, ${colorOf(c)} 0 ${step}deg, transparent ${step}deg)"></i>`; }).join('');
   $('.gaps').style.background = `repeating-conic-gradient(from ${-step / 2 - 1}deg, #fff 0 2deg, transparent 2deg ${step}deg)`;
   $('.pg').textContent = `${p + 1} / ${pages}`;

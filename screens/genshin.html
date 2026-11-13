@@ -111,6 +111,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 /* низкое окно: меню остаётся на экране */
 @media (min-width:761px) and (max-height:640px){.quote{display:none}.lvl{margin-top:6px}.exp{margin:6px 0 8px}.attrs div:nth-child(n+3){display:none}}
+/* телефон: без размытия фона под панелями (оно тормозит слабые телефоны), панели плотнее */
+@media(max-width:760px){.elem,.elpick,.attrs{backdrop-filter:none}.elem,.attrs{background:#1b2a4aa6}.elpick{background:#1b2a4af2}}
 </style>
 </head>
 <body>
@@ -225,7 +227,7 @@ const rarity = (c) => (c.msgs >= 100 || c.chats >= 5) ? 5 : 4;
 const friend = (c) => Math.min(10, c.chats + Math.floor(c.msgs / 120));
 const badge = (e) => `<span class="eicon" style="--c:${e.c}">${icon(e.k)}</span>`;
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch r${rarity(c)}" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt="">${badge(elOf(c))}<b>${esc(c.name)}</b></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch r${rarity(c)}" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}" alt="">${badge(elOf(c))}<b>${esc(c.name)}</b></button>`).join('');
 
 let cur = 0;
 function show(i, keep) {

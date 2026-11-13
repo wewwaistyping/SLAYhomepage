@@ -146,6 +146,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pb .f.b:nth-child(7){transform:rotateY(180deg) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0a4f15,#1d8c30 55%,#45c446)}
 .pb .f.b:nth-child(8){transform:rotateY(270deg) translateZ(17.0px) rotateX(-20.28deg);background:linear-gradient(10deg,#0d5a1b,#27a63a 55%,#62dc58)}
 .pb .f::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,#ffffff55 46%,transparent 56%)}
+/* телефон: без размытия фона под панелями (оно тормозит слабые телефоны), панели плотнее */
+@media(max-width:760px){.hello,.card,.sec button,.family{backdrop-filter:none}.family{background:#ffffffe6}}
 </style>
 </head>
 <body>
@@ -194,7 +196,7 @@ $('.pb').innerHTML = '<div class="glow"></div><div class="gem">' + '<i class="f 
 
 const rel = n => n >= 10 ? tt('Лучшие друзья') : n >= 5 ? tt('Хорошие друзья') : n >= 2 ? tt('Друзья') : tt('Знакомые');
 const maxChats = Math.max(...C.map(c => c.chats));
-$('.family .list').innerHTML = C.map((c,i)=>`<button class="mem" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}"></button>`).join('');
+$('.family .list').innerHTML = C.map((c,i)=>`<button class="mem" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}"></button>`).join('');
 let cur = 0;
 
 function show(i){

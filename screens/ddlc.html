@@ -163,7 +163,7 @@ const pl = PL;
 const affOf = (c) => Math.min(100, Math.round(c.msgs / 2 + c.chats * 4));
 const WORDS = [tt('сердце'), tt('вечность'), tt('капкейк'), tt('шёпот'), tt('звёзды'), tt('объятие'), tt('ливень'), tt('чернила'), tt('мечта'), tt('тайна'), tt('ромашка'), tt('рассвет'), tt('пульс'), tt('конфета')];
 
-$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.img}" alt=""><span><b>${esc(c.name)}</b><small>♥ ${affOf(c)}</small></span></button>`).join('');
+$('.roster').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}"><img decoding="async" src="${c.thumb || c.img}" alt=""><span><b>${esc(c.name)}</b><small>♥ ${affOf(c)}</small></span></button>`).join('');
 
 let cur = 0, sel = 0;
 const fig = (c) => c.render

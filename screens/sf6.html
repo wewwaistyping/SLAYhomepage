@@ -105,7 +105,7 @@ const maxMsgs = Math.max(...ITEMS.map((c) => c.msgs));
 // «Классика» — давние собеседники (3+ чата), «Современное» — новенькие
 const classic = (c) => c.chats >= 3;
 
-$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.img}" alt=""></button>`).join('');
+$('.grid').innerHTML = ITEMS.map((c, i) => `<button class="cell" data-i="${i}" title="${esc(c.name)}"><img decoding="async" src="${c.thumb || c.img}" alt=""></button>`).join('');
 
 let cur = 0, sel = 0;
 function show(i) {

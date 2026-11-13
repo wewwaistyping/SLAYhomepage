@@ -141,7 +141,7 @@ const CORNER = '<svg class="fil" viewBox="0 0 44 44"><path d="M14.15 43L14.44 41
 const NOTES = [tt('Разговаривает охотно и долго. Никогда не уходит первым.'), tt('Помнит больше, чем говорит. Не стоит его недооценивать.'), tt('Опасен для режима сна: «ещё одно сообщение» тянется до утра.'), tt('Безвреден, если не задавать вопросов о прошлом.'), tt('Встречается в тёплых местах. Приходит на голос.')];
 const GOAL = 100;
 
-$('.ents').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}">${HOOK.replace('fil', 'fil l')}<img decoding="async" src="${c.img}" alt=""><span>${esc(c.name)}</span>${HOOK.replace('fil', 'fil r')}</button>`).join('');
+$('.ents').innerHTML = ITEMS.map((c, i) => `<button class="ch" data-i="${i}">${HOOK.replace('fil', 'fil l')}<img decoding="async" src="${c.thumb || c.img}" alt=""><span>${esc(c.name)}</span>${HOOK.replace('fil', 'fil r')}</button>`).join('');
 $$('.menu button').forEach((b) => b.insertAdjacentHTML('beforeend', FLEUR.replace('class="fil"', 'class="fil l"') + FLEUR.replace('class="fil"', 'class="fil r"')));
 $('.motes').innerHTML = Array.from({ length: 34 }, (_, k) => {
   const r = (n) => seeded('hk' + k, n);
