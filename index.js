@@ -927,7 +927,7 @@ panel.className = 'slayhome-settings';
 panel.innerHTML = `
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
-            <b>SLAYhomepage</b>
+            <b style="display:inline-flex;align-items:center"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:1.3em;height:1.3em;margin-right:.45em;flex:none;color:#ff4fa3"><path fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill-rule="evenodd" d="M12 3.4 21.2 11.2h-2.4v9.3H5.2v-9.3H2.8zM12 18.6c-3.2-2.3-4.3-3.9-4.3-5.4 0-1.4 1-2.4 2.2-2.4.9 0 1.6.5 2.1 1.3.5-.8 1.2-1.3 2.1-1.3 1.2 0 2.2 1 2.2 2.4 0 1.5-1.1 3.1-4.3 5.4z"/></svg>SLAYhomepage</b>
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content">
