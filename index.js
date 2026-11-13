@@ -17,6 +17,7 @@ import {
 } from '../../../../script.js';
 import { getConnectedPersonas, user_avatar } from '../../../personas.js';
 import { power_user } from '../../../power-user.js';
+import { getCurrentUserHandle } from '../../../user.js';
 import { extension_settings } from '../../../extensions.js';
 import { groups, openGroupById, openGroupChat } from '../../../group-chats.js';
 import { VER, LANG, tt, pl, localize } from './lang.js';
@@ -58,8 +59,14 @@ function rememberChats(list) {
         const ch = c.characters?.[c.characterId];
         return ch ? fileKey(ch.avatar, id) : null;
     };
-    const syncCurrent = () => { const k = currentKey(); if (k && !loads.get(k)?.failed) known.set(k, chat.length); };
-    for (const ev of ['MESSAGE_SENT', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'CHAT_CHANGED']) if (event_types[ev]) eventSource.on(event_types[ev], () => setTimeout(syncCurrent, 0));
+    // Пока файл читается, счётчик не трогаем: в памяти в этот момент пусто, и ноль выключил бы защиту
+    // в самое опасное окно. Опустить счётчик до нуля может только удаление сообщений.
+    const syncCurrent = (deleted) => {
+        const k = currentKey(), l = loads.get(k);
+        if (!k || l?.failed || l?.busy) return;
+        if (chat.length > 0 || deleted || known.get(k) === undefined) known.set(k, chat.length);
+    };
+    for (const ev of ['MESSAGE_SENT', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'CHAT_CHANGED']) if (event_types[ev]) eventSource.on(event_types[ev], () => setTimeout(() => syncCurrent(ev === 'MESSAGE_DELETED'), 0));
 
     // тело сохранения таверна может сжать gzip: разжимаем копию, оригинал уходит как есть
     async function bodyText(init) {
@@ -76,6 +83,9 @@ function rememberChats(list) {
     function verdict(key, n, force) {
         const had = known.get(key), l = loads.get(key) ?? {};
         if (force || !had) return '';
+        // Пометка от сбоя сети или от нашей же проверки, а чат в памяти цел (сообщений не меньше, чем в файле):
+        // значит, таверна его всё-таки загрузила. Снимаем пометку, иначе глушили бы нормальные сохранения.
+        if (l.failed === 'error' && key === currentKey() && chat.length >= had) l.failed = false;
         if (l.failed) return tt('Чат загрузился пустым, хотя в файле есть сообщения. Сохранение остановлено, обнови страницу (F5).');
         if (n === 0 && (l.busy || Date.now() < (l.until ?? 0) || chat.length > 0)) return tt('Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.');
         return '';
@@ -111,10 +121,10 @@ function rememberChats(list) {
         try {
             res = await native.apply(this, arguments);
         } catch (err) {
-            Object.assign(l, { busy: false, failed: true, until: Date.now() + RECENT });
+            Object.assign(l, { busy: false, failed: 'error', until: Date.now() + RECENT });
             throw err;
         }
-        if (!res.ok) { Object.assign(l, { busy: false, failed: true, until: Date.now() + RECENT }); return res; }
+        if (!res.ok) { Object.assign(l, { busy: false, failed: 'error', until: Date.now() + RECENT }); return res; }
         // сколько сообщений пришло: первая запись — заголовок чата; пустой или новый файл приходит как [] или {}
         // Пустой или новый файл приходит как [] или {}. Чтобы это понять, хватает первых байтов копии ответа:
         // мегабайты чата второй раз не разбираем, точное число сообщений придёт из памяти таверны после загрузки.
@@ -125,16 +135,19 @@ function rememberChats(list) {
             reader.cancel().catch(() => {});
             const empty = size <= 2;
             // сервер при ошибке чтения отвечает пустым: пустой ответ при непустом файле — это неудачное чтение
-            l.failed = empty && known.get(key) > 0;
+            l.failed = empty && known.get(key) > 0 ? 'empty' : false;
             if (empty && !l.failed) known.set(key, 0);
             else if (!empty && known.get(key) === undefined) known.set(key, 1);
-        })().catch(() => { l.failed = true; }).finally(() => { l.busy = false; l.until = Date.now() + RECENT; l.wait = null; });
+        })().catch(() => { l.failed = 'error'; }).finally(() => { l.busy = false; l.until = Date.now() + RECENT; l.wait = null; });
         return res;
     };
 })();
 
 const KEY = 'slayHome';
-const CACHE = 'slayhome:cache';
+// Память экрана своя у каждой учётки таверны: на общем браузере второй человек не увидит ботов и картинки первого.
+// У единственной учётки (default-user) имена хранилищ прежние.
+const WHO = getCurrentUserHandle() === 'default-user' ? '' : ':' + getCurrentUserHandle();
+const CACHE = 'slayhome:cache' + WHO;
 const BASE = new URL('.', import.meta.url).pathname;
 const s = extension_settings[KEY] ??= {};
 s.enabled ??= true;
@@ -223,7 +236,7 @@ const personaUrl = (file) => (smallThumbs ? `/User%20Avatars/${encodeURIComponen
 const SMALL_H = 384;
 const small = new Map(); // файл аватарки → { url, stamp }
 const smallStore = (mode, fn) => new Promise((ok, bad) => {
-    const open = indexedDB.open('slayhome', 1);
+    const open = indexedDB.open('slayhome' + WHO, 1);
     open.onupgradeneeded = () => open.result.createObjectStore('small', { keyPath: 'avatar' });
     open.onerror = () => bad(open.error);
     open.onsuccess = () => {
@@ -322,7 +335,7 @@ async function fetchItems() {
     }
     return picked.map(({ item, chat, owner }) => ({ ...item, me: personaOf({ chat_metadata: { persona: personaSeen[chatKey(chat)]?.persona } }, owner) }));
 }
-const PERSONAS = 'slayhome:personas';
+const PERSONAS = 'slayhome:personas' + WHO;
 let personaSeen = {};
 try { personaSeen = JSON.parse(localStorage.getItem(PERSONAS) || '{}') || {}; } catch { personaSeen = {}; }
 
@@ -682,15 +695,34 @@ function fitName() {
 }
 
 // Одно действие за раз: двойной тап или зажатый Enter не запускают две загрузки чата одновременно
-let acting = false;
+let acting = false, actTimer = 0;
+const ctx = () => globalThis.SillyTavern?.getContext?.() ?? {};
+// Карточка на экране могла устареть (экран рисуется из памяти, пока сервер отвечает): чат удалили или переименовали.
+// Берём ту же карточку из свежего списка; нет такого чата — карточку этого же бота; нет бота — ничего не открываем.
+function freshCard(c) {
+    const same = (x) => (c.group ? x.group === c.group : x.avatar && x.avatar === c.avatar);
+    return items.find((x) => same(x) && x.file === c.file) ?? items.find(same) ?? null;
+}
 async function act(what, c) {
-    if (!c || !appReady || acting) return;
-    // «Все чаты» чат не открывает: показываем список таверны прямо на главной. Нет списка (старая таверна или он свёрнут) — как раньше
-    if (what === 'all' && showTavernList(c)) return;
+    if (!c || !appReady || acting || !settled) return;
     acting = true;
+    clearTimeout(actTimer);
+    actTimer = setTimeout(() => { acting = false; }, 60000); // таверна не ответила — кнопки не остаются мёртвыми до перезагрузки
     try {
+        // список ещё обновляется: ждём свежий, чтобы не открыть чат, которого уже нет (таверна создала бы пустой с тем же именем)
+        while (refreshJob) await refreshJob;
+        c = freshCard(c);
+        if (!c) return;
+        // «Все чаты» чат не открывает: показываем список таверны прямо на главной. Нет списка (старая таверна или он свёрнут) — как раньше
+        if (what === 'all' && showTavernList(c)) return;
+        // таверна уже сама открывает чат (автозагрузка последнего чата, клик в её списке): вторую загрузку поверх не запускаем —
+        // иначе сообщения одного чата могут лечь в память под именем другого
+        if (ctx().characterId !== undefined || ctx().groupId) return;
         if (c.group) {
             await openGroupById(c.group);
+            // таверна отказалась открыть группу (идёт сохранение или генерация): чат без выбранной группы не открываем,
+            // сообщения в нём никуда бы не сохранились
+            if (String(ctx().groupId) !== String(c.group)) return;
             setActiveGroup(c.group);
             if (what === 'continue' && getCurrentChatId() !== c.file) await openGroupChat(c.group, c.file);
         } else {
@@ -698,7 +730,7 @@ async function act(what, c) {
             if (id === -1) return;
             await selectCharacterById(id);
             // таверна ещё сохраняет прошлый чат и сама попросила подождать: бот не выбран, дальше не идём
-            if (String(globalThis.SillyTavern?.getContext?.().characterId) !== String(id)) return;
+            if (String(ctx().characterId) !== String(id)) return;
             setActiveCharacter(c.avatar);
             if (what === 'continue' && getCurrentChatId() !== c.file) await openCharacterChat(c.file);
         }
@@ -710,6 +742,7 @@ async function act(what, c) {
         toastr.error(tt('Не удалось открыть чат, подробности в консоли'));
     } finally {
         acting = false;
+        clearTimeout(actTimer);
     }
 }
 
@@ -763,16 +796,19 @@ function setVisible(on) {
 // redraw: настройки поменялись (тема, кнопка, кол-во) — перерисовать, даже если боты те же
 // События таверны приходят пачкой. Обновление идёт одно: пока ждём сервер, новые просьбы запоминаем и после ответа
 // обновляемся ещё раз, а не шлём запросы параллельно (иначе старый ответ мог прийти позже свежего).
-let refreshing = false, refreshAgain = false, forceRedraw = false;
+let refreshing = false, refreshAgain = false, forceRedraw = false, refreshJob = null;
 async function refresh(redraw = false) {
     forceRedraw ||= redraw;
     if (!s.enabled || getCurrentChatId() !== undefined) return setVisible(false);
+    if (!settled) return; // таверна сама открывает последний чат: экран пока не показываем
     setVisible(true);
     if (!root) build();
     // возврат из чата: сразу рисуем ботов, которых помним, а не держим пустой экран до ответа сервера
     if (!root.childElementCount && items.length && !forceRedraw) render();
     if (refreshing) { refreshAgain = true; return; }
     refreshing = true;
+    let finish;
+    refreshJob = new Promise((r) => { finish = r; });
     try {
         const force = forceRedraw;
         forceRedraw = false;
@@ -791,7 +827,9 @@ async function refresh(redraw = false) {
         if (!root?.childElementCount) render(); // сервер не ответил — показываем то, что помним
     } finally {
         refreshing = false;
+        refreshJob = null;
         if (refreshAgain) { refreshAgain = false; refresh(); }
+        finish();
     }
 }
 
@@ -799,7 +837,7 @@ async function refresh(redraw = false) {
 try { items = JSON.parse(localStorage.getItem(CACHE) || '[]'); } catch { items = []; }
 smallReady.then(() => {
     // таверна могла успеть загрузиться и нарисовать экран сама
-    if (appReady || root?.childElementCount) return;
+    if (appReady || root?.childElementCount || !settled) return;
     for (const x of items) x.thumb = small.get(x.pic)?.url || x.img;
     if (s.enabled && items.length) { setVisible(true); render(); }
 });
@@ -823,8 +861,17 @@ window.addEventListener('keydown', e => {
     if (e.key === 'Enter' && items[current]) act('continue', items[current]);
 });
 
-eventSource.once(event_types.APP_READY, () => { appReady = true; refresh(); });
+// У таверны есть настройка «автозагрузка последнего чата»: при запуске она сама открывает чат в фоне. Пока он не
+// открылся, экран не показываем и нажатия не принимаем: клик по карточке запустил бы вторую загрузку поверх первой.
+// Ждём первой смены чата, но не дольше 2 секунд после запуска (если открывать было нечего).
+let settled = !power_user.auto_load_chat;
+eventSource.once(event_types.APP_READY, () => {
+    appReady = true;
+    if (settled) return refresh();
+    setTimeout(() => { if (!settled) { settled = true; refresh(); } }, 2000);
+});
 eventSource.on(event_types.CHAT_CHANGED, () => {
+    settled = true;
     if (!appReady) return;
     if (getCurrentChatId() !== undefined) { endPeek(); return setVisible(false); }
     if (!peek) refresh(); // пока открыт список таверны, свой экран не возвращаем: его вернёт кнопка
@@ -845,7 +892,8 @@ function openStudio() {
 let studioChanged = false;
 function closeStudio() {
     studio?.remove(); studio = null;
-    if (s.lang !== langAtStart) return saveSettings().then(() => location.reload()); // язык подхватывается только при загрузке
+    // язык подхватывается только при загрузке; перед ней дожидаемся сохранения открытого чата, чтобы не потерять правку
+    if (s.lang !== langAtStart) return saveSettings().then(() => ctx().saveChat?.()).catch(() => {}).then(() => location.reload());
     document.body.classList.remove('slayhome-studio-on');
     if (appReady) refresh(studioChanged);
     studioChanged = false;
