@@ -68,6 +68,10 @@ function rememberChats(list) {
     };
     for (const ev of ['MESSAGE_SENT', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'CHAT_CHANGED']) if (event_types[ev]) eventSource.on(event_types[ev], () => setTimeout(() => syncCurrent(ev === 'MESSAGE_DELETED'), 0));
 
+    // Таверна дочитала чат бота без ошибок (при сорванном чтении этого события нет): пометку «ошибка» снимаем.
+    // Она могла остаться, только если споткнулась наша собственная проверка ответа.
+    if (event_types.CHAT_LOADED) eventSource.on(event_types.CHAT_LOADED, () => { const l = loads.get(currentKey()); if (l?.failed === 'error') l.failed = false; });
+
     // тело сохранения таверна может сжать gzip: разжимаем копию, оригинал уходит как есть
     async function bodyText(init) {
         const b = init?.body;
@@ -82,10 +86,12 @@ function rememberChats(list) {
 
     function verdict(key, n, force) {
         const had = known.get(key), l = loads.get(key) ?? {};
-        if (force || !had) return '';
-        // Пометка от сбоя сети или от нашей же проверки, а чат в памяти цел (сообщений не меньше, чем в файле):
-        // значит, таверна его всё-таки загрузила. Снимаем пометку, иначе глушили бы нормальные сохранения.
-        if (l.failed === 'error' && key === currentKey() && chat.length >= had) l.failed = false;
+        if (force) return '';
+        // Чтение сорвалось (сеть, ошибка сервера): таверна считает чат пустым, дописывает приветствие и сохраняет его.
+        // Сколько сообщений в файле, можем и не знать (старый чат не из списка недавних), поэтому в такой файл
+        // не пишем ничего, пока он не прочитается нормально. Исключение — файл, про который известно, что он пуст.
+        if (l.failed === 'error' && had !== 0) return tt('Чат не удалось прочитать. Сохранение остановлено, чтобы не затереть файл: обнови страницу (F5).');
+        if (!had) return '';
         if (l.failed) return tt('Чат загрузился пустым, хотя в файле есть сообщения. Сохранение остановлено, обнови страницу (F5).');
         if (n === 0 && (l.busy || Date.now() < (l.until ?? 0) || chat.length > 0)) return tt('Таверна пыталась сохранить чат пустым поверх файла с сообщениями. Файл не тронут.');
         return '';
@@ -115,7 +121,11 @@ function rememberChats(list) {
         if (!GET.test(url)) return native.apply(this, arguments);
         const q = json(typeof init?.body === 'string' ? init.body : '');
         if (!q) return native.apply(this, arguments);
-        const key = fileKey(q.avatar_url, q.file_name, q.id), l = load(key);
+        const key = fileKey(q.avatar_url, q.file_name, q.id);
+        // Таверна перед загрузкой чата стирает сообщения в памяти. Если этот чат открыт и сообщения на месте,
+        // файл читает кто-то другой (расширение, поиск): на память таверны это не влияет, следить не за чем.
+        if (key === currentKey() && chat.length > 0) return native.apply(this, arguments);
+        const l = load(key);
         l.busy = true;
         let res;
         try {
@@ -695,7 +705,7 @@ function fitName() {
 }
 
 // Одно действие за раз: двойной тап или зажатый Enter не запускают две загрузки чата одновременно
-let acting = false, actTimer = 0;
+let acting = false, actTimer = 0, actRun = 0;
 const ctx = () => globalThis.SillyTavern?.getContext?.() ?? {};
 // Карточка на экране могла устареть (экран рисуется из памяти, пока сервер отвечает): чат удалили или переименовали.
 // Берём ту же карточку из свежего списка; нет такого чата — карточку этого же бота; нет бота — ничего не открываем.
@@ -706,11 +716,15 @@ function freshCard(c) {
 async function act(what, c) {
     if (!c || !appReady || acting || !settled) return;
     acting = true;
+    const run = ++actRun;
     clearTimeout(actTimer);
-    actTimer = setTimeout(() => { acting = false; }, 60000); // таверна не ответила — кнопки не остаются мёртвыми до перезагрузки
+    // таверна или сервер не ответили за минуту — кнопки не остаются мёртвыми до перезагрузки, а это нажатие отменяется
+    actTimer = setTimeout(() => { if (run === actRun) { acting = false; actRun++; } }, 60000);
     try {
         // список ещё обновляется: ждём свежий, чтобы не открыть чат, которого уже нет (таверна создала бы пустой с тем же именем)
         while (refreshJob) await refreshJob;
+        // ждали дольше минуты: человек уже занят другим, чат без спроса не открываем (и не открываем дважды после повторного клика)
+        if (run !== actRun) return;
         c = freshCard(c);
         if (!c) return;
         // «Все чаты» чат не открывает: показываем список таверны прямо на главной. Нет списка (старая таверна или он свёрнут) — как раньше
@@ -741,8 +755,8 @@ async function act(what, c) {
         console.error('[SLAYhomepage]', err);
         toastr.error(tt('Не удалось открыть чат, подробности в консоли'));
     } finally {
-        acting = false;
-        clearTimeout(actTimer);
+        // отменённое нажатие не сбрасывает флаг следующего
+        if (run === actRun) { acting = false; clearTimeout(actTimer); }
     }
 }
 
