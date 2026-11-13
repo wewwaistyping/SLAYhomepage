@@ -715,3 +715,22 @@ body.slayhome-studio-on #slayhome *, body.slayhome-studio-on #slayhome *::before
     position: absolute; top: 3px; left: 3px; z-index: 3; display: grid; place-items: center;
     width: 18px; height: 18px; border-radius: 50%; background: #000a; color: #fff; rotate: 30deg; pointer-events: none;
 }
+
+/* Заголовок в панели расширений: розовый домик, курсивное «SLAY», искра и название мелкими разреженными буквами */
+.sh-hd { display: inline-flex; align-items: center; white-space: nowrap; }
+.sh-hd-home { width: 1.3em; height: 1.3em; margin-right: .45em; flex: none; color: #ff4fa3; }
+.sh-hd-s {
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: .02em;
+    padding-right: 2px;
+    font-size: 1.15em;
+    /* темы таверны кладут под заголовки тёмную тень: на прозрачных буквах с заливкой она ложится поверх и глушит цвет */
+    text-shadow: none;
+    background: linear-gradient(135deg, #f472b6 0%, #f9a8d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.sh-hd-sp { width: .9em; height: .9em; margin: 0 .1em .4em -.3em; color: #f9a8d4; flex: none; }
+.sh-hd-i { font-size: .7em; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; opacity: .9; }
